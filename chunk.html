@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文档切分可视化 - RAG Chunking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+        :root {
+            --primary: #165DFF;
+            --success: #00B42A;
+            --warning: #FF7D00;
+            --error: #F53F3F;
+            --neutral: #86909C;
+            --bg-main: #F5F7FA;
+            --bg-card: #FFFFFF;
+            --bg-light: #F2F3F5;
+            --border: #E5E6EB;
+            --text-main: #1D2129;
+            --text-secondary: #4E5969;
+            --text-light: #86909C;
+            --shadow: 0 2px 12px 0 rgba(0,0,0,0.08);
+            --radius: 8px;
+            --transition: all 0.3s ease;
+            --active: rgba(22,93,255,0.1);
+        }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        .page-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .page-title small {
+            font-size: 14px;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .card {
+            background-color: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .card-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .card-body {
+            padding: 24px;
+        }
+        /* 切分配置区 */
+        .chunk-config {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .form-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .form-select, .form-input {
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .form-select:focus, .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(22,93,255,0.1);
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background-color: #0E4BDB;
+        }
+        .btn-default {
+            background-color: var(--bg-light);
+            color: var(--text-secondary);
+        }
+        .btn-default:hover {
+            background-color: #e5e7eb;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        /* 文档预览区 */
+        .doc-preview {
+            width: 100%;
+            min-height: 150px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            color: var(--text-main);
+            background-color: var(--bg-light);
+            resize: vertical;
+            margin-bottom: 30px;
+            outline: none;
+        }
+        .doc-preview:focus {
+            border-color: var(--primary);
+            background-color: #fff;
+        }
+        /* 片段列表区 */
+        .chunk-list {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .chunk-list th, .chunk-list td {
+            padding: 16px 24px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .chunk-list th {
+            background-color: var(--bg-light);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .chunk-list tr:hover {
+            background-color: var(--active);
+        }
+        .chunk-num {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            background-color: var(--primary);
+            color: #fff;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .chunk-content {
+            color: var(--text-main);
+            line-height: 1.6;
+            max-width: 800px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            position: relative;
+        }
+        .chunk-content:hover::after {
+            content: attr(title);
+            position: absolute;
+            top: 120%;
+            left: 0;
+            background: var(--text-main);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            white-space: pre-wrap;
+            z-index: 99;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+        }
+        .chunk-opt {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .opt-btn {
+            background: none;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: var(--transition);
+        }
+        .opt-split {
+            color: var(--warning);
+        }
+        .opt-merge {
+            color: var(--primary);
+        }
+        .opt-delete {
+            color: var(--error);
+        }
+        .opt-btn:hover {
+            opacity: 0.8;
+        }
+        /* 批量操作区 */
+        .batch-opt {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+        .batch-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .batch-tip {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        /* 空状态、提示 */
+        .empty-box {
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--border);
+        }
+        .tip-text {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+        .red-tip {
+            color: var(--error);
+        }
+        /* 弹窗样式 */
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            display: none;
+        }
+        .modal-box {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 450px;
+            padding: 24px;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+        .modal-form {
+            margin-bottom: 24px;
+        }
+        .modal-btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        /* 适配小屏 */
+        @media (max-width: 992px) {
+            .chunk-config {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .chunk-list th, .chunk-list td {
+                padding: 12px 16px;
+            }
+            .chunk-opt {
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .chunk-content {
+                max-width: 300px;
+            }
+        }
+        @media (max-width: 576px) {
+            .chunk-config {
+                grid-template-columns: 1fr;
+            }
+            .batch-opt {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .chunk-list th:nth-child(3), .chunk-list td:nth-child(3) {
+                display: none;
+            }
+        }
+    </style>
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-scissors"></i> 文档切分与片段可视化
+                <small>RAG Chunking 配置 & 编辑</small>
+            </h1>
+            <a href="javascript:;" class="back-btn"><i class="fas fa-arrow-left"></i> 返回文档管理</a>
+        </div>
+
+        <!-- 切分配置卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">切分策略配置</h3>
+                <span class="tip-text">当前文档：<b>企业RAG技术白皮书.md</b>（大小：245.6KB）</span>
+            </div>
+            <div class="card-body">
+                <!-- 配置项 -->
+                <div class="chunk-config">
+                    <div class="form-item">
+                        <label class="form-label">切分方式</label>
+                        <select class="form-select" id="chunkType">
+                            <option value="char">按字符</option>
+                            <option value="sentence">按句子</option>
+                            <option value="paragraph">按段落</option>
+                            <option value="custom">自定义规则</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">切分长度</label>
+                        <input type="number" class="form-input" id="chunkLen" value="500" min="100" max="2000" placeholder="请输入切分长度">
+                        <span class="tip-text">按字符/句子为数量，按段落忽略此参数</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">重叠长度</label>
+                        <input type="number" class="form-input" id="chunkOverlap" value="50" min="0" max="200" placeholder="请输入重叠长度">
+                        <span class="tip-text">片段间重叠字符/句子数</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">自定义规则</label>
+                        <input type="text" class="form-input" id="customRule" placeholder="如：\n、。！？；" disabled>
+                        <span class="tip-text red-tip">选择自定义规则后可编辑</span>
+                    </div>
+                </div>
+
+                <!-- 文档预览 -->
+                <label class="form-label">文档内容预览（可编辑）</label>
+                <textarea class="doc-preview" id="docContent" placeholder="文档内容将展示在这里，可手动修改后再切分">
+# 企业RAG技术白皮书
+## 一、RAG技术核心原理
+检索增强生成（RAG）是将信息检索与大语言模型结合的生成式AI技术，核心是通过检索外部知识库为模型提供精准上下文，解决大模型幻觉、知识过时问题。
+RAG的核心流程分为四步：文档加载与预处理、文档切分与向量化、检索匹配、生成回答。其中文档切分是关键环节，切分的粒度直接影响检索精度和生成效果。
+
+## 二、企业级RAG文档切分原则
+1. 粒度适配原则：业务问答短则按句子切分，技术文档长则按段落+字符混合切分；
+2. 语义完整原则：切分需保证单个片段语义独立，避免将完整语义拆分为多个片段；
+3. 重叠互补原则：片段间保留适量重叠，解决跨片段语义断裂问题；
+4. 动态调整原则：根据文档类型（结构化/非结构化）动态调整切分策略。
+
+## 三、主流切分策略对比
+按字符切分：优点是实现简单、通用性强；缺点是易拆分完整语义，适合无明显格式的纯文本。
+按句子切分：优点是语义完整性高；缺点是对分句符敏感，适合中文书面文档。
+按段落切分：优点是语义独立性最强；缺点是片段长度不均，适合排版规范的文档。
+自定义规则切分：优点是适配个性化业务；缺点是需要人工配置规则，适合专属格式文档。
+                </textarea>
+
+                <!-- 操作按钮 -->
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="chunkBtn"><i class="fas fa-scissors"></i> 执行切分</button>
+                    <button class="btn btn-default" id="resetBtn"><i class="fas fa-refresh"></i> 重置配置</button>
+                    <button class="btn btn-default" id="saveBtn"><i class="fas fa-save"></i> 保存切分结果</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 切分结果卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">切分结果（片段总数：<span id="chunkTotal">0</span>）</h3>
+                <span class="tip-text">支持单/批量删除、相邻片段合并、单片段拆分</span>
+            </div>
+            <div class="card-body">
+                <!-- 批量操作 -->
+                <div class="batch-opt">
+                    <div class="batch-left">
+                        <input type="checkbox" class="checkbox" id="checkAll">
+                        <label for="checkAll" class="form-label" style="cursor: pointer;">全选</label>
+                        <button class="opt-btn opt-delete" id="batchDelete"><i class="fas fa-trash"></i> 批量删除</button>
+                        <button class="opt-btn opt-merge" id="batchMerge"><i class="fas fa-compress-alt"></i> 合并选中</button>
+                    </div>
+                    <span class="batch-tip">选中 <span id="checkCount">0</span> 个片段 | 双击片段可查看完整内容</span>
+                </div>
+
+                <!-- 片段列表 -->
+                <table class="chunk-list" id="chunkTable">
+                    <thead>
+                        <tr>
+                            <th width="8%"><input type="checkbox" class="checkbox" id="thCheck" disabled></th>
+                            <th width="10%">片段编号</th>
+                            <th width="62%">片段内容</th>
+                            <th width="20%">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="chunkTableBody">
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-box">
+                                    <div class="empty-icon"><i class="fas fa-layer-group"></i></div>
+                                    <p>未执行切分，配置后点击「执行切分」生成片段</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 拆分片段弹窗 -->
+    <div class="modal-mask" id="splitModal">
+        <div class="modal-box">
+            <div class="modal-title">
+                <span>拆分片段</span>
+                <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-form">
+                <label class="form-label" for="splitPos">拆分位置（字符数）</label>
+                <input type="number" class="form-input" id="splitPos" min="10" placeholder="请输入拆分的字符位置">
+                <span class="tip-text">如在200字符处拆分，输入200即可</span>
+                <label class="form-label" style="margin-top:16px;">当前片段内容</label>
+                <textarea class="doc-preview" id="splitContent" rows="6" disabled></textarea>
+            </div>
+            <div class="modal-btn-group">
+                <button class="modal-btn btn-default" onclick="closeModal()">取消</button>
+                <button class="modal-btn btn-primary" onclick="confirmSplit()">确认拆分</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let chunkList = []; // 切分片段列表
+        let currentSplitId = ''; // 当前拆分的片段ID
+        // 元素获取
+        const chunkType = document.getElementById('chunkType');
+        const chunkLen = document.getElementById('chunkLen');
+        const chunkOverlap = document.getElementById('chunkOverlap');
+        const customRule = document.getElementById('customRule');
+        const docContent = document.getElementById('docContent');
+        const chunkBtn = document.getElementById('chunkBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const chunkTableBody = document.getElementById('chunkTableBody');
+        const chunkTotal = document.getElementById('chunkTotal');
+        const checkAll = document.getElementById('checkAll');
+        const checkCount = document.getElementById('checkCount');
+        const batchDelete = document.getElementById('batchDelete');
+        const batchMerge = document.getElementById('batchMerge');
+        const splitModal = document.getElementById('splitModal');
+        const splitPos = document.getElementById('splitPos');
+        const splitContent = document.getElementById('splitContent');
+
+        // 初始化：切分方式切换监听
+        chunkType.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customRule.disabled = false;
+                customRule.placeholder = '输入分隔符，如：\n、。！？；';
+            } else {
+                customRule.disabled = true;
+                customRule.value = '';
+                customRule.placeholder = '如：\n、。！？；';
+            }
+            // 按段落隐藏长度/重叠配置（前端视觉屏蔽，实际可加样式）
+            if (this.value === 'paragraph') {
+                chunkLen.readOnly = true;
+                chunkOverlap.readOnly = true;
+            } else {
+                chunkLen.readOnly = false;
+                chunkOverlap.readOnly = false;
+            }
+        });
+
+        // 执行切分
+        chunkBtn.addEventListener('click', function() {
+            const content = docContent.value.trim();
+            if (!content) {
+                alert('文档内容不能为空，请输入或粘贴内容后再切分！');
+                return;
+            }
+            const type = chunkType.value;
+            const len = parseInt(chunkLen.value);
+            const overlap = parseInt(chunkOverlap.value);
+            // 参数校验
+            if (type !== 'paragraph' && (isNaN(len) || len < 100 || len > 2000)) {
+                alert('切分长度请输入100-2000之间的数字！');
+                chunkLen.focus();
+                return;
+            }
+            if (type !== 'paragraph' && (isNaN(overlap) || overlap < 0 || overlap >= len)) {
+                alert('重叠长度请输入0到切分长度之间的数字！');
+                chunkOverlap.focus();
+                return;
+            }
+            // 执行对应切分方法
+            switch (type) {
+                case 'char':
+                    chunkList = chunkByChar(content, len, overlap);
+                    break;
+                case 'sentence':
+                    chunkList = chunkBySentence(content, len, overlap);
+                    break;
+                case 'paragraph':
+                    chunkList = chunkByParagraph(content);
+                    break;
+                case 'custom':
+                    const rule = customRule.value.trim();
+                    if (!rule) {
+                        alert('请输入自定义切分规则（分隔符）！');
+                        customRule.focus();
+                        return;
+                    }
+                    chunkList = chunkByCustom(content, rule, overlap);
+                    break;
+            }
+            // 渲染片段列表
+            renderChunkList();
+            // 提示
+            alert(`切分完成！共生成 ${chunkList.length} 个片段`);
+        });
+
+        // 1. 按字符切分（核心方法）
+        function chunkByChar(content, chunkSize, overlapSize) {
+            const chunks = [];
+            let index = 0;
+            let id = 1;
+            while (index < content.length) {
+                // 计算结束位置，最后一个片段取到末尾
+                const end = Math.min(index + chunkSize, content.length);
+                let chunk = content.substring(index, end);
+                // 推入片段
+                chunks.push({
+                    id: 'c' + id,
+                    num: id,
+                    content: chunk,
+                    length: chunk.length
+                });
+                // 下一个起始位置 = 当前起始 + 切分长度 - 重叠长度
+                index += chunkSize - overlapSize;
+                id++;
+            }
+            return chunks;
+        }
+
+        // 2. 按句子切分（按中文分句符拆分）
+        function chunkBySentence(content, chunkSize, overlapSize) {
+            // 中文分句符：。！？；\n
+            const sentenceReg = /([。！？；\n])/g;
+            const sentences = content.split(sentenceReg).filter(s => s.trim() !== '');
+            const chunks = [];
+            let index = 0;
+            let id = 1;
+            while (index < sentences.length) {
+                const end = Math.min(index + chunkSize, sentences.length);
+                // 取重叠的句子（前overlap个）
+                const start = index > 0 ? index - overlapSize : 0;
+                const chunkSentences = sentences.slice(start, end);
+                const chunkContent = chunkSentences.join('');
+                chunks.push({
+                    id: 'c' + id,
+                    num: id,
+                    content: chunkContent,
+                    length: chunkSentences.length
+                });
+                index = end;
+                id++;
+            }
+            return chunks;
+        }
+
+        // 3. 按段落切分（按换行符拆分，过滤空行）
+        function chunkByParagraph(content) {
+            const paragraphs = content.split('\n').filter(p => p.trim() !== '');
+            return paragraphs.map((p, i) => ({
+                id: 'c' + (i + 1),
+                num: i + 1,
+                content: p.trim(),
+                length: p.trim().length
+            }));
+        }
+
+        // 4. 自定义规则切分
+        function chunkByCustom(content, rule, overlapSize) {
+            // 将自定义规则转为正则（转义特殊字符）
+            const escapeReg = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const reg = new RegExp(`(${escapeReg(rule).split('').join('|')})`, 'g');
+            const parts = content.split(reg).filter(p => p.trim() !== '');
+            // 复用句子切分的逻辑，按自定义片段数切分
+            const chunkSize = parseInt(chunkLen.value);
+            const chunks = [];
+            let index = 0;
+            let id = 1;
+            while (index < parts.length) {
+                const end = Math.min(index + chunkSize, parts.length);
+                const start = index > 0 ? index - overlapSize : 0;
+                const chunkParts = parts.slice(start, end);
+                const chunkContent = chunkParts.join('');
+                chunks.push({
+                    id: 'c' + id,
+                    num: id,
+                    content: chunkContent,
+                    length: chunkParts.length
+                });
+                index = end;
+                id++;
+            }
+            return chunks;
+        }
+
+        // 渲染片段列表
+        function renderChunkList() {
+            chunkTableBody.innerHTML = '';
+            chunkTotal.innerText = chunkList.length;
+            checkCount.innerText = 0;
+            checkAll.checked = false;
+
+            // 空状态
+            if (chunkList.length === 0) {
+                chunkTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-box">
+                                <div class="empty-icon"><i class="fas fa-layer-group"></i></div>
+                                <p>未执行切分，配置后点击「执行切分」生成片段</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // 渲染片段
+            chunkList.forEach(chunk => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="checkbox chunk-check" data-id="${chunk.id}"></td>
+                    <td><span class="chunk-num">${chunk.num}</span></td>
+                    <td class="chunk-content" title="${chunk.content}">${chunk.content}</td>
+                    <td class="chunk-opt">
+                        <button class="opt-btn opt-split" onclick="openSplitModal('${chunk.id}')"><i class="fas fa-cut"></i> 拆分</button>
+                        <button class="opt-btn opt-merge" onclick="mergeChunk('${chunk.id}')"><i class="fas fa-plus"></i> 合并下一个</button>
+                        <button class="opt-btn opt-delete" onclick="deleteChunk('${chunk.id}')"><i class="fas fa-trash"></i> 删除</button>
+                    </td>
+                `;
+                chunkTableBody.appendChild(tr);
+            });
+
+            // 绑定单个复选框事件
+            document.querySelectorAll('.chunk-check').forEach(checkbox => {
+                checkbox.addEventListener('change', updateCheckCount);
+            });
+        }
+
+        // 全选/反选
+        checkAll.addEventListener('change', function() {
+            const allCheck = document.querySelectorAll('.chunk-check');
+            allCheck.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateCheckCount();
+        });
+
+        // 更新选中数量
+        function updateCheckCount() {
+            const checked = document.querySelectorAll('.chunk-check:checked');
+            checkCount.innerText = checked.length;
+            // 全选框状态同步
+            checkAll.checked = checked.length === chunkList.length && chunkList.length > 0;
+        }
+
+        // 重置配置
+        resetBtn.addEventListener('click', function() {
+            chunkType.value = 'char';
+            chunkLen.value = 500;
+            chunkOverlap.value = 50;
+            customRule.disabled = true;
+            customRule.value = '';
+            chunkLen.readOnly = false;
+            chunkOverlap.readOnly = false;
+            docContent.value = docContent.defaultValue;
+            chunkList = [];
+            renderChunkList();
+            alert('配置已重置为默认值！');
+        });
+
+        // 保存切分结果
+        saveBtn.addEventListener('click', function() {
+            if (chunkList.length === 0) {
+                alert('暂无切分结果，无法保存！');
+                return;
+            }
+            // 模拟保存（实际对接后端接口）
+            const saveData = {
+                docName: '企业RAG技术白皮书.md',
+                chunkStrategy: chunkType.options[chunkType.selectedIndex].text,
+                chunkParams: {
+                    length: chunkLen.value,
+                    overlap: chunkOverlap.value,
+                    customRule: customRule.value
+                },
+                chunkTotal: chunkList.length,
+                chunks: chunkList
+            };
+            console.log('保存的切分结果：', saveData);
+            alert(`切分结果保存成功！共${chunkList.length}个片段，已同步至知识库`);
+        });
+
+        // 单个片段删除
+        function deleteChunk(id) {
+            if (confirm('确定要删除该片段吗？删除后不可恢复！')) {
+                chunkList = chunkList.filter(item => item.id !== id);
+                // 重新编号
+                chunkList = chunkList.map((item, i) => ({ ...item, num: i + 1, id: 'c' + (i + 1) }));
+                renderChunkList();
+            }
+        }
+
+        // 批量删除
+        batchDelete.addEventListener('click', function() {
+            const checkedIds = Array.from(document.querySelectorAll('.chunk-check:checked')).map(c => c.dataset.id);
+            if (checkedIds.length === 0) {
+                alert('请选择要删除的片段！');
+                return;
+            }
+            if (confirm(`确定要删除选中的${checkedIds.length}个片段吗？删除后不可恢复！`)) {
+                chunkList = chunkList.filter(item => !checkedIds.includes(item.id));
+                chunkList = chunkList.map((item, i) => ({ ...item, num: i + 1, id: 'c' + (i + 1) }));
+                renderChunkList();
+            }
+        });
+
+        // 合并当前片段与下一个
+        function mergeChunk(id) {
+            const currentIndex = chunkList.findIndex(item => item.id === id);
+            if (currentIndex === -1 || currentIndex === chunkList.length - 1) {
+                alert('该片段为最后一个，无法合并下一个！');
+                return;
+            }
+            // 合并内容
+            const mergedContent = chunkList[currentIndex].content + chunkList[currentIndex + 1].content;
+            // 替换当前片段，删除下一个
+            chunkList[currentIndex] = {
+                ...chunkList[currentIndex],
+                content: mergedContent,
+                length: mergedContent.length
+            };
+            chunkList.splice(currentIndex + 1, 1);
+            // 重新编号
+            chunkList = chunkList.map((item, i) => ({ ...item, num: i + 1, id: 'c' + (i + 1) }));
+            renderChunkList();
+            alert('片段合并成功！');
+        }
+
+        // 批量合并（合并选中的连续片段）
+        batchMerge.addEventListener('click', function() {
+            const checkedIds = Array.from(document.querySelectorAll('.chunk-check:checked')).map(c => c.dataset.id);
+            if (checkedIds.length < 2) {
+                alert('请选择至少2个连续片段进行合并！');
+                return;
+            }
+            // 获取选中片段的索引
+            const checkedIndexs = checkedIds.map(id => chunkList.findIndex(item => item.id === id)).sort((a, b) => a - b);
+            // 校验是否连续
+            const isContinuous = checkedIndexs.every((idx, i) => idx === checkedIndexs[0] + i);
+            if (!isContinuous) {
+                alert('仅支持合并**连续**的片段，请重新选择！');
+                return;
+            }
+            // 合并内容
+            const mergedContent = chunkList.filter((_, idx) => checkedIndexs.includes(idx)).map(item => item.content).join('');
+            // 删除选中的，在起始位置插入合并后的片段
+            chunkList.splice(checkedIndexs[0], checkedIndexs.length, {
+                id: 'c' + (checkedIndexs[0] + 1),
+                num: checkedIndexs[0] + 1,
+                content: mergedContent,
+                length: mergedContent.length
+            });
+            // 重新编号
+            chunkList = chunkList.map((item, i) => ({ ...item, num: i + 1, id: 'c' + (i + 1) }));
+            renderChunkList();
+            alert(`选中的${checkedIds.length}个片段合并成功！`);
+        });
+
+        // 打开拆分弹窗
+        function openSplitModal(id) {
+            const chunk = chunkList.find(item => item.id === id);
+            if (!chunk) return;
+            currentSplitId = id;
+            splitContent.value = chunk.content;
+            splitPos.value = Math.floor(chunk.content.length / 2); // 默认中间位置
+            splitModal.style.display = 'flex';
+            splitPos.focus();
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            splitModal.style.display = 'none';
+            splitPos.value = '';
+            currentSplitId = '';
+        }
+
+        // 确认拆分
+        function confirmSplit() {
+            const pos = parseInt(splitPos.value);
+            const chunk = chunkList.find(item => item.id === currentSplitId);
+            if (!chunk || isNaN(pos) || pos < 10 || pos >= chunk.content.length) {
+                alert(`请输入10到${chunk.content.length-1}之间的拆分位置！`);
+                splitPos.focus();
+                return;
+            }
+            // 拆分为两个片段
+            const chunk1 = {
+                id: 'c' + Date.now(),
+                num: 0,
+                content: chunk.content.substring(0, pos),
+                length: pos
+            };
+            const chunk2 = {
+                id: 'c' + (Date.now() + 1),
+                num: 0,
+                content: chunk.content.substring(pos),
+                length: chunk.content.length - pos
+            };
+            // 替换原片段
+            const currentIndex = chunkList.findIndex(item => item.id === currentSplitId);
+            chunkList.splice(currentIndex, 1, chunk1, chunk2);
+            // 重新编号
+            chunkList = chunkList.map((item, i) => ({ ...item, num: i + 1, id: 'c' + (i + 1) }));
+            renderChunkList();
+            closeModal();
+            alert('片段拆分成功！');
+        }
+
+        // 点击弹窗外部关闭
+        window.onclick = function(e) {
+            if (e.target === splitModal) closeModal();
+        }
+
+        // 回车确认拆分
+        splitPos.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') confirmSplit();
+        });
+
+        // 双击片段查看完整内容
+        document.addEventListener('dblclick', function(e) {
+            if (e.target.classList.contains('chunk-content')) {
+                alert('片段完整内容：\n\n' + e.target.title);
+            }
+        });
+    </script>
+</body>
+</html>

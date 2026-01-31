@@ -1,0 +1,58 @@
+2026-01-29 21:02:35 - rag_backend - INFO - 加载了 12 个文档
+INFO:     Started server process [142390]
+INFO:     Waiting for application startup.
+2026-01-29 21:02:37 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 21:02:37 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 21:02:37 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 21:02:37 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 21:02:37 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 21:02:37 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-01-29 21:03:03 - rag_backend - INFO - ================================================================================
+2026-01-29 21:03:03 - rag_backend - INFO - 收到智能对话请求
+2026-01-29 21:03:03 - rag_backend - INFO - 用户查询: 测试修复后的系统
+2026-01-29 21:03:03 - rag_backend - INFO - 检索配置: top_k=3, 阈值=0.6, 算法=SimilarityAlgorithm.COSINE
+2026-01-29 21:03:03 - rag_backend - INFO - 生成配置: provider=local, model=Qwen2.5-0.5B-Instruct, temperature=0.7
+2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 开始处理查询: '测试修复后的系统'
+2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 步骤1/4: 开始检索相关文档...
+2026-01-29 21:03:03 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 271, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 检索完成: 找到 0 个相关片段, 耗时 2.17ms
+2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 步骤2/4: 构建上下文...
+2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 上下文构建完成, 长度: 9 字符 (限制: 6000)
+2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 步骤3/4: 构建 Prompt...
+2026-01-29 21:03:04 - rag_backend - INFO - [RAG生成] 步骤4/4: 使用 LLM 生成回答...
+2026-01-29 21:03:04 - rag_backend - INFO - [RAG生成] LLM 配置: provider=local, model=Qwen2.5-0.5B-Instruct
+2026-01-29 21:03:07 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-01-29 21:03:08 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
+2026-01-29 21:03:20 - rag_backend - INFO - [RAG生成] 生成完成: 回答长度=355字符, 耗时 16619.56ms
+2026-01-29 21:03:20 - rag_backend - INFO - [RAG生成] 总耗时: 16622.59ms (检索: 2.17ms, 生成: 16619.56ms)
+2026-01-29 21:03:20 - rag_backend - INFO - RAG 生成完成
+2026-01-29 21:03:20 - rag_backend - INFO -   - 查询: 测试修复后的系统
+2026-01-29 21:03:20 - rag_backend - INFO -   - 检索耗时: 2.17ms
+2026-01-29 21:03:20 - rag_backend - INFO -   - 生成耗时: 16619.56ms
+2026-01-29 21:03:20 - rag_backend - INFO -   - 总耗时: 16622.59ms
+2026-01-29 21:03:20 - rag_backend - INFO -   - 检索到上下文片段数: 0
+2026-01-29 21:03:20 - rag_backend - INFO -   - 生成回答: 测试修复后的系统需要进行详细的检查和验证，以确保其功能正常，并且没有任何潜在的问题存在。这个过程通常包括以下几个步骤：
+
+1. 系统性能测试：使用各种工具和方法来评估系统的运行效率和处理能力。
+2. 应用程序测试：对应用程序进行全面的测试，以确保它们能够正确地执行用户需求。
+3. 安全性测试：对系统中的所有安全模块进行测试，以确保数据的安全性和完整性。
+4. 性能优化：通过调整配置参数、更改代码等...
+2026-01-29 21:03:20 - rag_backend - INFO - ================================================================================
+INFO:     127.0.0.1:57234 - "POST /rag/generate HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-01-29 21:05:05 - rag_backend - INFO - 关闭应用
+2026-01-29 21:05:05 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+INFO:     Application shutdown complete.
+INFO:     Finished server process [142390]

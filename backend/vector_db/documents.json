@@ -1,0 +1,134 @@
+{
+  "86a794c746c01e0abf6c1db9f2086bec": {
+    "id": "86a794c746c01e0abf6c1db9f2086bec",
+    "name": "rag笔记 - 副本.md",
+    "size": 18104,
+    "status": "indexed",
+    "upload_time": "2026-01-28T21:51:12.328051",
+    "chunk_count": 20,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "rag笔记 - 副本.md"
+  },
+  "09224b1670ff90dc104d7ba2bfc007e5": {
+    "id": "09224b1670ff90dc104d7ba2bfc007e5",
+    "name": "test_rag.md",
+    "size": 476,
+    "status": "pending",
+    "upload_time": "2026-01-28T21:56:32.729519",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "test_rag.md"
+  },
+  "a12fbf6d725eab30b32f3ca84b93d18a": {
+    "id": "a12fbf6d725eab30b32f3ca84b93d18a",
+    "name": "新建文本文档 (2).txt",
+    "size": 0,
+    "status": "pending",
+    "upload_time": "2026-01-28T21:58:58.961083",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "新建文本文档 (2).txt"
+  },
+  "80ae8bcd129ca8b5ad78f00811c7515f": {
+    "id": "80ae8bcd129ca8b5ad78f00811c7515f",
+    "name": "需要下载的包.txt",
+    "size": 82,
+    "status": "pending",
+    "upload_time": "2026-01-28T21:59:16.546280",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "需要下载的包.txt"
+  },
+  "b303a445e76652d58592d83edfa759d8": {
+    "id": "b303a445e76652d58592d83edfa759d8",
+    "name": "test_preview.txt",
+    "size": 94,
+    "status": "pending",
+    "upload_time": "2026-01-28T22:04:10.027241",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "test_preview.txt"
+  },
+  "da23ff1668ba791c5da0f6d3431ba768": {
+    "id": "da23ff1668ba791c5da0f6d3431ba768",
+    "name": "16laodonghetongfa.pdf",
+    "size": 172756,
+    "status": "split",
+    "upload_time": "2026-01-28T22:17:28.293041",
+    "chunk_count": 30,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "16laodonghetongfa.pdf"
+  },
+  "348b36503299e6758a78eb747b04e9b3": {
+    "id": "348b36503299e6758a78eb747b04e9b3",
+    "name": "rag开发代码.pdf",
+    "size": 504789,
+    "status": "pending",
+    "upload_time": "2026-01-28T22:22:54.491040",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "rag开发代码.pdf"
+  },
+  "ac18daca2b6dbc5a6282abb7bdf6d427": {
+    "id": "ac18daca2b6dbc5a6282abb7bdf6d427",
+    "name": "test.txt",
+    "size": 725,
+    "status": "pending",
+    "upload_time": "2026-01-28T22:22:57.683441",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "test.txt"
+  },
+  "c5d3039c5b38104a572da2ba8ad3e4e7": {
+    "id": "c5d3039c5b38104a572da2ba8ad3e4e7",
+    "name": "新建文本文档 (2).txt",
+    "size": 0,
+    "status": "pending",
+    "upload_time": "2026-01-28T22:28:45.770682",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "新建文本文档 (2).txt"
+  },
+  "0dc12595a0b290707325b9d5c4efb1ec": {
+    "id": "0dc12595a0b290707325b9d5c4efb1ec",
+    "name": "董彪彪-辞职报告.docx",
+    "size": 15413,
+    "status": "split",
+    "upload_time": "2026-01-28T22:29:01.030820",
+    "chunk_count": 1,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "董彪彪-辞职报告.docx"
+  },
+  "57e727fefb3ad585a67daae1159ba93a": {
+    "id": "57e727fefb3ad585a67daae1159ba93a",
+    "name": "laodonghetongfa.pdf",
+    "size": 172756,
+    "status": "indexed",
+    "upload_time": "2026-01-28T23:09:50.446493",
+    "chunk_count": 30,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "laodonghetongfa.pdf"
+  },
+  "77cd8d56f82e59475eec15a656f8a6af": {
+    "id": "77cd8d56f82e59475eec15a656f8a6af",
+    "name": "laodonghetongfa.pdf",
+    "size": 172756,
+    "status": "pending",
+    "upload_time": "2026-01-28T23:50:42.540897",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "laodonghetongfa.pdf"
+  }
+}

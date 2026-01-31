@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识文档管理 - RAG数据来源可视化</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+        :root {
+            --primary: #165DFF;
+            --success: #00B42A;
+            --processing: #FF7D00;
+            --pending: #86909C;
+            --error: #F53F3F;
+            --bg-main: #F5F7FA;
+            --bg-card: #FFFFFF;
+            --border: #E5E6EB;
+            --text-main: #1D2129;
+            --text-secondary: #4E5969;
+            --text-light: #86909C;
+            --hover: #F2F3F5;
+            --shadow: 0 2px 12px 0 rgba(0,0,0,0.08);
+            --radius: 8px;
+            --transition: all 0.3s ease;
+        }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        .page-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .upload-btn {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        .upload-btn:hover {
+            background-color: #0E4BDB;
+        }
+        .upload-btn input {
+            display: none;
+        }
+        .doc-card {
+            background-color: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .file-tip {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        .file-tip span {
+            color: var(--primary);
+        }
+        .doc-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .doc-table th, .doc-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .doc-table th {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .doc-table tr:last-child td {
+            border-bottom: none;
+        }
+        .doc-table tr:hover {
+            background-color: var(--hover);
+        }
+        .doc-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        .doc-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background-color: rgba(22,93,255,0.1);
+            color: var(--primary);
+        }
+        .doc-size, .doc-time {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-pending {
+            background-color: rgba(134,144,156,0.1);
+            color: var(--pending);
+        }
+        .status-split {
+            background-color: rgba(255,125,0,0.1);
+            color: var(--processing);
+        }
+        .status-index {
+            background-color: rgba(0,180,42,0.1);
+            color: var(--success);
+        }
+        .status-error {
+            background-color: rgba(245,63,63,0.1);
+            color: var(--error);
+        }
+        .operate {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .op-btn {
+            background: none;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .op-rename {
+            color: var(--primary);
+        }
+        .op-reprocess {
+            color: var(--processing);
+        }
+        .op-delete {
+            color: var(--error);
+        }
+        .op-btn:hover {
+            opacity: 0.8;
+        }
+        .empty-box {
+            padding: 80px 20px;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--border);
+        }
+        /* 弹窗样式 */
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            display: none;
+        }
+        .modal-box {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 400px;
+            padding: 24px;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+        .modal-form {
+            margin-bottom: 24px;
+        }
+        .form-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: block;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .form-input:focus {
+            border-color: var(--primary);
+        }
+        .modal-btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .modal-btn {
+            padding: 8px 16px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-cancel {
+            background: var(--hover);
+            color: var(--text-secondary);
+        }
+        .btn-confirm {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-confirm:hover {
+            background: #0E4BDB;
+        }
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* 适配小屏 */
+        @media (max-width: 768px) {
+            .doc-table th, .doc-table td {
+                padding: 12px 10px;
+            }
+            .operate {
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .file-tip {
+                display: none;
+            }
+        }
+    </style>
+    <!-- 引入字体图标（替代图片，无需额外资源） -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <h1 class="page-title">知识文档管理 <small style="font-size:14px;color:var(--text-light);font-weight:400;">RAG数据来源可视化</small></h1>
+            <label class="upload-btn">
+                <i class="fas fa-upload"></i> 上传文档
+                <input type="file" id="fileUpload" multiple accept=".txt,.pdf,.docx,.md" />
+            </label>
+        </div>
+
+        <!-- 文档卡片 -->
+        <div class="doc-card">
+            <div class="card-header">
+                <h3 class="card-title">已上传文档列表</h3>
+                <p class="file-tip">支持格式：<span>TXT、PDF、DOCX、MD</span> | 状态：未切分/已切分/已索引/异常</p>
+            </div>
+            <!-- 文档表格 -->
+            <table class="doc-table" id="docTable">
+                <thead>
+                    <tr>
+                        <th width="35%">文档名称</th>
+                        <th width="12%">文件大小</th>
+                        <th width="18%">上传时间</th>
+                        <th width="15%">处理状态</th>
+                        <th width="20%">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="docTableBody">
+                    <!-- 空状态 -->
+                    <tr class="empty-tr">
+                        <td colspan="5">
+                            <div class="empty-box">
+                                <div class="empty-icon"><i class="fas fa-file-alt"></i></div>
+                                <p>暂无上传文档，点击上方「上传文档」添加RAG数据源</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 重命名弹窗 -->
+    <div class="modal-mask" id="renameModal">
+        <div class="modal-box">
+            <div class="modal-title">
+                <span>重命名文档</span>
+                <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-form">
+                <label class="form-label" for="newName">新文档名称</label>
+                <input type="text" class="form-input" id="newName" placeholder="请输入新的文档名称（保留后缀）">
+            </div>
+            <div class="modal-btn-group">
+                <button class="modal-btn btn-cancel" onclick="closeModal()">取消</button>
+                <button class="modal-btn btn-confirm" onclick="confirmRename()">确认重命名</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量：存储文档数据、当前操作文档ID
+        let docList = [];
+        let currentDocId = '';
+        const fileUpload = document.getElementById('fileUpload');
+        const docTableBody = document.getElementById('docTableBody');
+        const renameModal = document.getElementById('renameModal');
+        const newNameInput = document.getElementById('newName');
+
+        // 页面初始化：监听文件上传
+        fileUpload.addEventListener('change', handleFileUpload);
+
+        // 处理文件上传
+        function handleFileUpload(e) {
+            const files = e.target.files;
+            if (files.length === 0) return;
+
+            // 遍历上传的文件
+            Array.from(files).forEach(file => {
+                // 过滤支持的格式
+                const supportExt = ['.txt', '.pdf', '.docx', '.md'];
+                const ext = '.' + file.name.split('.').pop().toLowerCase();
+                if (!supportExt.includes(ext)) {
+                    alert(`文件${file.name}格式不支持，仅支持TXT/PDF/DOCX/MD`);
+                    return;
+                }
+
+                // 构造文档数据
+                const doc = {
+                    id: Date.now() + Math.floor(Math.random() * 1000), // 唯一ID
+                    name: file.name,
+                    size: formatFileSize(file.size),
+                    time: formatTime(new Date()),
+                    status: 'pending' // 初始状态：未切分
+                };
+                docList.push(doc);
+            });
+
+            // 重置上传组件（允许重复上传同一文件）
+            fileUpload.value = '';
+            // 渲染文档列表
+            renderDocList();
+        }
+
+        // 渲染文档列表
+        function renderDocList() {
+            // 清空表格
+            docTableBody.innerHTML = '';
+
+            // 空状态
+            if (docList.length === 0) {
+                docTableBody.innerHTML = `
+                    <tr class="empty-tr">
+                        <td colspan="5">
+                            <div class="empty-box">
+                                <div class="empty-icon"><i class="fas fa-file-alt"></i></div>
+                                <p>暂无上传文档，点击上方「上传文档」添加RAG数据源</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // 渲染文档项
+            docList.forEach(doc => {
+                const tr = document.createElement('tr');
+                // 状态样式与文字映射
+                const statusMap = {
+                    pending: { class: 'status-pending', text: '未切分' },
+                    split: { class: 'status-split', text: '已切分' },
+                    index: { class: 'status-index', text: '已索引' },
+                    error: { class: 'status-error', text: '异常' }
+                };
+                const status = statusMap[doc.status];
+
+                tr.innerHTML = `
+                    <td>
+                        <div class="doc-name">
+                            <div class="doc-icon"><i class="fas fa-file"></i></div>
+                            <span>${doc.name}</span>
+                        </div>
+                    </td>
+                    <td class="doc-size">${doc.size}</td>
+                    <td class="doc-time">${doc.time}</td>
+                    <td><span class="status ${status.class}">${status.text}</span></td>
+                    <td class="operate">
+                        <button class="op-btn op-rename" onclick="openRenameModal(${doc.id})"><i class="fas fa-edit"></i> 重命名</button>
+                        <button class="op-btn op-reprocess" onclick="reprocessDoc(${doc.id})"><i class="fas fa-sync-alt"></i> 重新处理</button>
+                        <button class="op-btn op-delete" onclick="deleteDoc(${doc.id})"><i class="fas fa-trash"></i> 删除</button>
+                    </td>
+                `;
+                docTableBody.appendChild(tr);
+            });
+        }
+
+        // 打开重命名弹窗
+        function openRenameModal(id) {
+            currentDocId = id;
+            // 获取当前文档名称，填充到输入框
+            const doc = docList.find(item => item.id === id);
+            newNameInput.value = doc.name;
+            renameModal.style.display = 'flex';
+            // 聚焦输入框
+            newNameInput.focus();
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            renameModal.style.display = 'none';
+            newNameInput.value = '';
+            currentDocId = '';
+        }
+
+        // 确认重命名
+        function confirmRename() {
+            const newName = newNameInput.value.trim();
+            if (!newName) {
+                alert('请输入文档名称');
+                return;
+            }
+            // 校验是否包含后缀（简单校验）
+            const hasExt = newName.includes('.');
+            if (!hasExt) {
+                alert('请保留文件后缀（如.txt、.pdf）');
+                return;
+            }
+            // 更新名称
+            const docIndex = docList.findIndex(item => item.id === currentDocId);
+            docList[docIndex].name = newName;
+            // 刷新列表、关闭弹窗
+            renderDocList();
+            closeModal();
+        }
+
+        // 重新处理文档
+        function reprocessDoc(id) {
+            const docIndex = docList.findIndex(item => item.id === id);
+            // 重新处理后先置为未切分，模拟处理流程
+            docList[docIndex].status = 'pending';
+            renderDocList();
+            // 模拟异步处理（2秒后改为已切分，实际项目替换为后端接口）
+            setTimeout(() => {
+                docList[docIndex].status = 'split';
+                // 再1秒后改为已索引
+                setTimeout(() => {
+                    docList[docIndex].status = 'index';
+                    renderDocList();
+                }, 1000);
+                renderDocList();
+            }, 2000);
+            alert(`开始重新处理文档：${docList[docIndex].name}`);
+        }
+
+        // 删除文档
+        function deleteDoc(id) {
+            const doc = docList.find(item => item.id === id);
+            if (confirm(`确定要删除文档「${doc.name}」吗？删除后不可恢复`)) {
+                docList = docList.filter(item => item.id !== id);
+                renderDocList();
+            }
+        }
+
+        // 工具函数：格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+            else return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        // 工具函数：格式化时间
+        function formatTime(date) {
+            const y = date.getFullYear();
+            const m = (date.getMonth() + 1).toString().padStart(2, '0');
+            const d = date.getDate().toString().padStart(2, '0');
+            const h = date.getHours().toString().padStart(2, '0');
+            const min = date.getMinutes().toString().padStart(2, '0');
+            const s = date.getSeconds().toString().padStart(2, '0');
+            return `${y}-${m}-${d} ${h}:${min}:${s}`;
+        }
+
+        // 点击弹窗外部关闭
+        window.onclick = function(e) {
+            if (e.target === renameModal) {
+                closeModal();
+            }
+        }
+
+        // 回车确认重命名
+        newNameInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                confirmRename();
+            }
+        })
+    </script>
+</body>
+</html>

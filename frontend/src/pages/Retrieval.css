@@ -1,0 +1,572 @@
+.retrieval-config {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.retrieval-process {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--bg-light);
+  margin-bottom: 20px;
+  line-height: 1.8;
+  font-size: 14px;
+}
+
+.process-step {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.step-icon {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: #fff;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.step-success {
+  background-color: var(--success);
+}
+
+.process-tip {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.similarity-score {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* 检索策略按钮组 */
+.strategy-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* 算法网格 */
+.algo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.algo-option {
+  padding: 20px;
+  background: var(--bg-light);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  display: flex;
+  gap: 16px;
+}
+
+.algo-option:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.algo-option.selected {
+  border-color: var(--success);
+  background: linear-gradient(135deg, var(--success-light), var(--bg-card));
+}
+
+.algo-icon {
+  font-size: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.algo-info {
+  flex: 1;
+}
+
+.algo-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.algo-formula {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-family: 'Courier New', monospace;
+  margin-bottom: 12px;
+}
+
+.algo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.meta-item {
+  padding: 3px 10px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.algo-check {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 24px;
+  color: var(--success);
+}
+
+/* 重排序配置 */
+.rerank-toggle {
+  padding: 16px;
+  background: var(--bg-light);
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.rerank-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-range {
+  width: 100%;
+  cursor: pointer;
+}
+
+.range-value {
+  text-align: right;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: 4px;
+}
+
+/* 过滤配置 */
+.filter-section {
+  margin-bottom: 24px;
+}
+
+.filter-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.range-filter {
+  margin-bottom: 12px;
+}
+
+.range-filter label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 6px;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+/* 性能监控 */
+.perf-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.perf-card {
+  padding: 20px;
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.perf-card.primary {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.perf-card.success {
+  border-color: var(--success);
+  background: var(--success-light);
+}
+
+.perf-card.info {
+  border-color: var(--info);
+  background: var(--info-light);
+}
+
+.perf-card.warning {
+  border-color: var(--warning);
+  background: var(--warning-light);
+}
+
+.perf-card.secondary {
+  border-color: var(--text-light);
+}
+
+.perf-card.error {
+  border-color: var(--error);
+  background: var(--error-light);
+}
+
+.perf-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.perf-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.perf-label {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.perf-details {
+  padding: 20px;
+  background: var(--bg-light);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.perf-details h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.perf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.perf-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+}
+
+.perf-item span {
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+.perf-item strong {
+  font-size: 16px;
+  color: var(--text-main);
+}
+
+/* A/B测试 */
+.ab-test-setup,
+.ab-test-results {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ab-test-setup h4,
+.ab-test-results h4,
+.result-comparison h5,
+.recommendation h5 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.ab-strategies {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.strategy-config {
+  padding: 16px;
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.strategy-config h5 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.traffic-slider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.traffic-slider span {
+  font-size: 14px;
+  color: var(--text-light);
+  min-width: 80px;
+}
+
+.test-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-light);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-item span {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.summary-item strong {
+  font-size: 16px;
+  color: var(--text-main);
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.compare-item {
+  padding: 20px;
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.compare-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 16px;
+}
+
+.compare-values {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+}
+
+.value-a,
+.value-b {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.vs {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.compare-winner {
+  text-align: center;
+  padding: 8px;
+  background: var(--success);
+  color: #fff;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.recommendation {
+  padding: 20px;
+  background: var(--bg-light);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.recommendation-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--success-light);
+  border: 1px solid var(--success);
+  border-radius: var(--radius);
+  font-size: 15px;
+  color: var(--text-main);
+}
+
+.recommendation-box i {
+  font-size: 20px;
+  color: var(--success);
+}
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.score-high {
+  background-color: var(--success-light);
+  color: var(--success);
+}
+
+.score-middle {
+  background-color: var(--warning-light);
+  color: var(--warning);
+}
+
+.score-low {
+  background-color: var(--neutral-light);
+  color: var(--neutral);
+}
+
+@media (max-width: 992px) {
+  .retrieval-config {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .strategy-buttons {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .algo-grid,
+  .ab-strategies {
+    grid-template-columns: 1fr;
+  }
+  
+  .perf-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .comparison-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .retrieval-config {
+    grid-template-columns: 1fr;
+  }
+  
+  .strategy-buttons {
+    width: 100%;
+  }
+  
+  .perf-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .test-summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .traffic-slider {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .checkbox-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 576px) {
+  .retrieval-config {
+    grid-template-columns: 1fr;
+  }
+  
+  .strategy-buttons button {
+    width: 100%;
+  }
+  
+  .algo-option,
+  .strategy-config {
+    padding: 12px;
+  }
+  
+  .perf-card {
+    padding: 12px;
+  }
+  
+  .perf-value {
+    font-size: 20px;
+  }
+}

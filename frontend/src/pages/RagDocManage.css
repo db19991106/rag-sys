@@ -1,0 +1,244 @@
+/* 腾讯风格文档管理页面样式 */
+
+.upload-btn {
+  background-color: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.upload-btn:hover {
+  opacity: 0.9;
+}
+
+.upload-btn input {
+  display: none;
+}
+
+.batch-import-btn {
+  background-color: var(--success);
+}
+
+.batch-import-btn:hover {
+  opacity: 0.9;
+}
+
+.btn {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-sm {
+  padding: 4px 12px;
+  font-size: 13px;
+}
+
+.btn-default {
+  background-color: #fff;
+  color: var(--text-main);
+  border: 1px solid var(--border);
+}
+
+.btn-default:hover {
+  background-color: var(--bg-light);
+  border-color: var(--border-dark);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-danger {
+  background-color: var(--error);
+  color: #fff;
+}
+
+.btn-danger:hover {
+  opacity: 0.9;
+}
+
+.btn-warning {
+  background-color: var(--warning);
+  color: #fff;
+}
+
+.btn-warning:hover {
+  opacity: 0.9;
+}
+
+.file-tip {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.file-tip span {
+  color: var(--primary);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.filter-select {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #fff;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.filter-select:hover {
+  border-color: var(--border-dark);
+}
+
+.doc-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.doc-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.doc-size,
+.doc-time {
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  background-color: var(--bg-light);
+  color: var(--text-secondary);
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.status-split {
+  background-color: var(--warning-light);
+  color: var(--warning);
+}
+
+.status-index {
+  background-color: var(--success-light);
+  color: var(--success);
+}
+
+.status-error {
+  background-color: var(--error-light);
+  color: var(--error);
+}
+
+.operate {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.op-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.op-preview {
+  color: var(--primary);
+}
+
+.op-preview:hover {
+  background-color: var(--primary-light);
+}
+
+.op-edit {
+  color: var(--info);
+}
+
+.op-edit:hover {
+  background-color: var(--info-light);
+}
+
+.op-chunk {
+  color: var(--warning);
+}
+
+.op-chunk:hover {
+  background-color: var(--warning-light);
+}
+
+.op-rename {
+  color: var(--secondary);
+}
+
+.op-rename:hover {
+  background-color: var(--secondary-light);
+}
+
+.op-reprocess {
+  color: var(--primary);
+}
+
+.op-reprocess:hover {
+  background-color: var(--primary-light);
+}
+
+.op-delete {
+  color: var(--error);
+}
+
+.op-delete:hover {
+  background-color: var(--error-light);
+}

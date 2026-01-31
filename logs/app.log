@@ -1,0 +1,8 @@
+2026-01-29 00:21:34 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: bge)
+2026-01-29 00:21:37 - rag_backend - INFO - 从HuggingFace下载模型: BAAI/bge-large-zh-v1.5
+2026-01-29 00:24:23 - rag_backend - ERROR - 加载 BGE 模型失败: We couldn't connect to 'https://huggingface.co' to load this file, couldn't find it in the cached files and it looks like BAAI/bge-large-zh-v1.5 is not the path to a directory containing a file named config.json.
+Checkout your internet connection or see how to run the library in offline mode at 'https://huggingface.co/docs/transformers/installation#offline-mode'.
+2026-01-29 00:24:23 - rag_backend - ERROR - 加载嵌入模型失败: We couldn't connect to 'https://huggingface.co' to load this file, couldn't find it in the cached files and it looks like BAAI/bge-large-zh-v1.5 is not the path to a directory containing a file named config.json.
+Checkout your internet connection or see how to run the library in offline mode at 'https://huggingface.co/docs/transformers/installation#offline-mode'.
+2026-01-29 00:37:29 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: bge)
+2026-01-29 00:37:32 - rag_backend - INFO - 从HuggingFace下载模型: BAAI/bge-large-zh-v1.5

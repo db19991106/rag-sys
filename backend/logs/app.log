@@ -1,0 +1,1626 @@
+2026-01-28 09:43:43 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 09:43:44 - rag_backend - ERROR - 向量数据库初始化失败: numpy.core.multiarray failed to import
+2026-01-28 10:23:09 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 10:23:09 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 10:23:09 - rag_backend - INFO - FAISS 索引文件不存在，使用空索引
+2026-01-28 10:23:09 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:23:59 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:23:59 - rag_backend - ERROR - 向量数据库初始化失败: No module named 'faiss'
+2026-01-28 21:27:32 - rag_backend - ERROR - 不支持的文件格式: 
+2026-01-28 21:28:33 - rag_backend - ERROR - 不支持的文件格式: 
+2026-01-28 21:31:56 - rag_backend - INFO - 关闭应用
+2026-01-28 21:31:57 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:31:57 - rag_backend - ERROR - 向量数据库初始化失败: No module named 'faiss'
+2026-01-28 21:33:13 - rag_backend - ERROR - 不支持的文件格式: 
+2026-01-28 21:34:21 - rag_backend - INFO - 关闭应用
+2026-01-28 21:34:28 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:34:28 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 21:34:28 - rag_backend - INFO - FAISS 索引文件不存在，使用空索引
+2026-01-28 21:34:28 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:35:01 - rag_backend - ERROR - 不支持的文件格式: 
+2026-01-28 21:35:18 - rag_backend - ERROR - 不支持的文件格式: 
+2026-01-28 21:35:30 - rag_backend - INFO - 关闭应用
+2026-01-28 21:35:30 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 21:35:31 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:35:31 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 21:35:31 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 21:35:31 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:35:35 - rag_backend - INFO - 文档上传成功: test_doc.txt (ID: 706593b74d052929a4610fc0277f6094)
+2026-01-28 21:35:58 - rag_backend - INFO - 加载了 1 个文档
+2026-01-28 21:37:28 - rag_backend - INFO - 文档上传成功: test_doc.txt (ID: 1b6d724e3d225b4fd30ee3b677170fec)
+2026-01-28 21:37:39 - rag_backend - INFO - 文档上传成功: test.txt (ID: 27b98d04a29f65f61634b862bb1732b3)
+2026-01-28 21:38:09 - rag_backend - INFO - 文档上传成功: rag.pdf (ID: 4b38b13631dc29ddb72f2f9135a47200)
+2026-01-28 21:39:22 - rag_backend - INFO - 文档上传成功: rag.pdf (ID: dd7edc1c9a978eb14221d60a79e367d1)
+2026-01-28 21:41:22 - rag_backend - INFO - 关闭应用
+2026-01-28 21:41:22 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 21:41:24 - rag_backend - INFO - 加载了 5 个文档
+2026-01-28 21:41:25 - rag_backend - INFO - 加载了 5 个文档
+2026-01-28 21:41:25 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:41:25 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 21:41:25 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 21:41:25 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:46:10 - rag_backend - INFO - 文档上传成功: rag.pdf (ID: 2dc464d163147f5be4214d7b578fda50)
+2026-01-28 21:46:10 - rag_backend - INFO - 文档上传成功: test.txt (ID: ad0dd85de0518e3a4c10fec58f703bbf)
+2026-01-28 21:47:59 - rag_backend - INFO - 关闭应用
+2026-01-28 21:47:59 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 21:48:00 - rag_backend - INFO - 加载了 7 个文档
+2026-01-28 21:48:00 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:48:00 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 21:48:00 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 21:48:00 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:48:09 - rag_backend - INFO - 关闭应用
+2026-01-28 21:48:09 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 21:48:10 - rag_backend - INFO - 加载了 7 个文档
+2026-01-28 21:48:10 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:48:10 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 21:48:10 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 21:48:10 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:48:16 - rag_backend - INFO - 关闭应用
+2026-01-28 21:48:16 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 21:48:16 - rag_backend - INFO - 加载了 7 个文档
+2026-01-28 21:48:17 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:48:17 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 21:48:17 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 21:48:17 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:48:20 - rag_backend - INFO - 关闭应用
+2026-01-28 21:48:20 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 21:48:21 - rag_backend - INFO - 加载了 7 个文档
+2026-01-28 21:48:21 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:48:21 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 21:48:21 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 21:48:21 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:48:24 - rag_backend - INFO - 关闭应用
+2026-01-28 21:48:24 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 21:48:25 - rag_backend - INFO - 加载了 7 个文档
+2026-01-28 21:48:25 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:48:25 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 21:48:25 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 21:48:25 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:48:27 - rag_backend - INFO - 关闭应用
+2026-01-28 21:48:27 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 21:48:28 - rag_backend - INFO - 加载了 7 个文档
+2026-01-28 21:48:28 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:48:28 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 21:48:28 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 21:48:28 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:48:33 - rag_backend - INFO - 关闭应用
+2026-01-28 21:48:33 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 21:48:36 - rag_backend - INFO - 加载了 7 个文档
+2026-01-28 21:48:37 - rag_backend - INFO - 加载了 7 个文档
+2026-01-28 21:48:37 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:48:37 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 21:48:37 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 21:48:37 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:48:39 - rag_backend - ERROR - 解析文件失败 data/docs/rag_test.pdf: Stream has ended unexpectedly
+2026-01-28 21:48:43 - rag_backend - INFO - 文档上传成功: rag_test.txt (ID: 53c78b3b3f80636e7dadcd2dd4dfaed4)
+2026-01-28 21:50:28 - rag_backend - INFO - 文档已删除: 53c78b3b3f80636e7dadcd2dd4dfaed4
+2026-01-28 21:51:12 - rag_backend - INFO - 文档上传成功: rag笔记 - 副本.md (ID: 86a794c746c01e0abf6c1db9f2086bec)
+2026-01-28 21:55:41 - rag_backend - INFO - 关闭应用
+2026-01-28 21:55:41 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 21:55:42 - rag_backend - INFO - 加载了 8 个文档
+2026-01-28 21:55:42 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:55:42 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 21:55:42 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 21:55:42 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:55:58 - rag_backend - INFO - 关闭应用
+2026-01-28 21:55:58 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 21:56:11 - rag_backend - INFO - 加载了 8 个文档
+2026-01-28 21:56:12 - rag_backend - INFO - 加载了 8 个文档
+2026-01-28 21:56:12 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 21:56:12 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 21:56:12 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 21:56:12 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 21:56:32 - rag_backend - INFO - 文档上传成功: test_rag.md (ID: 09224b1670ff90dc104d7ba2bfc007e5)
+2026-01-28 21:58:58 - rag_backend - INFO - 文档上传成功: 新建文本文档 (2).txt (ID: a12fbf6d725eab30b32f3ca84b93d18a)
+2026-01-28 21:59:16 - rag_backend - INFO - 文档上传成功: 需要下载的包.txt (ID: 80ae8bcd129ca8b5ad78f00811c7515f)
+2026-01-28 22:04:10 - rag_backend - INFO - 文档上传成功: test_preview.txt (ID: b303a445e76652d58592d83edfa759d8)
+2026-01-28 22:04:40 - rag_backend - INFO - 文档上传成功: test.txt (ID: 5b73a964e162840c85c3cebbcf68d39a)
+2026-01-28 22:05:10 - rag_backend - INFO - 文档上传成功: rag开发代码.pdf (ID: 41dde68c844c6129c8dc8311b56b7056)
+2026-01-28 22:07:56 - rag_backend - INFO - 关闭应用
+2026-01-28 22:07:56 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:07:57 - rag_backend - INFO - 加载了 14 个文档
+2026-01-28 22:07:57 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:07:57 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:07:57 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:07:57 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:08:15 - rag_backend - INFO - 关闭应用
+2026-01-28 22:08:15 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:08:15 - rag_backend - INFO - 加载了 14 个文档
+2026-01-28 22:08:16 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:08:16 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:08:16 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:08:16 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:08:20 - rag_backend - INFO - 关闭应用
+2026-01-28 22:08:20 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:08:21 - rag_backend - INFO - 加载了 14 个文档
+2026-01-28 22:08:21 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:08:21 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:08:21 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:08:21 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:08:25 - rag_backend - INFO - 关闭应用
+2026-01-28 22:08:25 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:08:26 - rag_backend - INFO - 加载了 14 个文档
+2026-01-28 22:08:26 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:08:26 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:08:26 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:08:26 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:08:30 - rag_backend - INFO - 关闭应用
+2026-01-28 22:08:30 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:08:39 - rag_backend - INFO - 加载了 14 个文档
+2026-01-28 22:08:40 - rag_backend - INFO - 加载了 14 个文档
+2026-01-28 22:08:41 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:08:41 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:08:41 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:08:41 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:09:33 - rag_backend - INFO - 文档清洗完成，原长度: 142，清洗后长度: 136
+2026-01-28 22:09:44 - rag_backend - INFO - 文档清洗完成，原长度: 98，清洗后长度: 90
+2026-01-28 22:17:12 - rag_backend - INFO - 文档上传成功: rag开发代码.pdf (ID: dadf850ac82f4006d883a4f81e7925f7)
+2026-01-28 22:17:28 - rag_backend - INFO - 文档上传成功: 16laodonghetongfa.pdf (ID: da23ff1668ba791c5da0f6d3431ba768)
+2026-01-28 22:22:55 - rag_backend - INFO - 文档上传成功: rag开发代码.pdf (ID: 348b36503299e6758a78eb747b04e9b3)
+2026-01-28 22:22:57 - rag_backend - INFO - 文档上传成功: test.txt (ID: ac18daca2b6dbc5a6282abb7bdf6d427)
+2026-01-28 22:25:50 - rag_backend - INFO - 关闭应用
+2026-01-28 22:25:50 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:25:51 - rag_backend - INFO - 加载了 18 个文档
+2026-01-28 22:25:51 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:25:51 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:25:51 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:25:51 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:26:26 - rag_backend - INFO - 关闭应用
+2026-01-28 22:26:26 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:26:27 - rag_backend - INFO - 加载了 18 个文档
+2026-01-28 22:26:27 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:26:27 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:26:27 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:26:27 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:26:29 - rag_backend - INFO - 关闭应用
+2026-01-28 22:26:29 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:26:30 - rag_backend - INFO - 加载了 18 个文档
+2026-01-28 22:26:30 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:26:30 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:26:30 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:26:30 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:26:35 - rag_backend - INFO - 关闭应用
+2026-01-28 22:26:35 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:26:44 - rag_backend - INFO - 加载了 18 个文档
+2026-01-28 22:26:45 - rag_backend - INFO - 加载了 18 个文档
+2026-01-28 22:26:46 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:26:46 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:26:46 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:26:46 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:27:01 - rag_backend - INFO - 更新文档信息: 16laodonghetongfa.pdf
+2026-01-28 22:27:01 - rag_backend - INFO - 更新文档信息: 需要下载的包.txt
+2026-01-28 22:27:01 - rag_backend - INFO - 更新文档信息: test_preview.txt
+2026-01-28 22:27:01 - rag_backend - INFO - 更新文档信息: test.txt
+2026-01-28 22:27:01 - rag_backend - INFO - 更新文档信息: rag笔记 - 副本.md
+2026-01-28 22:27:01 - rag_backend - INFO - 更新文档信息: test_rag.md
+2026-01-28 22:27:01 - rag_backend - INFO - 更新文档信息: rag开发代码.pdf
+2026-01-28 22:27:01 - rag_backend - INFO - 更新文档信息: 新建文本文档 (2).txt
+2026-01-28 22:27:01 - rag_backend - INFO - 文档同步完成: 新增 0, 删除 0, 更新 8, 总计 8
+2026-01-28 22:27:30 - rag_backend - INFO - 清理了 7 个孤立记录
+2026-01-28 22:28:04 - rag_backend - INFO - 文档已删除: 5b73a964e162840c85c3cebbcf68d39a
+2026-01-28 22:28:04 - rag_backend - INFO - 文档已删除: 41dde68c844c6129c8dc8311b56b7056
+2026-01-28 22:28:04 - rag_backend - INFO - 文档已删除: dadf850ac82f4006d883a4f81e7925f7
+2026-01-28 22:28:45 - rag_backend - INFO - 文档上传成功: 新建文本文档 (2).txt (ID: c5d3039c5b38104a572da2ba8ad3e4e7)
+2026-01-28 22:29:01 - rag_backend - INFO - 文档上传成功: 董彪彪-辞职报告.docx (ID: 0dc12595a0b290707325b9d5c4efb1ec)
+2026-01-28 22:34:03 - rag_backend - INFO - 文档切分完成: 79 个片段 (方式: ChunkType.PARAGRAPH)
+2026-01-28 22:34:03 - rag_backend - INFO - 文档切分成功: 86a794c746c01e0abf6c1db9f2086bec, 生成 79 个片段
+2026-01-28 22:34:30 - rag_backend - INFO - 文档切分完成: 30 个片段 (方式: ChunkType.CHAR)
+2026-01-28 22:34:30 - rag_backend - INFO - 文档切分成功: da23ff1668ba791c5da0f6d3431ba768, 生成 30 个片段
+2026-01-28 22:34:49 - rag_backend - INFO - 文档切分完成: 1 个片段 (方式: ChunkType.SENTENCE)
+2026-01-28 22:34:49 - rag_backend - INFO - 文档切分成功: da23ff1668ba791c5da0f6d3431ba768, 生成 1 个片段
+2026-01-28 22:35:10 - rag_backend - INFO - 文档切分完成: 30 个片段 (方式: ChunkType.CHAR)
+2026-01-28 22:35:10 - rag_backend - INFO - 文档切分成功: da23ff1668ba791c5da0f6d3431ba768, 生成 30 个片段
+2026-01-28 22:35:14 - rag_backend - INFO - 文档切分完成: 1 个片段 (方式: ChunkType.PARAGRAPH)
+2026-01-28 22:35:14 - rag_backend - INFO - 文档切分成功: da23ff1668ba791c5da0f6d3431ba768, 生成 1 个片段
+2026-01-28 22:35:25 - rag_backend - INFO - 文档切分完成: 30 个片段 (方式: ChunkType.CHAR)
+2026-01-28 22:35:25 - rag_backend - INFO - 文档切分成功: da23ff1668ba791c5da0f6d3431ba768, 生成 30 个片段
+2026-01-28 22:38:06 - rag_backend - ERROR - 连接 Milvus 失败: module 'marshmallow' has no attribute '__version_info__'
+2026-01-28 22:38:06 - rag_backend - ERROR - 向量数据库初始化失败: module 'marshmallow' has no attribute '__version_info__'
+2026-01-28 22:38:07 - rag_backend - ERROR - 连接 Milvus 失败: module 'marshmallow' has no attribute '__version_info__'
+2026-01-28 22:38:07 - rag_backend - ERROR - 向量数据库初始化失败: module 'marshmallow' has no attribute '__version_info__'
+2026-01-28 22:38:07 - rag_backend - ERROR - 连接 Milvus 失败: module 'marshmallow' has no attribute '__version_info__'
+2026-01-28 22:38:07 - rag_backend - ERROR - 向量数据库初始化失败: module 'marshmallow' has no attribute '__version_info__'
+2026-01-28 22:38:07 - rag_backend - ERROR - 连接 Milvus 失败: module 'marshmallow' has no attribute '__version_info__'
+2026-01-28 22:38:07 - rag_backend - ERROR - 向量数据库初始化失败: module 'marshmallow' has no attribute '__version_info__'
+2026-01-28 22:38:11 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 512)
+2026-01-28 22:38:11 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:38:11 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:38:11 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:39:17 - rag_backend - ERROR - 向量数据库初始化失败: 不支持的向量数据库类型: VectorDBType.QDRANT
+2026-01-28 22:39:21 - rag_backend - ERROR - 连接 Milvus 失败: module 'marshmallow' has no attribute '__version_info__'
+2026-01-28 22:39:21 - rag_backend - ERROR - 向量数据库初始化失败: module 'marshmallow' has no attribute '__version_info__'
+2026-01-28 22:39:53 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+2026-01-28 22:39:53 - rag_backend - INFO - 检索完成: 查询='RAG的核心流程是什么?', 结果数=0
+2026-01-28 22:40:11 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+2026-01-28 22:40:11 - rag_backend - INFO - 检索完成: 查询='劳动合同法', 结果数=0
+2026-01-28 22:40:20 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+2026-01-28 22:40:20 - rag_backend - INFO - 检索完成: 查询='劳动合同法', 结果数=0
+2026-01-28 22:40:34 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+2026-01-28 22:40:34 - rag_backend - INFO - 检索完成: 查询='劳动合同法', 结果数=0
+2026-01-28 22:40:37 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+2026-01-28 22:40:37 - rag_backend - INFO - 检索完成: 查询='劳动合同法', 结果数=0
+2026-01-28 22:40:47 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+2026-01-28 22:40:47 - rag_backend - INFO - 检索完成: 查询='劳动合同法', 结果数=0
+2026-01-28 22:47:43 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-28 22:47:43 - rag_backend - INFO - 文档切分成功: 86a794c746c01e0abf6c1db9f2086bec, 生成 20 个片段
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:13 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:37 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:37 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:48:37 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:49:35 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:49:35 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:49:35 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:49:44 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:49:44 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:49:44 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:50:18 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:50:18 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:50:18 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:50:20 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:50:20 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:50:20 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'device'
+2026-01-28 22:52:25 - rag_backend - INFO - 关闭应用
+2026-01-28 22:52:25 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:52:25 - rag_backend - INFO - 加载了 10 个文档
+2026-01-28 22:52:26 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:52:26 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:52:26 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:52:26 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:52:33 - rag_backend - INFO - 关闭应用
+2026-01-28 22:52:33 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:52:45 - rag_backend - INFO - 加载了 10 个文档
+2026-01-28 22:52:46 - rag_backend - INFO - 加载了 10 个文档
+2026-01-28 22:52:46 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:52:46 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:52:46 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:52:46 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:52:55 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 22:53:02 - rag_backend - INFO - 从ModelScope下载模型: BAAI/bge-large-zh-v1.5
+2026-01-28 22:53:02 - rag_backend - ERROR - 加载 BGE 模型失败: FlagModel.__init__() got an unexpected keyword argument 'cache_dir'
+2026-01-28 22:53:02 - rag_backend - ERROR - 加载嵌入模型失败: FlagModel.__init__() got an unexpected keyword argument 'cache_dir'
+2026-01-28 22:53:02 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: FlagModel.__init__() got an unexpected keyword argument 'cache_dir'
+2026-01-28 22:53:34 - rag_backend - INFO - 关闭应用
+2026-01-28 22:53:34 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:53:35 - rag_backend - INFO - 加载了 10 个文档
+2026-01-28 22:53:35 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:53:35 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:53:35 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:53:35 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:53:50 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 22:53:57 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'FlagICLFlagModel' from 'FlagEmbedding' (/root/miniconda3/lib/python3.12/site-packages/FlagEmbedding/__init__.py)
+2026-01-28 22:53:57 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'FlagICLFlagModel' from 'FlagEmbedding' (/root/miniconda3/lib/python3.12/site-packages/FlagEmbedding/__init__.py)
+2026-01-28 22:53:57 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'FlagICLFlagModel' from 'FlagEmbedding' (/root/miniconda3/lib/python3.12/site-packages/FlagEmbedding/__init__.py)
+2026-01-28 22:54:12 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 22:54:12 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'FlagICLFlagModel' from 'FlagEmbedding' (/root/miniconda3/lib/python3.12/site-packages/FlagEmbedding/__init__.py)
+2026-01-28 22:54:12 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'FlagICLFlagModel' from 'FlagEmbedding' (/root/miniconda3/lib/python3.12/site-packages/FlagEmbedding/__init__.py)
+2026-01-28 22:54:12 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'FlagICLFlagModel' from 'FlagEmbedding' (/root/miniconda3/lib/python3.12/site-packages/FlagEmbedding/__init__.py)
+2026-01-28 22:54:43 - rag_backend - INFO - 关闭应用
+2026-01-28 22:54:43 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:54:44 - rag_backend - INFO - 加载了 10 个文档
+2026-01-28 22:54:44 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:54:44 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:54:44 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:54:44 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:54:55 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 22:55:02 - rag_backend - INFO - 从ModelScope下载模型: BAAI/bge-large-zh-v1.5
+2026-01-28 22:55:02 - rag_backend - ERROR - 加载 BGE 模型失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:55:02 - rag_backend - ERROR - 加载嵌入模型失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:55:02 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:00 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 22:56:00 - rag_backend - INFO - 从ModelScope下载模型: BAAI/bge-large-zh-v1.5
+2026-01-28 22:56:00 - rag_backend - ERROR - 加载 BGE 模型失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:00 - rag_backend - ERROR - 加载嵌入模型失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:00 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:02 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 22:56:02 - rag_backend - INFO - 从ModelScope下载模型: BAAI/bge-large-zh-v1.5
+2026-01-28 22:56:02 - rag_backend - ERROR - 加载 BGE 模型失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:02 - rag_backend - ERROR - 加载嵌入模型失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:02 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:07 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 22:56:07 - rag_backend - INFO - 从ModelScope下载模型: BAAI/bge-large-zh-v1.5
+2026-01-28 22:56:07 - rag_backend - ERROR - 加载 BGE 模型失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:07 - rag_backend - ERROR - 加载嵌入模型失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:07 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:10 - rag_backend - INFO - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 22:56:10 - rag_backend - INFO - 从ModelScope下载模型: BAAI/bge-base-zh-v1.5
+2026-01-28 22:56:10 - rag_backend - ERROR - 加载 BGE 模型失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:10 - rag_backend - ERROR - 加载嵌入模型失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:10 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:30 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-28 22:56:30 - rag_backend - INFO - 文档切分成功: 86a794c746c01e0abf6c1db9f2086bec, 生成 20 个片段
+2026-01-28 22:56:37 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 22:56:37 - rag_backend - INFO - 从ModelScope下载模型: BAAI/bge-large-zh-v1.5
+2026-01-28 22:56:37 - rag_backend - ERROR - 加载 BGE 模型失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:37 - rag_backend - ERROR - 加载嵌入模型失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:56:37 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: BGEM3FlagModel.__init__() got an unexpected keyword argument 'query_instruction_for_retrieval'
+2026-01-28 22:58:49 - rag_backend - INFO - 关闭应用
+2026-01-28 22:58:49 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 22:58:50 - rag_backend - INFO - 加载了 10 个文档
+2026-01-28 22:58:50 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 22:58:50 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 22:58:50 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 22:58:50 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 22:59:49 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 22:59:55 - rag_backend - INFO - 从ModelScope下载模型: BAAI/bge-large-zh-v1.5
+2026-01-28 23:02:05 - rag_backend - ERROR - 加载 BGE 模型失败: An error happened while trying to locate the files on the Hub and we cannot find the appropriate snapshot folder for the specified revision on the local disk. Please check your internet connection and try again.
+2026-01-28 23:02:05 - rag_backend - ERROR - 加载嵌入模型失败: An error happened while trying to locate the files on the Hub and we cannot find the appropriate snapshot folder for the specified revision on the local disk. Please check your internet connection and try again.
+2026-01-28 23:02:05 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: An error happened while trying to locate the files on the Hub and we cannot find the appropriate snapshot folder for the specified revision on the local disk. Please check your internet connection and try again.
+2026-01-28 23:03:06 - rag_backend - INFO - 关闭应用
+2026-01-28 23:03:06 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 23:03:07 - rag_backend - INFO - 加载了 10 个文档
+2026-01-28 23:03:07 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 23:03:08 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 23:03:08 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 23:03:08 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 23:03:14 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:03:20 - rag_backend - INFO - 从ModelScope下载模型: BAAI/bge-large-zh-v1.5
+2026-01-28 23:03:20 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'modelscope'
+2026-01-28 23:03:20 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'modelscope'
+2026-01-28 23:03:20 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'modelscope'
+2026-01-28 23:03:45 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:03:45 - rag_backend - INFO - 从ModelScope下载模型: BAAI/bge-large-zh-v1.5
+2026-01-28 23:05:11 - rag_backend - ERROR - 加载 BGE 模型失败: Due to a serious vulnerability issue in `torch.load`, even with `weights_only=True`, we now require users to upgrade torch to at least v2.6 in order to use the function. This version restriction does not apply when loading files with safetensors.
+See the vulnerability report here https://nvd.nist.gov/vuln/detail/CVE-2025-32434
+2026-01-28 23:05:11 - rag_backend - ERROR - 加载嵌入模型失败: Due to a serious vulnerability issue in `torch.load`, even with `weights_only=True`, we now require users to upgrade torch to at least v2.6 in order to use the function. This version restriction does not apply when loading files with safetensors.
+See the vulnerability report here https://nvd.nist.gov/vuln/detail/CVE-2025-32434
+2026-01-28 23:05:11 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: Due to a serious vulnerability issue in `torch.load`, even with `weights_only=True`, we now require users to upgrade torch to at least v2.6 in order to use the function. This version restriction does not apply when loading files with safetensors.
+See the vulnerability report here https://nvd.nist.gov/vuln/detail/CVE-2025-32434
+2026-01-28 23:05:49 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:05:49 - rag_backend - INFO - 从本地缓存加载模型: data/models/BAAI--bge-large-zh-v1.5
+2026-01-28 23:05:49 - rag_backend - ERROR - 加载 BGE 模型失败: Unrecognized model in data/models/BAAI--bge-large-zh-v1.5. Should have a `model_type` key in its config.json, or contain one of the following strings in its name: aimv2, aimv2_vision_model, albert, align, altclip, apertus, arcee, aria, aria_text, audio-spectrogram-transformer, autoformer, aya_vision, bamba, bark, bart, beit, bert, bert-generation, big_bird, bigbird_pegasus, biogpt, bit, bitnet, blenderbot, blenderbot-small, blip, blip-2, blip_2_qformer, bloom, blt, bridgetower, bros, camembert, canine, chameleon, chinese_clip, chinese_clip_vision_model, clap, clip, clip_text_model, clip_vision_model, clipseg, clvp, code_llama, codegen, cohere, cohere2, cohere2_vision, colpali, colqwen2, conditional_detr, convbert, convnext, convnextv2, cpmant, csm, ctrl, cvt, d_fine, dab-detr, dac, data2vec-audio, data2vec-text, data2vec-vision, dbrx, deberta, deberta-v2, decision_transformer, deepseek_v2, deepseek_v3, deepseek_vl, deepseek_vl_hybrid, deformable_detr, deit, depth_anything, depth_pro, deta, detr, dia, diffllama, dinat, dinov2, dinov2_with_registers, dinov3_convnext, dinov3_vit, distilbert, doge, donut-swin, dots1, dpr, dpt, edgetam, edgetam_video, edgetam_vision_model, efficientformer, efficientloftr, efficientnet, electra, emu3, encodec, encoder-decoder, eomt, ernie, ernie4_5, ernie4_5_moe, ernie_m, esm, evolla, exaone4, falcon, falcon_h1, falcon_mamba, fastspeech2_conformer, fastspeech2_conformer_with_hifigan, flaubert, flava, flex_olmo, florence2, fnet, focalnet, fsmt, funnel, fuyu, gemma, gemma2, gemma3, gemma3_text, gemma3n, gemma3n_audio, gemma3n_text, gemma3n_vision, git, glm, glm4, glm4_moe, glm4v, glm4v_moe, glm4v_moe_text, glm4v_text, glpn, got_ocr2, gpt-sw3, gpt2, gpt_bigcode, gpt_neo, gpt_neox, gpt_neox_japanese, gpt_oss, gptj, gptsan-japanese, granite, granite_speech, granitemoe, granitemoehybrid, granitemoeshared, granitevision, graphormer, grounding-dino, groupvit, helium, hgnet_v2, hiera, hubert, hunyuan_v1_dense, hunyuan_v1_moe, ibert, idefics, idefics2, idefics3, idefics3_vision, ijepa, imagegpt, informer, instructblip, instructblipvideo, internvl, internvl_vision, jamba, janus, jetmoe, jukebox, kosmos-2, kosmos-2.5, kyutai_speech_to_text, layoutlm, layoutlmv2, layoutlmv3, led, levit, lfm2, lfm2_vl, lightglue, lilt, llama, llama4, llama4_text, llava, llava_next, llava_next_video, llava_onevision, longcat_flash, longformer, longt5, luke, lxmert, m2m_100, mamba, mamba2, marian, markuplm, mask2former, maskformer, maskformer-swin, mbart, mctct, mega, megatron-bert, metaclip_2, mgp-str, mimi, minimax, ministral, mistral, mistral3, mixtral, mlcd, mllama, mm-grounding-dino, mobilebert, mobilenet_v1, mobilenet_v2, mobilevit, mobilevitv2, modernbert, modernbert-decoder, moonshine, moshi, mpnet, mpt, mra, mt5, musicgen, musicgen_melody, mvp, nat, nemotron, nezha, nllb-moe, nougat, nystromformer, olmo, olmo2, olmo3, olmoe, omdet-turbo, oneformer, open-llama, openai-gpt, opt, ovis2, owlv2, owlvit, paligemma, parakeet_ctc, parakeet_encoder, patchtsmixer, patchtst, pegasus, pegasus_x, perceiver, perception_encoder, perception_lm, persimmon, phi, phi3, phi4_multimodal, phimoe, pix2struct, pixtral, plbart, poolformer, pop2piano, prompt_depth_anything, prophetnet, pvt, pvt_v2, qdqbert, qwen2, qwen2_5_omni, qwen2_5_vl, qwen2_5_vl_text, qwen2_audio, qwen2_audio_encoder, qwen2_moe, qwen2_vl, qwen2_vl_text, qwen3, qwen3_moe, qwen3_next, qwen3_omni_moe, qwen3_vl, qwen3_vl_moe, qwen3_vl_moe_text, qwen3_vl_text, rag, realm, recurrent_gemma, reformer, regnet, rembert, resnet, retribert, roberta, roberta-prelayernorm, roc_bert, roformer, rt_detr, rt_detr_resnet, rt_detr_v2, rwkv, sam, sam2, sam2_hiera_det_model, sam2_video, sam2_vision_model, sam_hq, sam_hq_vision_model, sam_vision_model, seamless_m4t, seamless_m4t_v2, seed_oss, segformer, seggpt, sew, sew-d, shieldgemma2, siglip, siglip2, siglip2_vision_model, siglip_vision_model, smollm3, smolvlm, smolvlm_vision, speech-encoder-decoder, speech_to_text, speech_to_text_2, speecht5, splinter, squeezebert, stablelm, starcoder2, superglue, superpoint, swiftformer, swin, swin2sr, swinv2, switch_transformers, t5, t5gemma, table-transformer, tapas, textnet, time_series_transformer, timesfm, timesformer, timm_backbone, timm_wrapper, trajectory_transformer, transfo-xl, trocr, tvlt, tvp, udop, umt5, unispeech, unispeech-sat, univnet, upernet, van, vaultgemma, video_llava, videomae, vilt, vipllava, vision-encoder-decoder, vision-text-dual-encoder, visual_bert, vit, vit_hybrid, vit_mae, vit_msn, vitdet, vitmatte, vitpose, vitpose_backbone, vits, vivit, vjepa2, voxtral, voxtral_encoder, wav2vec2, wav2vec2-bert, wav2vec2-conformer, wavlm, whisper, xclip, xcodec, xglm, xlm, xlm-prophetnet, xlm-roberta, xlm-roberta-xl, xlnet, xlstm, xmod, yolos, yoso, zamba, zamba2, zoedepth
+2026-01-28 23:05:49 - rag_backend - ERROR - 加载嵌入模型失败: Unrecognized model in data/models/BAAI--bge-large-zh-v1.5. Should have a `model_type` key in its config.json, or contain one of the following strings in its name: aimv2, aimv2_vision_model, albert, align, altclip, apertus, arcee, aria, aria_text, audio-spectrogram-transformer, autoformer, aya_vision, bamba, bark, bart, beit, bert, bert-generation, big_bird, bigbird_pegasus, biogpt, bit, bitnet, blenderbot, blenderbot-small, blip, blip-2, blip_2_qformer, bloom, blt, bridgetower, bros, camembert, canine, chameleon, chinese_clip, chinese_clip_vision_model, clap, clip, clip_text_model, clip_vision_model, clipseg, clvp, code_llama, codegen, cohere, cohere2, cohere2_vision, colpali, colqwen2, conditional_detr, convbert, convnext, convnextv2, cpmant, csm, ctrl, cvt, d_fine, dab-detr, dac, data2vec-audio, data2vec-text, data2vec-vision, dbrx, deberta, deberta-v2, decision_transformer, deepseek_v2, deepseek_v3, deepseek_vl, deepseek_vl_hybrid, deformable_detr, deit, depth_anything, depth_pro, deta, detr, dia, diffllama, dinat, dinov2, dinov2_with_registers, dinov3_convnext, dinov3_vit, distilbert, doge, donut-swin, dots1, dpr, dpt, edgetam, edgetam_video, edgetam_vision_model, efficientformer, efficientloftr, efficientnet, electra, emu3, encodec, encoder-decoder, eomt, ernie, ernie4_5, ernie4_5_moe, ernie_m, esm, evolla, exaone4, falcon, falcon_h1, falcon_mamba, fastspeech2_conformer, fastspeech2_conformer_with_hifigan, flaubert, flava, flex_olmo, florence2, fnet, focalnet, fsmt, funnel, fuyu, gemma, gemma2, gemma3, gemma3_text, gemma3n, gemma3n_audio, gemma3n_text, gemma3n_vision, git, glm, glm4, glm4_moe, glm4v, glm4v_moe, glm4v_moe_text, glm4v_text, glpn, got_ocr2, gpt-sw3, gpt2, gpt_bigcode, gpt_neo, gpt_neox, gpt_neox_japanese, gpt_oss, gptj, gptsan-japanese, granite, granite_speech, granitemoe, granitemoehybrid, granitemoeshared, granitevision, graphormer, grounding-dino, groupvit, helium, hgnet_v2, hiera, hubert, hunyuan_v1_dense, hunyuan_v1_moe, ibert, idefics, idefics2, idefics3, idefics3_vision, ijepa, imagegpt, informer, instructblip, instructblipvideo, internvl, internvl_vision, jamba, janus, jetmoe, jukebox, kosmos-2, kosmos-2.5, kyutai_speech_to_text, layoutlm, layoutlmv2, layoutlmv3, led, levit, lfm2, lfm2_vl, lightglue, lilt, llama, llama4, llama4_text, llava, llava_next, llava_next_video, llava_onevision, longcat_flash, longformer, longt5, luke, lxmert, m2m_100, mamba, mamba2, marian, markuplm, mask2former, maskformer, maskformer-swin, mbart, mctct, mega, megatron-bert, metaclip_2, mgp-str, mimi, minimax, ministral, mistral, mistral3, mixtral, mlcd, mllama, mm-grounding-dino, mobilebert, mobilenet_v1, mobilenet_v2, mobilevit, mobilevitv2, modernbert, modernbert-decoder, moonshine, moshi, mpnet, mpt, mra, mt5, musicgen, musicgen_melody, mvp, nat, nemotron, nezha, nllb-moe, nougat, nystromformer, olmo, olmo2, olmo3, olmoe, omdet-turbo, oneformer, open-llama, openai-gpt, opt, ovis2, owlv2, owlvit, paligemma, parakeet_ctc, parakeet_encoder, patchtsmixer, patchtst, pegasus, pegasus_x, perceiver, perception_encoder, perception_lm, persimmon, phi, phi3, phi4_multimodal, phimoe, pix2struct, pixtral, plbart, poolformer, pop2piano, prompt_depth_anything, prophetnet, pvt, pvt_v2, qdqbert, qwen2, qwen2_5_omni, qwen2_5_vl, qwen2_5_vl_text, qwen2_audio, qwen2_audio_encoder, qwen2_moe, qwen2_vl, qwen2_vl_text, qwen3, qwen3_moe, qwen3_next, qwen3_omni_moe, qwen3_vl, qwen3_vl_moe, qwen3_vl_moe_text, qwen3_vl_text, rag, realm, recurrent_gemma, reformer, regnet, rembert, resnet, retribert, roberta, roberta-prelayernorm, roc_bert, roformer, rt_detr, rt_detr_resnet, rt_detr_v2, rwkv, sam, sam2, sam2_hiera_det_model, sam2_video, sam2_vision_model, sam_hq, sam_hq_vision_model, sam_vision_model, seamless_m4t, seamless_m4t_v2, seed_oss, segformer, seggpt, sew, sew-d, shieldgemma2, siglip, siglip2, siglip2_vision_model, siglip_vision_model, smollm3, smolvlm, smolvlm_vision, speech-encoder-decoder, speech_to_text, speech_to_text_2, speecht5, splinter, squeezebert, stablelm, starcoder2, superglue, superpoint, swiftformer, swin, swin2sr, swinv2, switch_transformers, t5, t5gemma, table-transformer, tapas, textnet, time_series_transformer, timesfm, timesformer, timm_backbone, timm_wrapper, trajectory_transformer, transfo-xl, trocr, tvlt, tvp, udop, umt5, unispeech, unispeech-sat, univnet, upernet, van, vaultgemma, video_llava, videomae, vilt, vipllava, vision-encoder-decoder, vision-text-dual-encoder, visual_bert, vit, vit_hybrid, vit_mae, vit_msn, vitdet, vitmatte, vitpose, vitpose_backbone, vits, vivit, vjepa2, voxtral, voxtral_encoder, wav2vec2, wav2vec2-bert, wav2vec2-conformer, wavlm, whisper, xclip, xcodec, xglm, xlm, xlm-prophetnet, xlm-roberta, xlm-roberta-xl, xlnet, xlstm, xmod, yolos, yoso, zamba, zamba2, zoedepth
+2026-01-28 23:05:49 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: Unrecognized model in data/models/BAAI--bge-large-zh-v1.5. Should have a `model_type` key in its config.json, or contain one of the following strings in its name: aimv2, aimv2_vision_model, albert, align, altclip, apertus, arcee, aria, aria_text, audio-spectrogram-transformer, autoformer, aya_vision, bamba, bark, bart, beit, bert, bert-generation, big_bird, bigbird_pegasus, biogpt, bit, bitnet, blenderbot, blenderbot-small, blip, blip-2, blip_2_qformer, bloom, blt, bridgetower, bros, camembert, canine, chameleon, chinese_clip, chinese_clip_vision_model, clap, clip, clip_text_model, clip_vision_model, clipseg, clvp, code_llama, codegen, cohere, cohere2, cohere2_vision, colpali, colqwen2, conditional_detr, convbert, convnext, convnextv2, cpmant, csm, ctrl, cvt, d_fine, dab-detr, dac, data2vec-audio, data2vec-text, data2vec-vision, dbrx, deberta, deberta-v2, decision_transformer, deepseek_v2, deepseek_v3, deepseek_vl, deepseek_vl_hybrid, deformable_detr, deit, depth_anything, depth_pro, deta, detr, dia, diffllama, dinat, dinov2, dinov2_with_registers, dinov3_convnext, dinov3_vit, distilbert, doge, donut-swin, dots1, dpr, dpt, edgetam, edgetam_video, edgetam_vision_model, efficientformer, efficientloftr, efficientnet, electra, emu3, encodec, encoder-decoder, eomt, ernie, ernie4_5, ernie4_5_moe, ernie_m, esm, evolla, exaone4, falcon, falcon_h1, falcon_mamba, fastspeech2_conformer, fastspeech2_conformer_with_hifigan, flaubert, flava, flex_olmo, florence2, fnet, focalnet, fsmt, funnel, fuyu, gemma, gemma2, gemma3, gemma3_text, gemma3n, gemma3n_audio, gemma3n_text, gemma3n_vision, git, glm, glm4, glm4_moe, glm4v, glm4v_moe, glm4v_moe_text, glm4v_text, glpn, got_ocr2, gpt-sw3, gpt2, gpt_bigcode, gpt_neo, gpt_neox, gpt_neox_japanese, gpt_oss, gptj, gptsan-japanese, granite, granite_speech, granitemoe, granitemoehybrid, granitemoeshared, granitevision, graphormer, grounding-dino, groupvit, helium, hgnet_v2, hiera, hubert, hunyuan_v1_dense, hunyuan_v1_moe, ibert, idefics, idefics2, idefics3, idefics3_vision, ijepa, imagegpt, informer, instructblip, instructblipvideo, internvl, internvl_vision, jamba, janus, jetmoe, jukebox, kosmos-2, kosmos-2.5, kyutai_speech_to_text, layoutlm, layoutlmv2, layoutlmv3, led, levit, lfm2, lfm2_vl, lightglue, lilt, llama, llama4, llama4_text, llava, llava_next, llava_next_video, llava_onevision, longcat_flash, longformer, longt5, luke, lxmert, m2m_100, mamba, mamba2, marian, markuplm, mask2former, maskformer, maskformer-swin, mbart, mctct, mega, megatron-bert, metaclip_2, mgp-str, mimi, minimax, ministral, mistral, mistral3, mixtral, mlcd, mllama, mm-grounding-dino, mobilebert, mobilenet_v1, mobilenet_v2, mobilevit, mobilevitv2, modernbert, modernbert-decoder, moonshine, moshi, mpnet, mpt, mra, mt5, musicgen, musicgen_melody, mvp, nat, nemotron, nezha, nllb-moe, nougat, nystromformer, olmo, olmo2, olmo3, olmoe, omdet-turbo, oneformer, open-llama, openai-gpt, opt, ovis2, owlv2, owlvit, paligemma, parakeet_ctc, parakeet_encoder, patchtsmixer, patchtst, pegasus, pegasus_x, perceiver, perception_encoder, perception_lm, persimmon, phi, phi3, phi4_multimodal, phimoe, pix2struct, pixtral, plbart, poolformer, pop2piano, prompt_depth_anything, prophetnet, pvt, pvt_v2, qdqbert, qwen2, qwen2_5_omni, qwen2_5_vl, qwen2_5_vl_text, qwen2_audio, qwen2_audio_encoder, qwen2_moe, qwen2_vl, qwen2_vl_text, qwen3, qwen3_moe, qwen3_next, qwen3_omni_moe, qwen3_vl, qwen3_vl_moe, qwen3_vl_moe_text, qwen3_vl_text, rag, realm, recurrent_gemma, reformer, regnet, rembert, resnet, retribert, roberta, roberta-prelayernorm, roc_bert, roformer, rt_detr, rt_detr_resnet, rt_detr_v2, rwkv, sam, sam2, sam2_hiera_det_model, sam2_video, sam2_vision_model, sam_hq, sam_hq_vision_model, sam_vision_model, seamless_m4t, seamless_m4t_v2, seed_oss, segformer, seggpt, sew, sew-d, shieldgemma2, siglip, siglip2, siglip2_vision_model, siglip_vision_model, smollm3, smolvlm, smolvlm_vision, speech-encoder-decoder, speech_to_text, speech_to_text_2, speecht5, splinter, squeezebert, stablelm, starcoder2, superglue, superpoint, swiftformer, swin, swin2sr, swinv2, switch_transformers, t5, t5gemma, table-transformer, tapas, textnet, time_series_transformer, timesfm, timesformer, timm_backbone, timm_wrapper, trajectory_transformer, transfo-xl, trocr, tvlt, tvp, udop, umt5, unispeech, unispeech-sat, univnet, upernet, van, vaultgemma, video_llava, videomae, vilt, vipllava, vision-encoder-decoder, vision-text-dual-encoder, visual_bert, vit, vit_hybrid, vit_mae, vit_msn, vitdet, vitmatte, vitpose, vitpose_backbone, vits, vivit, vjepa2, voxtral, voxtral_encoder, wav2vec2, wav2vec2-bert, wav2vec2-conformer, wavlm, whisper, xclip, xcodec, xglm, xlm, xlm-prophetnet, xlm-roberta, xlm-roberta-xl, xlnet, xlstm, xmod, yolos, yoso, zamba, zamba2, zoedepth
+2026-01-28 23:05:58 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:05:58 - rag_backend - INFO - 从本地缓存加载模型: data/models/BAAI--bge-large-zh-v1.5
+2026-01-28 23:05:58 - rag_backend - ERROR - 加载 BGE 模型失败: Unrecognized model in data/models/BAAI--bge-large-zh-v1.5. Should have a `model_type` key in its config.json, or contain one of the following strings in its name: aimv2, aimv2_vision_model, albert, align, altclip, apertus, arcee, aria, aria_text, audio-spectrogram-transformer, autoformer, aya_vision, bamba, bark, bart, beit, bert, bert-generation, big_bird, bigbird_pegasus, biogpt, bit, bitnet, blenderbot, blenderbot-small, blip, blip-2, blip_2_qformer, bloom, blt, bridgetower, bros, camembert, canine, chameleon, chinese_clip, chinese_clip_vision_model, clap, clip, clip_text_model, clip_vision_model, clipseg, clvp, code_llama, codegen, cohere, cohere2, cohere2_vision, colpali, colqwen2, conditional_detr, convbert, convnext, convnextv2, cpmant, csm, ctrl, cvt, d_fine, dab-detr, dac, data2vec-audio, data2vec-text, data2vec-vision, dbrx, deberta, deberta-v2, decision_transformer, deepseek_v2, deepseek_v3, deepseek_vl, deepseek_vl_hybrid, deformable_detr, deit, depth_anything, depth_pro, deta, detr, dia, diffllama, dinat, dinov2, dinov2_with_registers, dinov3_convnext, dinov3_vit, distilbert, doge, donut-swin, dots1, dpr, dpt, edgetam, edgetam_video, edgetam_vision_model, efficientformer, efficientloftr, efficientnet, electra, emu3, encodec, encoder-decoder, eomt, ernie, ernie4_5, ernie4_5_moe, ernie_m, esm, evolla, exaone4, falcon, falcon_h1, falcon_mamba, fastspeech2_conformer, fastspeech2_conformer_with_hifigan, flaubert, flava, flex_olmo, florence2, fnet, focalnet, fsmt, funnel, fuyu, gemma, gemma2, gemma3, gemma3_text, gemma3n, gemma3n_audio, gemma3n_text, gemma3n_vision, git, glm, glm4, glm4_moe, glm4v, glm4v_moe, glm4v_moe_text, glm4v_text, glpn, got_ocr2, gpt-sw3, gpt2, gpt_bigcode, gpt_neo, gpt_neox, gpt_neox_japanese, gpt_oss, gptj, gptsan-japanese, granite, granite_speech, granitemoe, granitemoehybrid, granitemoeshared, granitevision, graphormer, grounding-dino, groupvit, helium, hgnet_v2, hiera, hubert, hunyuan_v1_dense, hunyuan_v1_moe, ibert, idefics, idefics2, idefics3, idefics3_vision, ijepa, imagegpt, informer, instructblip, instructblipvideo, internvl, internvl_vision, jamba, janus, jetmoe, jukebox, kosmos-2, kosmos-2.5, kyutai_speech_to_text, layoutlm, layoutlmv2, layoutlmv3, led, levit, lfm2, lfm2_vl, lightglue, lilt, llama, llama4, llama4_text, llava, llava_next, llava_next_video, llava_onevision, longcat_flash, longformer, longt5, luke, lxmert, m2m_100, mamba, mamba2, marian, markuplm, mask2former, maskformer, maskformer-swin, mbart, mctct, mega, megatron-bert, metaclip_2, mgp-str, mimi, minimax, ministral, mistral, mistral3, mixtral, mlcd, mllama, mm-grounding-dino, mobilebert, mobilenet_v1, mobilenet_v2, mobilevit, mobilevitv2, modernbert, modernbert-decoder, moonshine, moshi, mpnet, mpt, mra, mt5, musicgen, musicgen_melody, mvp, nat, nemotron, nezha, nllb-moe, nougat, nystromformer, olmo, olmo2, olmo3, olmoe, omdet-turbo, oneformer, open-llama, openai-gpt, opt, ovis2, owlv2, owlvit, paligemma, parakeet_ctc, parakeet_encoder, patchtsmixer, patchtst, pegasus, pegasus_x, perceiver, perception_encoder, perception_lm, persimmon, phi, phi3, phi4_multimodal, phimoe, pix2struct, pixtral, plbart, poolformer, pop2piano, prompt_depth_anything, prophetnet, pvt, pvt_v2, qdqbert, qwen2, qwen2_5_omni, qwen2_5_vl, qwen2_5_vl_text, qwen2_audio, qwen2_audio_encoder, qwen2_moe, qwen2_vl, qwen2_vl_text, qwen3, qwen3_moe, qwen3_next, qwen3_omni_moe, qwen3_vl, qwen3_vl_moe, qwen3_vl_moe_text, qwen3_vl_text, rag, realm, recurrent_gemma, reformer, regnet, rembert, resnet, retribert, roberta, roberta-prelayernorm, roc_bert, roformer, rt_detr, rt_detr_resnet, rt_detr_v2, rwkv, sam, sam2, sam2_hiera_det_model, sam2_video, sam2_vision_model, sam_hq, sam_hq_vision_model, sam_vision_model, seamless_m4t, seamless_m4t_v2, seed_oss, segformer, seggpt, sew, sew-d, shieldgemma2, siglip, siglip2, siglip2_vision_model, siglip_vision_model, smollm3, smolvlm, smolvlm_vision, speech-encoder-decoder, speech_to_text, speech_to_text_2, speecht5, splinter, squeezebert, stablelm, starcoder2, superglue, superpoint, swiftformer, swin, swin2sr, swinv2, switch_transformers, t5, t5gemma, table-transformer, tapas, textnet, time_series_transformer, timesfm, timesformer, timm_backbone, timm_wrapper, trajectory_transformer, transfo-xl, trocr, tvlt, tvp, udop, umt5, unispeech, unispeech-sat, univnet, upernet, van, vaultgemma, video_llava, videomae, vilt, vipllava, vision-encoder-decoder, vision-text-dual-encoder, visual_bert, vit, vit_hybrid, vit_mae, vit_msn, vitdet, vitmatte, vitpose, vitpose_backbone, vits, vivit, vjepa2, voxtral, voxtral_encoder, wav2vec2, wav2vec2-bert, wav2vec2-conformer, wavlm, whisper, xclip, xcodec, xglm, xlm, xlm-prophetnet, xlm-roberta, xlm-roberta-xl, xlnet, xlstm, xmod, yolos, yoso, zamba, zamba2, zoedepth
+2026-01-28 23:05:58 - rag_backend - ERROR - 加载嵌入模型失败: Unrecognized model in data/models/BAAI--bge-large-zh-v1.5. Should have a `model_type` key in its config.json, or contain one of the following strings in its name: aimv2, aimv2_vision_model, albert, align, altclip, apertus, arcee, aria, aria_text, audio-spectrogram-transformer, autoformer, aya_vision, bamba, bark, bart, beit, bert, bert-generation, big_bird, bigbird_pegasus, biogpt, bit, bitnet, blenderbot, blenderbot-small, blip, blip-2, blip_2_qformer, bloom, blt, bridgetower, bros, camembert, canine, chameleon, chinese_clip, chinese_clip_vision_model, clap, clip, clip_text_model, clip_vision_model, clipseg, clvp, code_llama, codegen, cohere, cohere2, cohere2_vision, colpali, colqwen2, conditional_detr, convbert, convnext, convnextv2, cpmant, csm, ctrl, cvt, d_fine, dab-detr, dac, data2vec-audio, data2vec-text, data2vec-vision, dbrx, deberta, deberta-v2, decision_transformer, deepseek_v2, deepseek_v3, deepseek_vl, deepseek_vl_hybrid, deformable_detr, deit, depth_anything, depth_pro, deta, detr, dia, diffllama, dinat, dinov2, dinov2_with_registers, dinov3_convnext, dinov3_vit, distilbert, doge, donut-swin, dots1, dpr, dpt, edgetam, edgetam_video, edgetam_vision_model, efficientformer, efficientloftr, efficientnet, electra, emu3, encodec, encoder-decoder, eomt, ernie, ernie4_5, ernie4_5_moe, ernie_m, esm, evolla, exaone4, falcon, falcon_h1, falcon_mamba, fastspeech2_conformer, fastspeech2_conformer_with_hifigan, flaubert, flava, flex_olmo, florence2, fnet, focalnet, fsmt, funnel, fuyu, gemma, gemma2, gemma3, gemma3_text, gemma3n, gemma3n_audio, gemma3n_text, gemma3n_vision, git, glm, glm4, glm4_moe, glm4v, glm4v_moe, glm4v_moe_text, glm4v_text, glpn, got_ocr2, gpt-sw3, gpt2, gpt_bigcode, gpt_neo, gpt_neox, gpt_neox_japanese, gpt_oss, gptj, gptsan-japanese, granite, granite_speech, granitemoe, granitemoehybrid, granitemoeshared, granitevision, graphormer, grounding-dino, groupvit, helium, hgnet_v2, hiera, hubert, hunyuan_v1_dense, hunyuan_v1_moe, ibert, idefics, idefics2, idefics3, idefics3_vision, ijepa, imagegpt, informer, instructblip, instructblipvideo, internvl, internvl_vision, jamba, janus, jetmoe, jukebox, kosmos-2, kosmos-2.5, kyutai_speech_to_text, layoutlm, layoutlmv2, layoutlmv3, led, levit, lfm2, lfm2_vl, lightglue, lilt, llama, llama4, llama4_text, llava, llava_next, llava_next_video, llava_onevision, longcat_flash, longformer, longt5, luke, lxmert, m2m_100, mamba, mamba2, marian, markuplm, mask2former, maskformer, maskformer-swin, mbart, mctct, mega, megatron-bert, metaclip_2, mgp-str, mimi, minimax, ministral, mistral, mistral3, mixtral, mlcd, mllama, mm-grounding-dino, mobilebert, mobilenet_v1, mobilenet_v2, mobilevit, mobilevitv2, modernbert, modernbert-decoder, moonshine, moshi, mpnet, mpt, mra, mt5, musicgen, musicgen_melody, mvp, nat, nemotron, nezha, nllb-moe, nougat, nystromformer, olmo, olmo2, olmo3, olmoe, omdet-turbo, oneformer, open-llama, openai-gpt, opt, ovis2, owlv2, owlvit, paligemma, parakeet_ctc, parakeet_encoder, patchtsmixer, patchtst, pegasus, pegasus_x, perceiver, perception_encoder, perception_lm, persimmon, phi, phi3, phi4_multimodal, phimoe, pix2struct, pixtral, plbart, poolformer, pop2piano, prompt_depth_anything, prophetnet, pvt, pvt_v2, qdqbert, qwen2, qwen2_5_omni, qwen2_5_vl, qwen2_5_vl_text, qwen2_audio, qwen2_audio_encoder, qwen2_moe, qwen2_vl, qwen2_vl_text, qwen3, qwen3_moe, qwen3_next, qwen3_omni_moe, qwen3_vl, qwen3_vl_moe, qwen3_vl_moe_text, qwen3_vl_text, rag, realm, recurrent_gemma, reformer, regnet, rembert, resnet, retribert, roberta, roberta-prelayernorm, roc_bert, roformer, rt_detr, rt_detr_resnet, rt_detr_v2, rwkv, sam, sam2, sam2_hiera_det_model, sam2_video, sam2_vision_model, sam_hq, sam_hq_vision_model, sam_vision_model, seamless_m4t, seamless_m4t_v2, seed_oss, segformer, seggpt, sew, sew-d, shieldgemma2, siglip, siglip2, siglip2_vision_model, siglip_vision_model, smollm3, smolvlm, smolvlm_vision, speech-encoder-decoder, speech_to_text, speech_to_text_2, speecht5, splinter, squeezebert, stablelm, starcoder2, superglue, superpoint, swiftformer, swin, swin2sr, swinv2, switch_transformers, t5, t5gemma, table-transformer, tapas, textnet, time_series_transformer, timesfm, timesformer, timm_backbone, timm_wrapper, trajectory_transformer, transfo-xl, trocr, tvlt, tvp, udop, umt5, unispeech, unispeech-sat, univnet, upernet, van, vaultgemma, video_llava, videomae, vilt, vipllava, vision-encoder-decoder, vision-text-dual-encoder, visual_bert, vit, vit_hybrid, vit_mae, vit_msn, vitdet, vitmatte, vitpose, vitpose_backbone, vits, vivit, vjepa2, voxtral, voxtral_encoder, wav2vec2, wav2vec2-bert, wav2vec2-conformer, wavlm, whisper, xclip, xcodec, xglm, xlm, xlm-prophetnet, xlm-roberta, xlm-roberta-xl, xlnet, xlstm, xmod, yolos, yoso, zamba, zamba2, zoedepth
+2026-01-28 23:05:58 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: Unrecognized model in data/models/BAAI--bge-large-zh-v1.5. Should have a `model_type` key in its config.json, or contain one of the following strings in its name: aimv2, aimv2_vision_model, albert, align, altclip, apertus, arcee, aria, aria_text, audio-spectrogram-transformer, autoformer, aya_vision, bamba, bark, bart, beit, bert, bert-generation, big_bird, bigbird_pegasus, biogpt, bit, bitnet, blenderbot, blenderbot-small, blip, blip-2, blip_2_qformer, bloom, blt, bridgetower, bros, camembert, canine, chameleon, chinese_clip, chinese_clip_vision_model, clap, clip, clip_text_model, clip_vision_model, clipseg, clvp, code_llama, codegen, cohere, cohere2, cohere2_vision, colpali, colqwen2, conditional_detr, convbert, convnext, convnextv2, cpmant, csm, ctrl, cvt, d_fine, dab-detr, dac, data2vec-audio, data2vec-text, data2vec-vision, dbrx, deberta, deberta-v2, decision_transformer, deepseek_v2, deepseek_v3, deepseek_vl, deepseek_vl_hybrid, deformable_detr, deit, depth_anything, depth_pro, deta, detr, dia, diffllama, dinat, dinov2, dinov2_with_registers, dinov3_convnext, dinov3_vit, distilbert, doge, donut-swin, dots1, dpr, dpt, edgetam, edgetam_video, edgetam_vision_model, efficientformer, efficientloftr, efficientnet, electra, emu3, encodec, encoder-decoder, eomt, ernie, ernie4_5, ernie4_5_moe, ernie_m, esm, evolla, exaone4, falcon, falcon_h1, falcon_mamba, fastspeech2_conformer, fastspeech2_conformer_with_hifigan, flaubert, flava, flex_olmo, florence2, fnet, focalnet, fsmt, funnel, fuyu, gemma, gemma2, gemma3, gemma3_text, gemma3n, gemma3n_audio, gemma3n_text, gemma3n_vision, git, glm, glm4, glm4_moe, glm4v, glm4v_moe, glm4v_moe_text, glm4v_text, glpn, got_ocr2, gpt-sw3, gpt2, gpt_bigcode, gpt_neo, gpt_neox, gpt_neox_japanese, gpt_oss, gptj, gptsan-japanese, granite, granite_speech, granitemoe, granitemoehybrid, granitemoeshared, granitevision, graphormer, grounding-dino, groupvit, helium, hgnet_v2, hiera, hubert, hunyuan_v1_dense, hunyuan_v1_moe, ibert, idefics, idefics2, idefics3, idefics3_vision, ijepa, imagegpt, informer, instructblip, instructblipvideo, internvl, internvl_vision, jamba, janus, jetmoe, jukebox, kosmos-2, kosmos-2.5, kyutai_speech_to_text, layoutlm, layoutlmv2, layoutlmv3, led, levit, lfm2, lfm2_vl, lightglue, lilt, llama, llama4, llama4_text, llava, llava_next, llava_next_video, llava_onevision, longcat_flash, longformer, longt5, luke, lxmert, m2m_100, mamba, mamba2, marian, markuplm, mask2former, maskformer, maskformer-swin, mbart, mctct, mega, megatron-bert, metaclip_2, mgp-str, mimi, minimax, ministral, mistral, mistral3, mixtral, mlcd, mllama, mm-grounding-dino, mobilebert, mobilenet_v1, mobilenet_v2, mobilevit, mobilevitv2, modernbert, modernbert-decoder, moonshine, moshi, mpnet, mpt, mra, mt5, musicgen, musicgen_melody, mvp, nat, nemotron, nezha, nllb-moe, nougat, nystromformer, olmo, olmo2, olmo3, olmoe, omdet-turbo, oneformer, open-llama, openai-gpt, opt, ovis2, owlv2, owlvit, paligemma, parakeet_ctc, parakeet_encoder, patchtsmixer, patchtst, pegasus, pegasus_x, perceiver, perception_encoder, perception_lm, persimmon, phi, phi3, phi4_multimodal, phimoe, pix2struct, pixtral, plbart, poolformer, pop2piano, prompt_depth_anything, prophetnet, pvt, pvt_v2, qdqbert, qwen2, qwen2_5_omni, qwen2_5_vl, qwen2_5_vl_text, qwen2_audio, qwen2_audio_encoder, qwen2_moe, qwen2_vl, qwen2_vl_text, qwen3, qwen3_moe, qwen3_next, qwen3_omni_moe, qwen3_vl, qwen3_vl_moe, qwen3_vl_moe_text, qwen3_vl_text, rag, realm, recurrent_gemma, reformer, regnet, rembert, resnet, retribert, roberta, roberta-prelayernorm, roc_bert, roformer, rt_detr, rt_detr_resnet, rt_detr_v2, rwkv, sam, sam2, sam2_hiera_det_model, sam2_video, sam2_vision_model, sam_hq, sam_hq_vision_model, sam_vision_model, seamless_m4t, seamless_m4t_v2, seed_oss, segformer, seggpt, sew, sew-d, shieldgemma2, siglip, siglip2, siglip2_vision_model, siglip_vision_model, smollm3, smolvlm, smolvlm_vision, speech-encoder-decoder, speech_to_text, speech_to_text_2, speecht5, splinter, squeezebert, stablelm, starcoder2, superglue, superpoint, swiftformer, swin, swin2sr, swinv2, switch_transformers, t5, t5gemma, table-transformer, tapas, textnet, time_series_transformer, timesfm, timesformer, timm_backbone, timm_wrapper, trajectory_transformer, transfo-xl, trocr, tvlt, tvp, udop, umt5, unispeech, unispeech-sat, univnet, upernet, van, vaultgemma, video_llava, videomae, vilt, vipllava, vision-encoder-decoder, vision-text-dual-encoder, visual_bert, vit, vit_hybrid, vit_mae, vit_msn, vitdet, vitmatte, vitpose, vitpose_backbone, vits, vivit, vjepa2, voxtral, voxtral_encoder, wav2vec2, wav2vec2-bert, wav2vec2-conformer, wavlm, whisper, xclip, xcodec, xglm, xlm, xlm-prophetnet, xlm-roberta, xlm-roberta-xl, xlnet, xlstm, xmod, yolos, yoso, zamba, zamba2, zoedepth
+2026-01-28 23:09:12 - rag_backend - INFO - 文档切分完成: 1 个片段 (方式: ChunkType.CHAR)
+2026-01-28 23:09:12 - rag_backend - INFO - 文档切分成功: 0dc12595a0b290707325b9d5c4efb1ec, 生成 1 个片段
+2026-01-28 23:09:48 - rag_backend - INFO - 关闭应用
+2026-01-28 23:09:48 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 23:09:49 - rag_backend - INFO - 加载了 10 个文档
+2026-01-28 23:09:49 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 23:09:49 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 23:09:49 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 23:09:49 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 23:09:50 - rag_backend - INFO - 文档上传成功: laodonghetongfa.pdf (ID: 57e727fefb3ad585a67daae1159ba93a)
+2026-01-28 23:10:12 - rag_backend - INFO - 文档切分完成: 30 个片段 (方式: ChunkType.CHAR)
+2026-01-28 23:10:12 - rag_backend - INFO - 文档切分成功: da23ff1668ba791c5da0f6d3431ba768, 生成 30 个片段
+2026-01-28 23:10:15 - rag_backend - INFO - 关闭应用
+2026-01-28 23:10:15 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 23:10:16 - rag_backend - INFO - 加载了 11 个文档
+2026-01-28 23:10:16 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 23:10:16 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 23:10:16 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 23:10:16 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 23:10:19 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:10:26 - rag_backend - ERROR - 加载 BGE 模型失败: cannot access local variable 'os' where it is not associated with a value
+2026-01-28 23:10:26 - rag_backend - ERROR - 加载嵌入模型失败: cannot access local variable 'os' where it is not associated with a value
+2026-01-28 23:10:26 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot access local variable 'os' where it is not associated with a value
+2026-01-28 23:10:26 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:10:26 - rag_backend - ERROR - 加载 BGE 模型失败: cannot access local variable 'os' where it is not associated with a value
+2026-01-28 23:10:26 - rag_backend - ERROR - 加载嵌入模型失败: cannot access local variable 'os' where it is not associated with a value
+2026-01-28 23:10:26 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot access local variable 'os' where it is not associated with a value
+2026-01-28 23:10:26 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:10:26 - rag_backend - ERROR - 加载 BGE 模型失败: cannot access local variable 'os' where it is not associated with a value
+2026-01-28 23:10:26 - rag_backend - ERROR - 加载嵌入模型失败: cannot access local variable 'os' where it is not associated with a value
+2026-01-28 23:10:26 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot access local variable 'os' where it is not associated with a value
+2026-01-28 23:10:40 - rag_backend - INFO - 关闭应用
+2026-01-28 23:10:40 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 23:10:41 - rag_backend - INFO - 加载了 11 个文档
+2026-01-28 23:10:41 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 23:10:41 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 23:10:41 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 23:10:41 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 23:10:47 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:10:53 - rag_backend - INFO - 找到本地模型目录: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-28 23:10:53 - rag_backend - ERROR - 加载 BGE 模型失败: Due to a serious vulnerability issue in `torch.load`, even with `weights_only=True`, we now require users to upgrade torch to at least v2.6 in order to use the function. This version restriction does not apply when loading files with safetensors.
+See the vulnerability report here https://nvd.nist.gov/vuln/detail/CVE-2025-32434
+2026-01-28 23:10:53 - rag_backend - ERROR - 加载嵌入模型失败: Due to a serious vulnerability issue in `torch.load`, even with `weights_only=True`, we now require users to upgrade torch to at least v2.6 in order to use the function. This version restriction does not apply when loading files with safetensors.
+See the vulnerability report here https://nvd.nist.gov/vuln/detail/CVE-2025-32434
+2026-01-28 23:10:53 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: Due to a serious vulnerability issue in `torch.load`, even with `weights_only=True`, we now require users to upgrade torch to at least v2.6 in order to use the function. This version restriction does not apply when loading files with safetensors.
+See the vulnerability report here https://nvd.nist.gov/vuln/detail/CVE-2025-32434
+2026-01-28 23:11:11 - rag_backend - INFO - 关闭应用
+2026-01-28 23:11:12 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 23:11:12 - rag_backend - INFO - 加载了 11 个文档
+2026-01-28 23:11:13 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 23:11:13 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 23:11:13 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 23:11:13 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 23:11:18 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:11:24 - rag_backend - INFO - 找到本地模型目录: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-28 23:11:24 - rag_backend - INFO - 从本地路径加载模型: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-28 23:11:25 - rag_backend - ERROR - 加载 BGE 模型失败: Due to a serious vulnerability issue in `torch.load`, even with `weights_only=True`, we now require users to upgrade torch to at least v2.6 in order to use the function. This version restriction does not apply when loading files with safetensors.
+See the vulnerability report here https://nvd.nist.gov/vuln/detail/CVE-2025-32434
+2026-01-28 23:11:25 - rag_backend - ERROR - 加载嵌入模型失败: Due to a serious vulnerability issue in `torch.load`, even with `weights_only=True`, we now require users to upgrade torch to at least v2.6 in order to use the function. This version restriction does not apply when loading files with safetensors.
+See the vulnerability report here https://nvd.nist.gov/vuln/detail/CVE-2025-32434
+2026-01-28 23:11:25 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: Due to a serious vulnerability issue in `torch.load`, even with `weights_only=True`, we now require users to upgrade torch to at least v2.6 in order to use the function. This version restriction does not apply when loading files with safetensors.
+See the vulnerability report here https://nvd.nist.gov/vuln/detail/CVE-2025-32434
+2026-01-28 23:11:57 - rag_backend - INFO - 关闭应用
+2026-01-28 23:11:57 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 23:11:58 - rag_backend - INFO - 加载了 11 个文档
+2026-01-28 23:11:58 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 23:11:58 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 23:11:58 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 23:11:58 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 23:12:15 - rag_backend - INFO - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:12:21 - rag_backend - INFO - 从HuggingFace下载模型: BAAI/bge-base-zh-v1.5
+2026-01-28 23:16:35 - rag_backend - ERROR - 加载 BGE 模型失败: We couldn't connect to 'https://huggingface.co' to load the files, and couldn't find them in the cached files.
+Check your internet connection or see how to run the library in offline mode at 'https://huggingface.co/docs/transformers/installation#offline-mode'.
+2026-01-28 23:16:35 - rag_backend - ERROR - 加载嵌入模型失败: We couldn't connect to 'https://huggingface.co' to load the files, and couldn't find them in the cached files.
+Check your internet connection or see how to run the library in offline mode at 'https://huggingface.co/docs/transformers/installation#offline-mode'.
+2026-01-28 23:16:35 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: We couldn't connect to 'https://huggingface.co' to load the files, and couldn't find them in the cached files.
+Check your internet connection or see how to run the library in offline mode at 'https://huggingface.co/docs/transformers/installation#offline-mode'.
+2026-01-28 23:17:48 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:17:48 - rag_backend - INFO - 找到本地模型目录: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-28 23:17:48 - rag_backend - INFO - 从本地路径加载模型: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-28 23:17:50 - rag_backend - INFO - 加载 BGE 模型: BAAI/bge-large-zh-v1.5 (维度: 1024)
+2026-01-28 23:17:50 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: BAAI/bge-large-zh-v1.5
+2026-01-28 23:18:19 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:18:19 - rag_backend - INFO - 找到本地模型目录: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-28 23:18:19 - rag_backend - INFO - 从本地路径加载模型: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-28 23:18:20 - rag_backend - INFO - 加载 BGE 模型: BAAI/bge-large-zh-v1.5 (维度: 1024)
+2026-01-28 23:18:20 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: BAAI/bge-large-zh-v1.5
+2026-01-28 23:18:24 - rag_backend - INFO - 文档切分完成: 30 个片段 (方式: ChunkType.CHAR)
+2026-01-28 23:18:24 - rag_backend - ERROR - 文档向量化失败: 'SentenceTransformer' object has no attribute 'encode_queries'
+2026-01-28 23:18:31 - rag_backend - INFO - 文档切分完成: 30 个片段 (方式: ChunkType.CHAR)
+2026-01-28 23:18:31 - rag_backend - ERROR - 文档向量化失败: 'SentenceTransformer' object has no attribute 'encode_queries'
+2026-01-28 23:18:40 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 1024)
+2026-01-28 23:18:40 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 23:18:40 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 23:18:40 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 23:18:47 - rag_backend - INFO - 文档切分完成: 30 个片段 (方式: ChunkType.CHAR)
+2026-01-28 23:18:47 - rag_backend - ERROR - 文档向量化失败: 'SentenceTransformer' object has no attribute 'encode_queries'
+2026-01-28 23:45:54 - rag_backend - INFO - 加载了 11 个文档
+2026-01-28 23:45:54 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 23:45:54 - rag_backend - ERROR - 向量数据库初始化失败: No module named 'faiss'
+2026-01-28 23:45:54 - rag_backend - INFO - 关闭应用
+2026-01-28 23:50:42 - rag_backend - INFO - 文档上传成功: laodonghetongfa.pdf (ID: 77cd8d56f82e59475eec15a656f8a6af)
+2026-01-28 23:50:55 - rag_backend - INFO - 文档切分完成: 30 个片段 (方式: ChunkType.CHAR)
+2026-01-28 23:50:55 - rag_backend - INFO - 文档切分成功: 57e727fefb3ad585a67daae1159ba93a, 生成 30 个片段
+2026-01-28 23:51:03 - rag_backend - INFO - 文档切分完成: 30 个片段 (方式: ChunkType.CHAR)
+2026-01-28 23:51:03 - rag_backend - ERROR - 文档向量化失败: 'SentenceTransformer' object has no attribute 'encode_queries'
+2026-01-28 23:51:25 - rag_backend - INFO - 关闭应用
+2026-01-28 23:51:25 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-28 23:51:27 - rag_backend - INFO - 加载了 12 个文档
+2026-01-28 23:51:27 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-28 23:51:27 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-28 23:51:27 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-28 23:51:27 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-28 23:52:40 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:52:46 - rag_backend - ERROR - 加载 BGE 模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-28 23:52:46 - rag_backend - ERROR - 加载嵌入模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-28 23:52:46 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-28 23:52:46 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:52:46 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:46 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:46 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:46 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:52:46 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:46 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:46 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:50 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:52:50 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:50 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:50 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:52 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:52:52 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:52 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:52 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:54 - rag_backend - INFO - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:52:54 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:54 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:54 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:55 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-28 23:52:55 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:55 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-28 23:52:55 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:09:56 - rag_backend - INFO - 准备加载模型: BAAI/bge-small-zh-v1.5 (类型: sentence-transformers)
+2026-01-29 00:16:06 - rag_backend - INFO - 准备加载模型: BAAI/bge-small-zh-v1.5 (类型: sentence-transformers)
+2026-01-29 00:16:09 - rag_backend - INFO - 从huggingface下载模型: BAAI/bge-small-zh-v1.5
+2026-01-29 00:18:36 - rag_backend - ERROR - 加载 SentenceTransformer 模型失败: We couldn't connect to 'https://huggingface.co' to load this file, couldn't find it in the cached files and it looks like BAAI/bge-small-zh-v1.5 is not the path to a directory containing a file named config.json.
+Checkout your internet connection or see how to run the library in offline mode at 'https://huggingface.co/docs/transformers/installation#offline-mode'.
+2026-01-29 00:18:36 - rag_backend - ERROR - 加载嵌入模型失败: We couldn't connect to 'https://huggingface.co' to load this file, couldn't find it in the cached files and it looks like BAAI/bge-small-zh-v1.5 is not the path to a directory containing a file named config.json.
+Checkout your internet connection or see how to run the library in offline mode at 'https://huggingface.co/docs/transformers/installation#offline-mode'.
+2026-01-29 00:18:48 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:18:48 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:18:48 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:18:48 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:18:54 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:18:54 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:18:54 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:18:54 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:18:57 - rag_backend - INFO - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:18:57 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:18:57 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:18:57 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:19:02 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:19:02 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:19:02 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:19:02 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:19:14 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-29 00:19:14 - rag_backend - INFO - 文档切分成功: 86a794c746c01e0abf6c1db9f2086bec, 生成 20 个片段
+2026-01-29 00:19:26 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:19:26 - rag_backend - ERROR - 加载 BGE 模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:19:26 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:19:26 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:21:21 - rag_backend - INFO - 关闭应用
+2026-01-29 00:21:21 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:21:22 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:21:22 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:21:22 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:21:22 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:21:22 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:21:28 - rag_backend - INFO - 关闭应用
+2026-01-29 00:21:28 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:21:29 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:21:29 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:21:29 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:21:29 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:21:29 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:22:52 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:22:58 - rag_backend - ERROR - 加载 BGE 模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:22:58 - rag_backend - ERROR - 加载嵌入模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:22:58 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:23:24 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.SENTENCE_TRANSFORMERS)
+2026-01-29 00:23:24 - rag_backend - ERROR - 加载 SentenceTransformer 模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:23:24 - rag_backend - ERROR - 加载嵌入模型失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:23:24 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: cannot import name 'PreTrainedModel' from 'transformers' (/root/miniconda3/lib/python3.12/site-packages/transformers/__init__.py)
+2026-01-29 00:23:50 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:23:50 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:23:50 - rag_backend - ERROR - 向量数据库初始化失败: No module named 'faiss'
+2026-01-29 00:23:50 - rag_backend - INFO - 关闭应用
+2026-01-29 00:24:22 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:24:22 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:24:22 - rag_backend - ERROR - 向量数据库初始化失败: No module named 'faiss'
+2026-01-29 00:24:22 - rag_backend - INFO - 关闭应用
+2026-01-29 00:24:30 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.SENTENCE_TRANSFORMERS)
+2026-01-29 00:24:30 - rag_backend - ERROR - 加载 SentenceTransformer 模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:24:30 - rag_backend - ERROR - 加载嵌入模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:24:30 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:24:45 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:24:45 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:24:45 - rag_backend - ERROR - 向量数据库初始化失败: No module named 'faiss'
+2026-01-29 00:24:45 - rag_backend - INFO - 关闭应用
+2026-01-29 00:24:54 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.SENTENCE_TRANSFORMERS)
+2026-01-29 00:24:54 - rag_backend - ERROR - 加载 SentenceTransformer 模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:24:54 - rag_backend - ERROR - 加载嵌入模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:24:54 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:25:11 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:25:11 - rag_backend - ERROR - 加载 BGE 模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:25:11 - rag_backend - ERROR - 加载嵌入模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:25:11 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:25:12 - rag_backend - INFO - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:25:12 - rag_backend - ERROR - 加载 BGE 模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:25:12 - rag_backend - ERROR - 加载嵌入模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:25:12 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:25:17 - rag_backend - INFO - 准备加载模型: openai-embeddings (类型: EmbeddingModelType.OPENAI)
+2026-01-29 00:25:17 - rag_backend - INFO - 加载 OpenAI 嵌入模型: openai-embeddings (维度: 1536)
+2026-01-29 00:25:17 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: openai-embeddings
+2026-01-29 00:25:18 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:25:18 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:25:18 - rag_backend - ERROR - 向量数据库初始化失败: No module named 'faiss'
+2026-01-29 00:25:18 - rag_backend - INFO - 关闭应用
+2026-01-29 00:25:26 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.SENTENCE_TRANSFORMERS)
+2026-01-29 00:25:26 - rag_backend - ERROR - 加载 SentenceTransformer 模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:25:26 - rag_backend - ERROR - 加载嵌入模型失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:25:26 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: Could not import module 'CodeCarbonCallback'. Are this object's requirements defined correctly?
+2026-01-29 00:25:29 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-29 00:25:29 - rag_backend - INFO - 文档切分成功: 86a794c746c01e0abf6c1db9f2086bec, 生成 20 个片段
+2026-01-29 00:25:33 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-29 00:25:43 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:25:43 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:25:43 - rag_backend - ERROR - 向量数据库初始化失败: No module named 'faiss'
+2026-01-29 00:25:43 - rag_backend - INFO - 关闭应用
+2026-01-29 00:25:50 - rag_backend - ERROR - OpenAI API 调用失败: Connection error.
+2026-01-29 00:25:50 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:25:50 - rag_backend - INFO - 关闭应用
+2026-01-29 00:25:50 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:25:51 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:25:51 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:25:51 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:25:51 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:25:51 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:25:51 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 512)
+2026-01-29 00:25:51 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:25:51 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:25:51 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:25:51 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.SENTENCE_TRANSFORMERS)
+2026-01-29 00:25:53 - rag_backend - ERROR - 加载 SentenceTransformer 模型失败: No module named 'transformers'
+2026-01-29 00:25:53 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:25:53 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:25:58 - rag_backend - INFO - 准备加载模型: openai-embeddings (类型: EmbeddingModelType.OPENAI)
+2026-01-29 00:25:58 - rag_backend - INFO - 加载 OpenAI 嵌入模型: openai-embeddings (维度: 1536)
+2026-01-29 00:25:58 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: openai-embeddings
+2026-01-29 00:26:01 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-29 00:26:13 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:26:13 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:26:13 - rag_backend - ERROR - 向量数据库初始化失败: No module named 'faiss'
+2026-01-29 00:26:13 - rag_backend - INFO - 关闭应用
+2026-01-29 00:26:17 - rag_backend - ERROR - OpenAI API 调用失败: Connection error.
+2026-01-29 00:26:17 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:26:17 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 1536)
+2026-01-29 00:26:17 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:26:17 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:26:17 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:26:17 - rag_backend - INFO - 关闭应用
+2026-01-29 00:26:17 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:26:18 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:26:18 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:26:18 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:26:19 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:26:19 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:26:19 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 1536)
+2026-01-29 00:26:19 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:26:19 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:26:19 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:26:19 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 1536)
+2026-01-29 00:26:19 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:26:19 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:26:19 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:26:19 - rag_backend - ERROR - 连接 Milvus 失败: module 'marshmallow' has no attribute '__version_info__'
+2026-01-29 00:26:19 - rag_backend - ERROR - 向量数据库初始化失败: module 'marshmallow' has no attribute '__version_info__'
+2026-01-29 00:26:19 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 1536)
+2026-01-29 00:26:19 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:26:19 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:26:19 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 00:26:26 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.SENTENCE_TRANSFORMERS)
+2026-01-29 00:26:29 - rag_backend - ERROR - 加载 SentenceTransformer 模型失败: No module named 'transformers'
+2026-01-29 00:26:29 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:26:29 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:26:34 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:26:35 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:26:35 - rag_backend - ERROR - 向量数据库初始化失败: No module named 'faiss'
+2026-01-29 00:26:35 - rag_backend - INFO - 关闭应用
+2026-01-29 00:26:51 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:26:52 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:26:52 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:26:52 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:26:52 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:26:52 - rag_backend - INFO - 关闭应用
+2026-01-29 00:26:52 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:27:24 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.SENTENCE_TRANSFORMERS)
+2026-01-29 00:27:24 - rag_backend - ERROR - 加载 SentenceTransformer 模型失败: No module named 'transformers'
+2026-01-29 00:27:24 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:27:24 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:33:29 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:33:29 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:33:29 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:33:29 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:33:31 - rag_backend - INFO - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:33:31 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:33:31 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:33:31 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:33:57 - rag_backend - INFO - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:33:57 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:33:57 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:33:57 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:34:02 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:34:02 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:34:02 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:34:02 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:34:02 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:34:02 - rag_backend - INFO - 关闭应用
+2026-01-29 00:34:02 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:34:12 - rag_backend - INFO - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:34:12 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:34:12 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:34:12 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:34:13 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:34:13 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:34:13 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:34:13 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:34:37 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-29 00:34:37 - rag_backend - INFO - 文档切分成功: 86a794c746c01e0abf6c1db9f2086bec, 生成 20 个片段
+2026-01-29 00:34:42 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:34:42 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:34:42 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:34:42 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:36:22 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-29 00:36:22 - rag_backend - INFO - 文档切分成功: 86a794c746c01e0abf6c1db9f2086bec, 生成 20 个片段
+2026-01-29 00:36:26 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:36:26 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:36:26 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:36:26 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:37:13 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.SENTENCE_TRANSFORMERS)
+2026-01-29 00:37:13 - rag_backend - ERROR - 加载 SentenceTransformer 模型失败: No module named 'transformers'
+2026-01-29 00:37:13 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:37:13 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:38:52 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:38:52 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:38:52 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:38:52 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:39:18 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:39:18 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:39:18 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:39:18 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:39:18 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:39:18 - rag_backend - INFO - 关闭应用
+2026-01-29 00:39:18 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:39:39 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.SENTENCE_TRANSFORMERS)
+2026-01-29 00:39:39 - rag_backend - ERROR - 加载 SentenceTransformer 模型失败: No module named 'transformers'
+2026-01-29 00:39:39 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:39:39 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:40:39 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:40:39 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:40:39 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:40:39 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:42:06 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:42:06 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:42:06 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:42:06 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:42:08 - rag_backend - INFO - 准备加载模型: openai-embeddings (类型: EmbeddingModelType.OPENAI)
+2026-01-29 00:42:08 - rag_backend - INFO - 加载 OpenAI 嵌入模型: openai-embeddings (维度: 1536)
+2026-01-29 00:42:08 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: openai-embeddings
+2026-01-29 00:42:16 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-29 00:42:16 - rag_backend - INFO - 文档切分成功: 86a794c746c01e0abf6c1db9f2086bec, 生成 20 个片段
+2026-01-29 00:42:20 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-29 00:42:36 - rag_backend - ERROR - OpenAI API 调用失败: Connection error.
+2026-01-29 00:42:36 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:42:36 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:42:36 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:42:36 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:42:36 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:42:36 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:42:36 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:42:36 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:42:36 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:42:36 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:42:36 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:42:36 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:42:36 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:42:36 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:42:36 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:42:36 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:42:36 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:42:49 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-29 00:43:05 - rag_backend - ERROR - OpenAI API 调用失败: Connection error.
+2026-01-29 00:43:05 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:43:05 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-29 00:43:21 - rag_backend - ERROR - OpenAI API 调用失败: Connection error.
+2026-01-29 00:43:21 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:43:21 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-29 00:43:38 - rag_backend - ERROR - OpenAI API 调用失败: Connection error.
+2026-01-29 00:43:38 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:43:38 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: ChunkType.CHAR)
+2026-01-29 00:43:54 - rag_backend - ERROR - OpenAI API 调用失败: Connection error.
+2026-01-29 00:43:54 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:43:54 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.BGE)
+2026-01-29 00:43:54 - rag_backend - ERROR - 加载 BGE 模型失败: No module named 'transformers'
+2026-01-29 00:43:54 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:43:54 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:46:54 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:46:54 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:46:54 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:46:54 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:46:54 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:46:54 - rag_backend - INFO - 关闭应用
+2026-01-29 00:46:54 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:47:02 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: EmbeddingModelType.SENTENCE_TRANSFORMERS)
+2026-01-29 00:47:02 - rag_backend - ERROR - 加载 SentenceTransformer 模型失败: No module named 'transformers'
+2026-01-29 00:47:02 - rag_backend - ERROR - 加载嵌入模型失败: No module named 'transformers'
+2026-01-29 00:47:02 - rag_backend - INFO - 嵌入模型加载: 模型加载失败: No module named 'transformers'
+2026-01-29 00:47:11 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:47:12 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:47:12 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:47:12 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:47:12 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:47:12 - rag_backend - INFO - 关闭应用
+2026-01-29 00:47:12 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:47:22 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:47:22 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:47:22 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:47:22 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:47:22 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:47:31 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: sentence-transformers)
+2026-01-29 00:47:35 - rag_backend - INFO - 找到本地模型目录: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 00:47:35 - rag_backend - INFO - 从本地缓存加载模型: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 00:47:36 - rag_backend - INFO - 加载 SentenceTransformer 模型: BAAI/bge-large-zh-v1.5 (维度: 1024)
+2026-01-29 00:47:36 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: BAAI/bge-large-zh-v1.5
+2026-01-29 00:47:46 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:47:46 - rag_backend - INFO - 文档切分成功: 86a794c746c01e0abf6c1db9f2086bec, 生成 20 个片段
+2026-01-29 00:47:50 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: bge)
+2026-01-29 00:47:50 - rag_backend - INFO - 找到本地模型目录: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 00:47:50 - rag_backend - INFO - 从本地路径加载模型: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 00:47:50 - rag_backend - INFO - 加载 BGE 模型: BAAI/bge-large-zh-v1.5 (维度: 1024)
+2026-01-29 00:47:50 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: BAAI/bge-large-zh-v1.5
+2026-01-29 00:47:53 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:47:59 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:48:00 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 1024)
+2026-01-29 00:48:00 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:48:00 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:48:00 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:48:03 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:48:10 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:48:16 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:48:24 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:50:03 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:50:10 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:50:27 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:50:27 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:50:58 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:51:05 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:51:17 - rag_backend - INFO - 关闭应用
+2026-01-29 00:51:17 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:51:21 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:51:21 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:51:21 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:51:21 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:51:21 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:52:51 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:52:51 - rag_backend - INFO - 文档切分成功: 86a794c746c01e0abf6c1db9f2086bec, 生成 20 个片段
+2026-01-29 00:52:57 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: bge)
+2026-01-29 00:53:01 - rag_backend - INFO - 找到本地模型目录: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 00:53:01 - rag_backend - INFO - 从本地路径加载模型: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 00:53:03 - rag_backend - INFO - 加载 BGE 模型: BAAI/bge-large-zh-v1.5 (维度: 1024)
+2026-01-29 00:53:03 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: BAAI/bge-large-zh-v1.5
+2026-01-29 00:53:08 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 1024)
+2026-01-29 00:53:08 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:53:08 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:53:08 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:53:11 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:53:18 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:53:18 - rag_backend - ERROR - 堆栈跟踪: Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/api/chunking.py", line 110, in embed_chunks
+    vector_db_manager.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 328, in add_vectors
+    self.db.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 91, in add_vectors
+    self.index.add(vectors)
+  File "/root/miniconda3/envs/rag/lib/python3.10/site-packages/faiss/class_wrappers.py", line 271, in replacement_add
+    assert d == self.d
+AssertionError
+
+2026-01-29 00:53:27 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:53:34 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:53:34 - rag_backend - ERROR - 堆栈跟踪: Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/api/chunking.py", line 110, in embed_chunks
+    vector_db_manager.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 328, in add_vectors
+    self.db.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 91, in add_vectors
+    self.index.add(vectors)
+  File "/root/miniconda3/envs/rag/lib/python3.10/site-packages/faiss/class_wrappers.py", line 271, in replacement_add
+    assert d == self.d
+AssertionError
+
+2026-01-29 00:53:53 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:53:53 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:53:53 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:53:53 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:53:53 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:53:53 - rag_backend - INFO - 关闭应用
+2026-01-29 00:53:53 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:54:03 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:54:10 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:54:10 - rag_backend - ERROR - 堆栈跟踪: Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/api/chunking.py", line 110, in embed_chunks
+    vector_db_manager.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 328, in add_vectors
+    self.db.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 91, in add_vectors
+    self.index.add(vectors)
+  File "/root/miniconda3/envs/rag/lib/python3.10/site-packages/faiss/class_wrappers.py", line 271, in replacement_add
+    assert d == self.d
+AssertionError
+
+2026-01-29 00:54:16 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:54:16 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:54:16 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:54:16 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:54:16 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:54:16 - rag_backend - INFO - 关闭应用
+2026-01-29 00:54:16 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:54:29 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:54:29 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:54:29 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:54:29 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:54:29 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:54:31 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 00:54:31 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 00:54:31 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 00:54:31 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:54:31 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:54:31 - rag_backend - INFO - 关闭应用
+2026-01-29 00:54:31 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 00:54:41 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: bge)
+2026-01-29 00:54:44 - rag_backend - INFO - 找到本地模型目录: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 00:54:44 - rag_backend - INFO - 从本地路径加载模型: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 00:54:45 - rag_backend - INFO - 加载 BGE 模型: BAAI/bge-large-zh-v1.5 (维度: 1024)
+2026-01-29 00:54:45 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: BAAI/bge-large-zh-v1.5
+2026-01-29 00:54:45 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: sentence-transformers)
+2026-01-29 00:54:45 - rag_backend - INFO - 找到本地模型目录: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 00:54:45 - rag_backend - INFO - 从本地缓存加载模型: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 00:54:46 - rag_backend - INFO - 加载 SentenceTransformer 模型: BAAI/bge-large-zh-v1.5 (维度: 1024)
+2026-01-29 00:54:46 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: BAAI/bge-large-zh-v1.5
+2026-01-29 00:54:48 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:54:55 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:54:55 - rag_backend - ERROR - 堆栈跟踪: Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/api/chunking.py", line 110, in embed_chunks
+    vector_db_manager.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 328, in add_vectors
+    self.db.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 91, in add_vectors
+    self.index.add(vectors)
+  File "/root/miniconda3/envs/rag/lib/python3.10/site-packages/faiss/class_wrappers.py", line 271, in replacement_add
+    assert d == self.d
+AssertionError
+
+2026-01-29 00:54:55 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: sentence-transformers)
+2026-01-29 00:54:55 - rag_backend - INFO - 找到本地模型目录: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 00:54:55 - rag_backend - INFO - 从本地缓存加载模型: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 00:54:55 - rag_backend - INFO - 加载 SentenceTransformer 模型: BAAI/bge-large-zh-v1.5 (维度: 1024)
+2026-01-29 00:54:55 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: BAAI/bge-large-zh-v1.5
+2026-01-29 00:54:56 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:55:03 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:55:03 - rag_backend - ERROR - 堆栈跟踪: Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/api/chunking.py", line 110, in embed_chunks
+    vector_db_manager.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 328, in add_vectors
+    self.db.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 91, in add_vectors
+    self.index.add(vectors)
+  File "/root/miniconda3/envs/rag/lib/python3.10/site-packages/faiss/class_wrappers.py", line 271, in replacement_add
+    assert d == self.d
+AssertionError
+
+2026-01-29 00:55:05 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:55:12 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:55:12 - rag_backend - ERROR - 堆栈跟踪: Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/api/chunking.py", line 110, in embed_chunks
+    vector_db_manager.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 328, in add_vectors
+    self.db.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 91, in add_vectors
+    self.index.add(vectors)
+  File "/root/miniconda3/envs/rag/lib/python3.10/site-packages/faiss/class_wrappers.py", line 271, in replacement_add
+    assert d == self.d
+AssertionError
+
+2026-01-29 00:55:22 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 1024)
+2026-01-29 00:55:22 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 00:55:22 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:55:22 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:55:42 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:55:49 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 00:55:49 - rag_backend - ERROR - 堆栈跟踪: Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/api/chunking.py", line 110, in embed_chunks
+    vector_db_manager.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 328, in add_vectors
+    self.db.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 91, in add_vectors
+    self.index.add(vectors)
+  File "/root/miniconda3/envs/rag/lib/python3.10/site-packages/faiss/class_wrappers.py", line 271, in replacement_add
+    assert d == self.d
+AssertionError
+
+2026-01-29 00:56:42 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 1024)
+2026-01-29 00:56:42 - rag_backend - INFO - FAISS 索引文件不存在，使用空索引
+2026-01-29 00:56:42 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:56:42 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 00:57:12 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 00:57:19 - rag_backend - INFO - 添加 20 个向量到 FAISS (总数: 20)
+2026-01-29 00:57:19 - rag_backend - INFO - 文档向量化成功: 86a794c746c01e0abf6c1db9f2086bec, 20 个片段
+2026-01-29 01:03:58 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 01:03:58 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 01:03:58 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 01:03:58 - rag_backend - INFO - FAISS 索引文件不存在，使用空索引
+2026-01-29 01:03:58 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 01:03:58 - rag_backend - INFO - 关闭应用
+2026-01-29 01:03:58 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 01:04:06 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 01:04:06 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 01:04:07 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 01:04:07 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 01:04:07 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 01:04:07 - rag_backend - INFO - 关闭应用
+2026-01-29 01:04:07 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 01:05:03 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 01:05:03 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 01:05:03 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 01:05:03 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 01:05:03 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 01:07:40 - rag_backend - INFO - 关闭应用
+2026-01-29 01:07:40 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 01:07:43 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 01:07:43 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 01:07:43 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 01:07:43 - rag_backend - INFO - FAISS 索引已加载: 0 个向量
+2026-01-29 01:07:43 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 19:24:05 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 19:26:02 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 19:26:02 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 19:26:02 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 19:26:02 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 19:26:02 - rag_backend - INFO - 已加载 0 条元数据
+2026-01-29 19:26:02 - rag_backend - INFO - FAISS 索引已加载: 0 个向量，0 条元数据
+2026-01-29 19:26:02 - rag_backend - WARNING - 加载的索引为空，重新初始化
+2026-01-29 19:26:02 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 19:26:02 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 19:26:17 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 19:26:17 - rag_backend - INFO - 文档切分成功: 86a794c746c01e0abf6c1db9f2086bec, 生成 20 个片段
+2026-01-29 19:26:21 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: bge)
+2026-01-29 19:26:24 - rag_backend - INFO - 找到本地模型目录: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 19:26:24 - rag_backend - INFO - 从本地路径加载 BGE 模型: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 19:26:26 - rag_backend - INFO - 成功加载 BGE 模型: BAAI/bge-large-zh-v1.5 (维度: 1024)
+2026-01-29 19:26:26 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: BAAI/bge-large-zh-v1.5
+2026-01-29 19:26:32 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 19:26:38 - rag_backend - ERROR - 文档向量化失败: 
+2026-01-29 19:26:38 - rag_backend - ERROR - 堆栈跟踪: Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/api/chunking.py", line 110, in embed_chunks
+    vector_db_manager.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 353, in add_vectors
+    self.db.add_vectors(vectors, metadata)
+  File "/root/autodl-tmp/rag/backend/services/vector_db.py", line 91, in add_vectors
+    self.index.add(vectors)
+  File "/root/miniconda3/envs/rag/lib/python3.10/site-packages/faiss/class_wrappers.py", line 271, in replacement_add
+    assert d == self.d
+AssertionError
+
+2026-01-29 19:26:39 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 1024)
+2026-01-29 19:26:39 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 19:26:39 - rag_backend - INFO - 已加载 0 条元数据
+2026-01-29 19:26:39 - rag_backend - INFO - FAISS 索引已加载: 0 个向量，0 条元数据
+2026-01-29 19:26:39 - rag_backend - WARNING - 加载的索引为空，重新初始化
+2026-01-29 19:26:39 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 1024)
+2026-01-29 19:26:39 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 19:26:39 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 19:26:41 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 19:26:48 - rag_backend - INFO - 添加 20 个向量到 FAISS (总数: 20)
+2026-01-29 19:26:48 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 19:26:48 - rag_backend - INFO - 文档向量化成功: 86a794c746c01e0abf6c1db9f2086bec, 20 个片段
+2026-01-29 19:27:10 - rag_backend - ERROR - 检索失败: 'str' object has no attribute 'get'
+2026-01-29 19:27:10 - rag_backend - INFO - 检索完成: 查询='RAG的核心流程是什么?', 结果数=0
+2026-01-29 19:28:10 - rag_backend - ERROR - 检索失败: 'str' object has no attribute 'get'
+2026-01-29 19:28:10 - rag_backend - INFO - 检索完成: 查询='RAG的核心流程是什么?', 结果数=0
+2026-01-29 19:30:34 - rag_backend - ERROR - 检索失败: 'str' object has no attribute 'get'
+2026-01-29 19:30:34 - rag_backend - INFO - 检索完成: 查询='RAG的核心流程是什么?', 结果数=0
+2026-01-29 19:30:49 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 19:30:49 - rag_backend - INFO - 文档切分成功: 86a794c746c01e0abf6c1db9f2086bec, 生成 20 个片段
+2026-01-29 19:30:53 - rag_backend - INFO - 文档切分完成: 20 个片段 (方式: char)
+2026-01-29 19:31:00 - rag_backend - INFO - 添加 20 个向量到 FAISS (总数: 40)
+2026-01-29 19:31:00 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 19:31:00 - rag_backend - INFO - 文档向量化成功: 86a794c746c01e0abf6c1db9f2086bec, 20 个片段
+2026-01-29 19:31:06 - rag_backend - ERROR - 检索失败: 'str' object has no attribute 'get'
+2026-01-29 19:31:06 - rag_backend - INFO - 检索完成: 查询='RAG的核心流程是什么?', 结果数=0
+2026-01-29 19:33:23 - rag_backend - INFO - 关闭应用
+2026-01-29 19:33:23 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 19:33:28 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 19:33:28 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 19:33:28 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 19:33:28 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 19:33:28 - rag_backend - INFO - 已加载 40 条元数据
+2026-01-29 19:33:28 - rag_backend - INFO - FAISS 索引已加载: 40 个向量，40 条元数据
+2026-01-29 19:33:28 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 19:33:42 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 267, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 19:33:42 - rag_backend - INFO - 检索完成: 查询='RAG的核心流程是什么?', 结果数=0
+2026-01-29 19:33:55 - rag_backend - INFO - 准备加载模型: BAAI/bge-large-zh-v1.5 (类型: bge)
+2026-01-29 19:33:58 - rag_backend - INFO - 找到本地模型目录: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 19:33:58 - rag_backend - INFO - 从本地路径加载 BGE 模型: data/models/BAAI--bge-large-zh-v1.5/BAAI/bge-large-zh-v1___5
+2026-01-29 19:33:59 - rag_backend - INFO - 成功加载 BGE 模型: BAAI/bge-large-zh-v1.5 (维度: 1024)
+2026-01-29 19:33:59 - rag_backend - INFO - 嵌入模型加载: 模型加载成功: BAAI/bge-large-zh-v1.5
+2026-01-29 19:34:03 - rag_backend - INFO - 向量搜索完成: distances类型=<class 'numpy.ndarray'>, metadata_list类型=<class 'list'>
+2026-01-29 19:34:03 - rag_backend - INFO - 检索完成: 查询='RAG的核心流程是什么?', 返回=0个结果, 耗时=118.95ms
+2026-01-29 19:34:03 - rag_backend - INFO - 检索完成: 查询='RAG的核心流程是什么?', 结果数=0
+2026-01-29 19:34:31 - rag_backend - INFO - 向量搜索完成: distances类型=<class 'numpy.ndarray'>, metadata_list类型=<class 'list'>
+2026-01-29 19:34:31 - rag_backend - INFO - 检索完成: 查询='登录', 返回=0个结果, 耗时=70.97ms
+2026-01-29 19:34:31 - rag_backend - INFO - 检索完成: 查询='登录', 结果数=0
+2026-01-29 19:35:00 - rag_backend - INFO - 文档切分完成: 30 个片段 (方式: char)
+2026-01-29 19:35:00 - rag_backend - INFO - 文档切分成功: 57e727fefb3ad585a67daae1159ba93a, 生成 30 个片段
+2026-01-29 19:35:07 - rag_backend - INFO - 文档切分完成: 30 个片段 (方式: char)
+2026-01-29 19:35:23 - rag_backend - INFO - 添加 30 个向量到 FAISS (总数: 70)
+2026-01-29 19:35:23 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 19:35:23 - rag_backend - INFO - 文档向量化成功: 57e727fefb3ad585a67daae1159ba93a, 30 个片段
+2026-01-29 19:35:45 - rag_backend - INFO - 向量搜索完成: distances类型=<class 'numpy.ndarray'>, metadata_list类型=<class 'list'>
+2026-01-29 19:35:45 - rag_backend - INFO - 检索完成: 查询='中华人民共和国劳动合同法', 返回=5个结果, 耗时=208.06ms
+2026-01-29 19:35:45 - rag_backend - INFO - 检索完成: 查询='中华人民共和国劳动合同法', 结果数=5
+2026-01-29 19:35:58 - rag_backend - INFO - 向量搜索完成: distances类型=<class 'numpy.ndarray'>, metadata_list类型=<class 'list'>
+2026-01-29 19:35:58 - rag_backend - INFO - 检索完成: 查询='劳动合同法', 返回=5个结果, 耗时=161.35ms
+2026-01-29 19:35:58 - rag_backend - INFO - 检索完成: 查询='劳动合同法', 结果数=5
+2026-01-29 20:10:37 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 20:10:37 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 20:10:37 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 20:10:37 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 20:10:37 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 20:10:37 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 20:10:37 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 20:14:06 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 267, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 20:14:08 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
+2026-01-29 20:14:10 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
+2026-01-29 20:14:10 - rag_backend - ERROR - 本地 LLM 生成失败: name 'torch' is not defined
+2026-01-29 20:14:10 - rag_backend - ERROR - Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/rag_generator.py", line 163, in generate
+    with torch.no_grad():
+NameError: name 'torch' is not defined
+
+2026-01-29 20:14:10 - rag_backend - INFO - RAG 生成完成: 查询='测试', 耗时=4156.59ms
+2026-01-29 20:14:10 - rag_backend - INFO - RAG 生成完成: 查询='测试', 总耗时=4156.59ms
+2026-01-29 20:14:36 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 267, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 20:14:36 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
+2026-01-29 20:14:37 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
+2026-01-29 20:14:37 - rag_backend - ERROR - 本地 LLM 生成失败: name 'torch' is not defined
+2026-01-29 20:14:37 - rag_backend - ERROR - Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/rag_generator.py", line 163, in generate
+    with torch.no_grad():
+NameError: name 'torch' is not defined
+
+2026-01-29 20:14:37 - rag_backend - INFO - RAG 生成完成: 查询='你好', 耗时=734.67ms
+2026-01-29 20:14:37 - rag_backend - INFO - RAG 生成完成: 查询='你好', 总耗时=734.67ms
+2026-01-29 20:14:41 - rag_backend - INFO - 关闭应用
+2026-01-29 20:14:41 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 20:16:14 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 20:16:16 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 20:16:16 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 20:16:16 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 20:16:16 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 20:16:16 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 20:16:16 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 20:16:26 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 267, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 20:16:30 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
+2026-01-29 20:16:30 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
+2026-01-29 20:16:31 - rag_backend - INFO - RAG 生成完成: 查询='你好', 耗时=4632.33ms
+2026-01-29 20:16:31 - rag_backend - INFO - RAG 生成完成: 查询='你好', 总耗时=4632.33ms
+2026-01-29 20:18:13 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 20:18:14 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 20:18:14 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 20:18:14 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 20:18:14 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 20:18:14 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 20:18:14 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 20:18:14 - rag_backend - INFO - 关闭应用
+2026-01-29 20:18:14 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 20:18:25 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 20:18:27 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 20:18:27 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 20:18:27 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 20:18:27 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 20:18:27 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 20:18:27 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 20:18:27 - rag_backend - INFO - 关闭应用
+2026-01-29 20:18:27 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 20:18:39 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 20:18:41 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 20:18:41 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 20:18:41 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 20:18:41 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 20:18:41 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 20:18:41 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 20:18:41 - rag_backend - INFO - 关闭应用
+2026-01-29 20:18:41 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 20:21:29 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 20:21:31 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 20:21:31 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 20:21:31 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 20:21:31 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 20:21:31 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 20:21:31 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 20:21:31 - rag_backend - INFO - 关闭应用
+2026-01-29 20:21:31 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 20:22:02 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 20:22:04 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 20:22:04 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 20:22:04 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 20:22:04 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 20:22:04 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 20:22:04 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 20:22:04 - rag_backend - INFO - 关闭应用
+2026-01-29 20:22:04 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 20:23:17 - rag_backend - INFO - 关闭应用
+2026-01-29 20:23:17 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 20:23:20 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 20:23:22 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 20:23:22 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 20:23:22 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 20:23:22 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 20:23:22 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 20:23:22 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 20:25:05 - rag_backend - INFO - 关闭应用
+2026-01-29 20:25:05 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 20:25:13 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 20:25:15 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 20:25:15 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 20:25:15 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 20:25:15 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 20:25:15 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 20:25:15 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 20:25:30 - rag_backend - INFO - ================================================================================
+2026-01-29 20:25:30 - rag_backend - INFO - 收到智能对话请求
+2026-01-29 20:25:30 - rag_backend - INFO - 用户查询: 测试日志记录功能
+2026-01-29 20:25:30 - rag_backend - INFO - 检索配置: top_k=3, 阈值=0.6, 算法=SimilarityAlgorithm.COSINE
+2026-01-29 20:25:30 - rag_backend - INFO - 生成配置: provider=local, model=Qwen2.5-0.5B-Instruct, temperature=0.7
+2026-01-29 20:25:30 - rag_backend - INFO - [RAG生成] 开始处理查询: '测试日志记录功能'
+2026-01-29 20:25:30 - rag_backend - INFO - [RAG生成] 步骤1/4: 开始检索相关文档...
+2026-01-29 20:25:30 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 267, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 20:25:30 - rag_backend - INFO - [RAG生成] 检索完成: 找到 0 个相关片段, 耗时 2.18ms
+2026-01-29 20:25:30 - rag_backend - INFO - [RAG生成] 步骤2/4: 构建上下文...
+2026-01-29 20:25:30 - rag_backend - INFO - [RAG生成] 上下文构建完成, 长度: 9 字符
+2026-01-29 20:25:30 - rag_backend - INFO - [RAG生成] 步骤3/4: 构建 Prompt...
+2026-01-29 20:25:30 - rag_backend - INFO - [RAG生成] 步骤4/4: 使用 LLM 生成回答...
+2026-01-29 20:25:30 - rag_backend - INFO - [RAG生成] LLM 配置: provider=local, model=Qwen2.5-0.5B-Instruct
+2026-01-29 20:25:33 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
+2026-01-29 20:25:34 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
+2026-01-29 20:25:37 - rag_backend - INFO - [RAG生成] 生成完成: 回答长度=77字符, 耗时 6928.62ms
+2026-01-29 20:25:37 - rag_backend - INFO - [RAG生成] 总耗时: 6931.73ms (检索: 2.18ms, 生成: 6928.62ms)
+2026-01-29 20:25:37 - rag_backend - INFO - RAG 生成完成
+2026-01-29 20:25:37 - rag_backend - INFO -   - 查询: 测试日志记录功能
+2026-01-29 20:25:37 - rag_backend - INFO -   - 检索耗时: 2.18ms
+2026-01-29 20:25:37 - rag_backend - INFO -   - 生成耗时: 6928.62ms
+2026-01-29 20:25:37 - rag_backend - INFO -   - 总耗时: 6931.73ms
+2026-01-29 20:25:37 - rag_backend - INFO -   - 检索到上下文片段数: 0
+2026-01-29 20:25:37 - rag_backend - INFO -   - 生成回答: 测试日志记录功能是通过在软件开发过程中记录和分析用户行为数据的一种方法，以帮助发现和解决问题。这些数据可以用于优化性能、改进用户体验或进行安全审计等目的。
+2026-01-29 20:25:37 - rag_backend - INFO - ================================================================================
+2026-01-29 20:26:03 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 20:26:04 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 20:26:04 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 20:26:04 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 20:26:04 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 20:26:04 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 20:26:04 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 20:26:04 - rag_backend - INFO - 关闭应用
+2026-01-29 20:26:04 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 20:26:09 - rag_backend - INFO - 关闭应用
+2026-01-29 20:26:09 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 20:26:12 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 20:26:14 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 20:26:14 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 20:26:14 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 20:26:14 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 20:26:14 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 20:26:14 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 20:28:30 - rag_backend - INFO - ================================================================================
+2026-01-29 20:28:30 - rag_backend - INFO - 收到智能对话请求
+2026-01-29 20:28:30 - rag_backend - INFO - 用户查询: 你好
+2026-01-29 20:28:30 - rag_backend - INFO - 检索配置: top_k=3, 阈值=0.6, 算法=cosine
+2026-01-29 20:28:30 - rag_backend - INFO - 生成配置: provider=local, model=Qwen2.5-0.5B-Instruct, temperature=0.7
+2026-01-29 20:28:30 - rag_backend - INFO - [RAG生成] 开始处理查询: '你好'
+2026-01-29 20:28:30 - rag_backend - INFO - [RAG生成] 步骤1/4: 开始检索相关文档...
+2026-01-29 20:28:30 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 267, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 20:28:30 - rag_backend - INFO - [RAG生成] 检索完成: 找到 0 个相关片段, 耗时 1.32ms
+2026-01-29 20:28:30 - rag_backend - INFO - [RAG生成] 步骤2/4: 构建上下文...
+2026-01-29 20:28:30 - rag_backend - INFO - [RAG生成] 上下文构建完成, 长度: 9 字符
+2026-01-29 20:28:30 - rag_backend - INFO - [RAG生成] 步骤3/4: 构建 Prompt...
+2026-01-29 20:28:30 - rag_backend - INFO - [RAG生成] 步骤4/4: 使用 LLM 生成回答...
+2026-01-29 20:28:30 - rag_backend - INFO - [RAG生成] LLM 配置: provider=local, model=Qwen2.5-0.5B-Instruct
+2026-01-29 20:28:30 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
+2026-01-29 20:28:32 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
+2026-01-29 20:28:32 - rag_backend - INFO - [RAG生成] 生成完成: 回答长度=2字符, 耗时 2514.93ms
+2026-01-29 20:28:32 - rag_backend - INFO - [RAG生成] 总耗时: 2517.17ms (检索: 1.32ms, 生成: 2514.93ms)
+2026-01-29 20:28:32 - rag_backend - INFO - RAG 生成完成
+2026-01-29 20:28:32 - rag_backend - INFO -   - 查询: 你好
+2026-01-29 20:28:32 - rag_backend - INFO -   - 检索耗时: 1.32ms
+2026-01-29 20:28:32 - rag_backend - INFO -   - 生成耗时: 2514.93ms
+2026-01-29 20:28:32 - rag_backend - INFO -   - 总耗时: 2517.17ms
+2026-01-29 20:28:32 - rag_backend - INFO -   - 检索到上下文片段数: 0
+2026-01-29 20:28:32 - rag_backend - INFO -   - 生成回答: 你好
+2026-01-29 20:28:32 - rag_backend - INFO - ================================================================================
+2026-01-29 20:30:14 - rag_backend - INFO - ================================================================================
+2026-01-29 20:30:14 - rag_backend - INFO - 收到智能对话请求
+2026-01-29 20:30:14 - rag_backend - INFO - 用户查询: RAG的核心流程是什么？
+2026-01-29 20:30:14 - rag_backend - INFO - 检索配置: top_k=5, 阈值=0.6, 算法=cosine
+2026-01-29 20:30:14 - rag_backend - INFO - 生成配置: provider=local, model=Qwen2.5-0.5B-Instruct, temperature=0.7
+2026-01-29 20:30:14 - rag_backend - INFO - [RAG生成] 开始处理查询: 'RAG的核心流程是什么？'
+2026-01-29 20:30:14 - rag_backend - INFO - [RAG生成] 步骤1/4: 开始检索相关文档...
+2026-01-29 20:30:14 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 267, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 20:30:14 - rag_backend - INFO - [RAG生成] 检索完成: 找到 0 个相关片段, 耗时 0.77ms
+2026-01-29 20:30:14 - rag_backend - INFO - [RAG生成] 步骤2/4: 构建上下文...
+2026-01-29 20:30:14 - rag_backend - INFO - [RAG生成] 上下文构建完成, 长度: 9 字符
+2026-01-29 20:30:14 - rag_backend - INFO - [RAG生成] 步骤3/4: 构建 Prompt...
+2026-01-29 20:30:14 - rag_backend - INFO - [RAG生成] 步骤4/4: 使用 LLM 生成回答...
+2026-01-29 20:30:14 - rag_backend - INFO - [RAG生成] LLM 配置: provider=local, model=Qwen2.5-0.5B-Instruct
+2026-01-29 20:30:14 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
+2026-01-29 20:30:15 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
+2026-01-29 20:30:16 - rag_backend - INFO - [RAG生成] 生成完成: 回答长度=22字符, 耗时 1626.87ms
+2026-01-29 20:30:16 - rag_backend - INFO - [RAG生成] 总耗时: 1628.54ms (检索: 0.77ms, 生成: 1626.87ms)
+2026-01-29 20:30:16 - rag_backend - INFO - RAG 生成完成
+2026-01-29 20:30:16 - rag_backend - INFO -   - 查询: RAG的核心流程是什么？
+2026-01-29 20:30:16 - rag_backend - INFO -   - 检索耗时: 0.77ms
+2026-01-29 20:30:16 - rag_backend - INFO -   - 生成耗时: 1626.87ms
+2026-01-29 20:30:16 - rag_backend - INFO -   - 总耗时: 1628.54ms
+2026-01-29 20:30:16 - rag_backend - INFO -   - 检索到上下文片段数: 0
+2026-01-29 20:30:16 - rag_backend - INFO -   - 生成回答: RAG的核心流程是：招募、评估和培训候选人。
+2026-01-29 20:30:16 - rag_backend - INFO - ================================================================================
+2026-01-29 20:30:28 - rag_backend - INFO - ================================================================================
+2026-01-29 20:30:28 - rag_backend - INFO - 收到智能对话请求
+2026-01-29 20:30:28 - rag_backend - INFO - 用户查询: 解释下劳动合同法
+2026-01-29 20:30:28 - rag_backend - INFO - 检索配置: top_k=5, 阈值=0.6, 算法=cosine
+2026-01-29 20:30:28 - rag_backend - INFO - 生成配置: provider=local, model=Qwen2.5-0.5B-Instruct, temperature=0.7
+2026-01-29 20:30:28 - rag_backend - INFO - [RAG生成] 开始处理查询: '解释下劳动合同法'
+2026-01-29 20:30:28 - rag_backend - INFO - [RAG生成] 步骤1/4: 开始检索相关文档...
+2026-01-29 20:30:28 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 267, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 20:30:28 - rag_backend - INFO - [RAG生成] 检索完成: 找到 0 个相关片段, 耗时 0.59ms
+2026-01-29 20:30:28 - rag_backend - INFO - [RAG生成] 步骤2/4: 构建上下文...
+2026-01-29 20:30:28 - rag_backend - INFO - [RAG生成] 上下文构建完成, 长度: 9 字符
+2026-01-29 20:30:28 - rag_backend - INFO - [RAG生成] 步骤3/4: 构建 Prompt...
+2026-01-29 20:30:28 - rag_backend - INFO - [RAG生成] 步骤4/4: 使用 LLM 生成回答...
+2026-01-29 20:30:28 - rag_backend - INFO - [RAG生成] LLM 配置: provider=local, model=Qwen2.5-0.5B-Instruct
+2026-01-29 20:30:28 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
+2026-01-29 20:30:29 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
+2026-01-29 20:30:45 - rag_backend - INFO - [RAG生成] 生成完成: 回答长度=570字符, 耗时 16710.85ms
+2026-01-29 20:30:45 - rag_backend - INFO - [RAG生成] 总耗时: 16712.80ms (检索: 0.59ms, 生成: 16710.85ms)
+2026-01-29 20:30:45 - rag_backend - INFO - RAG 生成完成
+2026-01-29 20:30:45 - rag_backend - INFO -   - 查询: 解释下劳动合同法
+2026-01-29 20:30:45 - rag_backend - INFO -   - 检索耗时: 0.59ms
+2026-01-29 20:30:45 - rag_backend - INFO -   - 生成耗时: 16710.85ms
+2026-01-29 20:30:45 - rag_backend - INFO -   - 总耗时: 16712.80ms
+2026-01-29 20:30:45 - rag_backend - INFO -   - 检索到上下文片段数: 0
+2026-01-29 20:30:45 - rag_backend - INFO -   - 生成回答: 《中华人民共和国劳动合同法》是中国劳动立法的重要组成部分，旨在保护劳动者的合法权益和促进企业的健康发展。该法律规定了用人单位与劳动者之间在签订、履行劳动合同过程中的权利义务，并对违反法律规定的行为进行了约束。
+
+主要条款包括但不限于：
+1. 劳动合同的订立：要求双方必须就工作内容、工作时间、休息休假等事项达成一致。
+2. 劳动合同的履行：规定了用人单位应支付给劳动者工资标准以及如何处理劳动争议等问...
+2026-01-29 20:30:45 - rag_backend - INFO - ================================================================================
+2026-01-29 20:33:38 - rag_backend - INFO - ================================================================================
+2026-01-29 20:33:38 - rag_backend - INFO - 收到智能对话请求
+2026-01-29 20:33:38 - rag_backend - INFO - 用户查询: 你是谁？
+2026-01-29 20:33:38 - rag_backend - INFO - 检索配置: top_k=5, 阈值=0.6, 算法=cosine
+2026-01-29 20:33:38 - rag_backend - INFO - 生成配置: provider=local, model=Qwen2.5-0.5B-Instruct, temperature=0.7
+2026-01-29 20:33:38 - rag_backend - INFO - [RAG生成] 开始处理查询: '你是谁？'
+2026-01-29 20:33:38 - rag_backend - INFO - [RAG生成] 步骤1/4: 开始检索相关文档...
+2026-01-29 20:33:38 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 267, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 20:33:38 - rag_backend - INFO - [RAG生成] 检索完成: 找到 0 个相关片段, 耗时 1.64ms
+2026-01-29 20:33:38 - rag_backend - INFO - [RAG生成] 步骤2/4: 构建上下文...
+2026-01-29 20:33:38 - rag_backend - INFO - [RAG生成] 上下文构建完成, 长度: 9 字符
+2026-01-29 20:33:38 - rag_backend - INFO - [RAG生成] 步骤3/4: 构建 Prompt...
+2026-01-29 20:33:38 - rag_backend - INFO - [RAG生成] 步骤4/4: 使用 LLM 生成回答...
+2026-01-29 20:33:38 - rag_backend - INFO - [RAG生成] LLM 配置: provider=local, model=Qwen2.5-0.5B-Instruct
+2026-01-29 20:33:38 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
+2026-01-29 20:33:39 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
+2026-01-29 20:33:40 - rag_backend - INFO - [RAG生成] 生成完成: 回答长度=24字符, 耗时 1942.93ms
+2026-01-29 20:33:40 - rag_backend - INFO - [RAG生成] 总耗时: 1944.96ms (检索: 1.64ms, 生成: 1942.93ms)
+2026-01-29 20:33:40 - rag_backend - INFO - RAG 生成完成
+2026-01-29 20:33:40 - rag_backend - INFO -   - 查询: 你是谁？
+2026-01-29 20:33:40 - rag_backend - INFO -   - 检索耗时: 1.64ms
+2026-01-29 20:33:40 - rag_backend - INFO -   - 生成耗时: 1942.93ms
+2026-01-29 20:33:40 - rag_backend - INFO -   - 总耗时: 1944.96ms
+2026-01-29 20:33:40 - rag_backend - INFO -   - 检索到上下文片段数: 0
+2026-01-29 20:33:40 - rag_backend - INFO -   - 生成回答: 我是阿里云开发的超大规模语言模型，我叫通义千问。
+2026-01-29 20:33:40 - rag_backend - INFO - ================================================================================
+2026-01-29 20:33:50 - rag_backend - INFO - ================================================================================
+2026-01-29 20:33:50 - rag_backend - INFO - 收到智能对话请求
+2026-01-29 20:33:50 - rag_backend - INFO - 用户查询: RAG的核心流程是什么？
+2026-01-29 20:33:50 - rag_backend - INFO - 检索配置: top_k=5, 阈值=0.6, 算法=cosine
+2026-01-29 20:33:50 - rag_backend - INFO - 生成配置: provider=local, model=Qwen2.5-0.5B-Instruct, temperature=0.7
+2026-01-29 20:33:50 - rag_backend - INFO - [RAG生成] 开始处理查询: 'RAG的核心流程是什么？'
+2026-01-29 20:33:50 - rag_backend - INFO - [RAG生成] 步骤1/4: 开始检索相关文档...
+2026-01-29 20:33:50 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 267, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 20:33:50 - rag_backend - INFO - [RAG生成] 检索完成: 找到 0 个相关片段, 耗时 0.94ms
+2026-01-29 20:33:50 - rag_backend - INFO - [RAG生成] 步骤2/4: 构建上下文...
+2026-01-29 20:33:50 - rag_backend - INFO - [RAG生成] 上下文构建完成, 长度: 9 字符
+2026-01-29 20:33:50 - rag_backend - INFO - [RAG生成] 步骤3/4: 构建 Prompt...
+2026-01-29 20:33:50 - rag_backend - INFO - [RAG生成] 步骤4/4: 使用 LLM 生成回答...
+2026-01-29 20:33:50 - rag_backend - INFO - [RAG生成] LLM 配置: provider=local, model=Qwen2.5-0.5B-Instruct
+2026-01-29 20:33:50 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
+2026-01-29 20:33:51 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
+2026-01-29 20:33:52 - rag_backend - INFO - [RAG生成] 生成完成: 回答长度=22字符, 耗时 1738.51ms
+2026-01-29 20:33:52 - rag_backend - INFO - [RAG生成] 总耗时: 1740.38ms (检索: 0.94ms, 生成: 1738.51ms)
+2026-01-29 20:33:52 - rag_backend - INFO - RAG 生成完成
+2026-01-29 20:33:52 - rag_backend - INFO -   - 查询: RAG的核心流程是什么？
+2026-01-29 20:33:52 - rag_backend - INFO -   - 检索耗时: 0.94ms
+2026-01-29 20:33:52 - rag_backend - INFO -   - 生成耗时: 1738.51ms
+2026-01-29 20:33:52 - rag_backend - INFO -   - 总耗时: 1740.38ms
+2026-01-29 20:33:52 - rag_backend - INFO -   - 检索到上下文片段数: 0
+2026-01-29 20:33:52 - rag_backend - INFO -   - 生成回答: RAG的核心流程是：招募、评估、分配和跟进。
+2026-01-29 20:33:52 - rag_backend - INFO - ================================================================================
+2026-01-29 20:34:03 - rag_backend - INFO - ================================================================================
+2026-01-29 20:34:03 - rag_backend - INFO - 收到智能对话请求
+2026-01-29 20:34:03 - rag_backend - INFO - 用户查询: 能详细解释下吗？
+2026-01-29 20:34:03 - rag_backend - INFO - 检索配置: top_k=5, 阈值=0.6, 算法=cosine
+2026-01-29 20:34:03 - rag_backend - INFO - 生成配置: provider=local, model=Qwen2.5-0.5B-Instruct, temperature=0.7
+2026-01-29 20:34:03 - rag_backend - INFO - [RAG生成] 开始处理查询: '能详细解释下吗？'
+2026-01-29 20:34:03 - rag_backend - INFO - [RAG生成] 步骤1/4: 开始检索相关文档...
+2026-01-29 20:34:03 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 267, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 20:34:03 - rag_backend - INFO - [RAG生成] 检索完成: 找到 0 个相关片段, 耗时 0.55ms
+2026-01-29 20:34:03 - rag_backend - INFO - [RAG生成] 步骤2/4: 构建上下文...
+2026-01-29 20:34:03 - rag_backend - INFO - [RAG生成] 上下文构建完成, 长度: 9 字符
+2026-01-29 20:34:03 - rag_backend - INFO - [RAG生成] 步骤3/4: 构建 Prompt...
+2026-01-29 20:34:03 - rag_backend - INFO - [RAG生成] 步骤4/4: 使用 LLM 生成回答...
+2026-01-29 20:34:03 - rag_backend - INFO - [RAG生成] LLM 配置: provider=local, model=Qwen2.5-0.5B-Instruct
+2026-01-29 20:34:03 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
+2026-01-29 20:34:03 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
+2026-01-29 20:34:06 - rag_backend - INFO - [RAG生成] 生成完成: 回答长度=74字符, 耗时 2762.87ms
+2026-01-29 20:34:06 - rag_backend - INFO - [RAG生成] 总耗时: 2764.38ms (检索: 0.55ms, 生成: 2762.87ms)
+2026-01-29 20:34:06 - rag_backend - INFO - RAG 生成完成
+2026-01-29 20:34:06 - rag_backend - INFO -   - 查询: 能详细解释下吗？
+2026-01-29 20:34:06 - rag_backend - INFO -   - 检索耗时: 0.55ms
+2026-01-29 20:34:06 - rag_backend - INFO -   - 生成耗时: 2762.87ms
+2026-01-29 20:34:06 - rag_backend - INFO -   - 总耗时: 2764.38ms
+2026-01-29 20:34:06 - rag_backend - INFO -   - 检索到上下文片段数: 0
+2026-01-29 20:34:06 - rag_backend - INFO -   - 生成回答: 抱歉，由于我没有找到与您请求的文档相关的任何信息，我无法为您提供详细的解释。如果您能提供更多关于该文档的信息或要求进一步澄清的问题，我会尽力帮助您。
+2026-01-29 20:34:06 - rag_backend - INFO - ================================================================================
+2026-01-29 20:56:56 - rag_backend - INFO - 关闭应用
+2026-01-29 20:56:56 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 20:56:59 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 20:57:01 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 20:57:01 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 20:57:01 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 20:57:01 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 20:57:01 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 20:57:01 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 21:02:30 - rag_backend - INFO - 关闭应用
+2026-01-29 21:02:30 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 21:02:35 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 21:02:37 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 21:02:37 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 21:02:37 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 21:02:37 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 21:02:37 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 21:02:37 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
+2026-01-29 21:03:03 - rag_backend - INFO - ================================================================================
+2026-01-29 21:03:03 - rag_backend - INFO - 收到智能对话请求
+2026-01-29 21:03:03 - rag_backend - INFO - 用户查询: 测试修复后的系统
+2026-01-29 21:03:03 - rag_backend - INFO - 检索配置: top_k=3, 阈值=0.6, 算法=SimilarityAlgorithm.COSINE
+2026-01-29 21:03:03 - rag_backend - INFO - 生成配置: provider=local, model=Qwen2.5-0.5B-Instruct, temperature=0.7
+2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 开始处理查询: '测试修复后的系统'
+2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 步骤1/4: 开始检索相关文档...
+2026-01-29 21:03:03 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
+Traceback (most recent call last):
+  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
+    query_vector = embedding_service.encode([query])[0]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 271, in encode
+    raise ValueError("模型未加载，请先调用 load_model")
+ValueError: 模型未加载，请先调用 load_model
+
+2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 检索完成: 找到 0 个相关片段, 耗时 2.17ms
+2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 步骤2/4: 构建上下文...
+2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 上下文构建完成, 长度: 9 字符 (限制: 6000)
+2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 步骤3/4: 构建 Prompt...
+2026-01-29 21:03:04 - rag_backend - INFO - [RAG生成] 步骤4/4: 使用 LLM 生成回答...
+2026-01-29 21:03:04 - rag_backend - INFO - [RAG生成] LLM 配置: provider=local, model=Qwen2.5-0.5B-Instruct
+2026-01-29 21:03:07 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
+2026-01-29 21:03:08 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
+2026-01-29 21:03:20 - rag_backend - INFO - [RAG生成] 生成完成: 回答长度=355字符, 耗时 16619.56ms
+2026-01-29 21:03:20 - rag_backend - INFO - [RAG生成] 总耗时: 16622.59ms (检索: 2.17ms, 生成: 16619.56ms)
+2026-01-29 21:03:20 - rag_backend - INFO - RAG 生成完成
+2026-01-29 21:03:20 - rag_backend - INFO -   - 查询: 测试修复后的系统
+2026-01-29 21:03:20 - rag_backend - INFO -   - 检索耗时: 2.17ms
+2026-01-29 21:03:20 - rag_backend - INFO -   - 生成耗时: 16619.56ms
+2026-01-29 21:03:20 - rag_backend - INFO -   - 总耗时: 16622.59ms
+2026-01-29 21:03:20 - rag_backend - INFO -   - 检索到上下文片段数: 0
+2026-01-29 21:03:20 - rag_backend - INFO -   - 生成回答: 测试修复后的系统需要进行详细的检查和验证，以确保其功能正常，并且没有任何潜在的问题存在。这个过程通常包括以下几个步骤：
+
+1. 系统性能测试：使用各种工具和方法来评估系统的运行效率和处理能力。
+2. 应用程序测试：对应用程序进行全面的测试，以确保它们能够正确地执行用户需求。
+3. 安全性测试：对系统中的所有安全模块进行测试，以确保数据的安全性和完整性。
+4. 性能优化：通过调整配置参数、更改代码等...
+2026-01-29 21:03:20 - rag_backend - INFO - ================================================================================
+2026-01-29 21:04:58 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 21:05:00 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 21:05:00 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 21:05:00 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 21:05:00 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 21:05:00 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 21:05:00 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 21:05:00 - rag_backend - INFO - 关闭应用
+2026-01-29 21:05:00 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 21:05:05 - rag_backend - INFO - 关闭应用
+2026-01-29 21:05:05 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 21:05:07 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 21:05:09 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 21:05:09 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 21:05:09 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 21:05:09 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 21:05:09 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 21:05:09 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 21:14:23 - rag_backend - INFO - 关闭应用
+2026-01-29 21:14:23 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 21:14:35 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 21:14:37 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 21:14:37 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 21:14:37 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 21:14:37 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 21:14:37 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 21:14:37 - rag_backend - INFO - 向量数据库初始化成功: faiss
+2026-01-29 21:21:35 - rag_backend - INFO - 关闭应用
+2026-01-29 21:21:35 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
+2026-01-29 21:21:38 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 21:21:40 - rag_backend - INFO - 加载了 12 个文档
+2026-01-29 21:21:42 - rag_backend - INFO - 启动 RAG Backend v1.0.0
+2026-01-29 21:21:42 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
+2026-01-29 21:21:42 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
+2026-01-29 21:21:42 - rag_backend - INFO - 已加载 70 条元数据
+2026-01-29 21:21:42 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
+2026-01-29 21:21:42 - rag_backend - INFO - 向量数据库初始化成功: faiss

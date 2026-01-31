@@ -1,0 +1,144 @@
+.login-container {
+  background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-box {
+  background: #fff;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-title {
+  text-align: center;
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+.login-box .form-item {
+  margin-bottom: 25px;
+  position: relative;
+}
+
+.login-box .form-item input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.login-box .form-item input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.login-box .form-item label {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+  transition: all 0.3s;
+  background: #fff;
+  padding: 0 5px;
+}
+
+.login-box .form-item input:focus ~ label,
+.login-box .form-item input:valid ~ label {
+  top: 0;
+  font-size: 12px;
+  color: #667eea;
+}
+
+.login-box .btn-group {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.btn-login {
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #667eea;
+  color: #fff;
+}
+
+.btn-login:hover {
+  background: #556cd6;
+}
+
+.btn-reset {
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #f3f4f6;
+  color: #333;
+}
+
+.btn-reset:hover {
+  background: #e5e7eb;
+}
+
+.login-box .tip {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.success-page {
+  text-align: center;
+  color: #fff;
+  padding: 50px 30px;
+}
+
+.success-page h2 {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.success-page p {
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+.back-btn {
+  padding: 10px 30px;
+  background: #fff;
+  color: #667eea;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.back-btn:hover {
+  background: #f3f4f6;
+}

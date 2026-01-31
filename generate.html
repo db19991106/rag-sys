@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上下文构建与生成输入展示 - RAG Context 可视化</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+        :root {
+            --primary: #165DFF;
+            --success: #00B42A;
+            --warning: #FF7D00;
+            --error: #F53F3F;
+            --neutral: #86909C;
+            --bg-main: #F5F7FA;
+            --bg-card: #FFFFFF;
+            --bg-light: #F2F3F5;
+            --bg-prompt: #F9FAFB;
+            --border: #E5E6EB;
+            --border-dark: #D0D3D9;
+            --text-main: #1D2129;
+            --text-secondary: #4E5969;
+            --text-light: #86909C;
+            --text-prompt: #344054;
+            --shadow: 0 2px 12px 0 rgba(0,0,0,0.08);
+            --radius: 8px;
+            --radius-sm: 4px;
+            --transition: all 0.3s ease;
+            --active: rgba(22,93,255,0.1);
+            --highlight: #FFF7E6;
+            --drag-active: rgba(22,93,255,0.2);
+        }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        .page-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .page-title small {
+            font-size: 14px;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .card {
+            background-color: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .card-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-body {
+            padding: 24px;
+        }
+        /* 按钮样式 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background-color: #0E4BDB;
+        }
+        .btn-default {
+            background-color: var(--bg-light);
+            color: var(--text-secondary);
+        }
+        .btn-default:hover {
+            background-color: #e5e7eb;
+        }
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+        .btn-danger {
+            background-color: var(--error);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background-color: #D93025;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        /* 检索结果与上下文编辑 */
+        .edit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .edit-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .chunk-item {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            background-color: var(--bg-light);
+            transition: var(--transition);
+            cursor: grab;
+        }
+        .chunk-item:active {
+            cursor: grabbing;
+        }
+        .chunk-item-dragging {
+            background-color: var(--drag-active);
+            border-color: var(--primary);
+        }
+        .chunk-left {
+            flex: 1;
+        }
+        .chunk-num {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            background-color: var(--primary);
+            color: #fff;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .chunk-sim {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background-color: rgba(22,93,255,0.1);
+            color: var(--primary);
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        .chunk-content {
+            line-height: 1.6;
+            margin-top: 8px;
+            max-width: 100%;
+            color: var(--text-secondary);
+        }
+        .highlight {
+            background-color: var(--highlight);
+            padding: 2px 4px;
+            border-radius: 2px;
+            color: var(--warning);
+            font-weight: 500;
+        }
+        /* Prompt预览区 */
+        .prompt-preview {
+            width: 100%;
+            min-height: 300px;
+            padding: 24px;
+            border: 1px solid var(--border-dark);
+            border-radius: var(--radius);
+            background-color: var(--bg-prompt);
+            font-family: "Consolas", "Monaco", monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-prompt);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .prompt-label {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .prompt-context {
+            color: var(--text-prompt);
+            margin: 8px 0;
+        }
+        .prompt-question {
+            color: var(--warning);
+            font-weight: 500;
+        }
+        /* 空状态、加载 */
+        .empty-box {
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--border);
+        }
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid currentColor;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* 适配小屏 */
+        @media (max-width: 992px) {
+            .chunk-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .btn-group {
+                flex-wrap: wrap;
+            }
+        }
+        @media (max-width: 576px) {
+            .card-body {
+                padding: 16px;
+            }
+            .prompt-preview {
+                padding: 16px;
+                font-size: 13px;
+            }
+        }
+    </style>
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SortableJS：实现片段拖拽排序 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-layer-group"></i> 上下文构建与生成输入展示
+                <small>RAG Context 编辑 & Prompt 可视化</small>
+            </h1>
+            <div>
+                <a href="javascript:;" class="back-btn"><i class="fas fa-arrow-left"></i> 返回查询检索</a>
+                <a href="javascript:;" class="back-btn" style="margin-left:10px;"><i class="fas fa-arrow-left"></i> 返回文档管理</a>
+            </div>
+        </div>
+
+        <!-- 用户查询与检索结果展示 -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-question-circle"></i> 用户查询与原始检索结果</h3>
+                <span style="font-size:12px; color:var(--text-light);">检索参数：Top-K=5 | 余弦相似度≥0.6 | 匹配结果：5个</span>
+            </div>
+            <div class="card-body">
+                <!-- 用户查询 -->
+                <div class="form-item mb-20" style="margin-bottom:20px;">
+                    <label class="form-label" style="font-size:14px; font-weight:500; color:var(--text-secondary); margin-bottom:8px;">用户查询问题</label>
+                    <div style="padding:16px; border:1px solid var(--border); border-radius:var(--radius); background-color:var(--bg-light); font-size:16px;" id="userQuery">
+                        RAG的核心流程是什么？
+                    </div>
+                </div>
+
+                <!-- 上下文编辑区 -->
+                <div class="edit-header">
+                    <div class="edit-title">检索结果（支持<span style="color:var(--primary);">拖拽排序</span> / <span style="color:var(--primary);">点击删除</span>）</div>
+                    <div>
+                        <button class="btn btn-default btn-sm" id="resetContext"><i class="fas fa-refresh"></i> 重置上下文</button>
+                        <button class="btn btn-primary btn-sm" id="refreshPrompt"><i class="fas fa-sync-alt"></i> 刷新Prompt</button>
+                    </div>
+                </div>
+                <div id="chunkList" style="min-height:100px; margin-bottom:20px;">
+                    <!-- 检索结果片段由JS渲染 -->
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="buildContextBtn"><i class="fas fa-cogs"></i> 构建生成上下文</button>
+                    <button class="btn btn-default" id="clearAllBtn"><i class="fas fa-trash"></i> 清空所有片段</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prompt生成输入预览 -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-file-code"></i> 生成输入Prompt结构可视化</h3>
+                <span style="font-size:12px; color:var(--text-light);" id="promptStatus">状态：未构建上下文 | Prompt长度：0字符</span>
+            </div>
+            <div class="card-body">
+                <div class="form-item">
+                    <label class="form-label" style="font-size:14px; font-weight:500; color:var(--text-secondary); margin-bottom:16px;">
+                        标准化Prompt模板（上下文+问题）- 可直接传入大模型生成
+                    </label>
+                    <div class="prompt-preview" id="promptPreview">
+                        # RAG生成输入模板
+                        请根据以下参考文档片段，回答用户的问题，仅使用文档中的信息，不要编造内容。
+
+                        ## 参考文档
+                        （请先构建生成上下文，将自动填充此处）
+
+                        ## 用户问题
+                        RAG的核心流程是什么？
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let originalChunks = []; // 原始检索结果片段（不可变）
+        let currentChunks = [];  // 当前编辑的上下文片段（可拖拽/删除）
+        let userQuery = "RAG的核心流程是什么？"; // 用户查询
+        // 元素获取
+        const userQueryEl = document.getElementById('userQuery');
+        const chunkList = document.getElementById('chunkList');
+        const resetContext = document.getElementById('resetContext');
+        const refreshPrompt = document.getElementById('refreshPrompt');
+        const buildContextBtn = document.getElementById('buildContextBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const promptPreview = document.getElementById('promptPreview');
+        const promptStatus = document.getElementById('promptStatus');
+
+        // 页面初始化：生成模拟原始检索结果（5个匹配片段，带相似度/高亮）
+        window.onload = function() {
+            generateMockOriginalChunks();
+            renderChunkList();
+            initSortable();
+            bindEvents();
+        };
+
+        // 生成模拟原始检索结果
+        function generateMockOriginalChunks() {
+            originalChunks = [
+                {
+                    id: 'c4',
+                    num: 4,
+                    sim: 0.92,
+                    content: 'RAG的核心流程分为四步：文档加载与预处理、文档切分与向量化、检索匹配、生成回答',
+                    highlightKeywords: ['RAG', '核心流程']
+                },
+                {
+                    id: 'c2',
+                    num: 2,
+                    sim: 0.88,
+                    content: '检索增强生成（RAG）是将信息检索与大语言模型结合的生成式AI技术',
+                    highlightKeywords: ['RAG']
+                },
+                {
+                    id: 'c5',
+                    num: 5,
+                    sim: 0.85,
+                    content: '文档切分是RAG的关键环节，切分粒度直接影响检索精度和生成效果',
+                    highlightKeywords: ['RAG']
+                },
+                {
+                    id: 'c11',
+                    num: 11,
+                    sim: 0.76,
+                    content: '向量嵌入（Embedding）是将文本片段转为数值向量的过程，是RAG向量化环节的核心',
+                    highlightKeywords: ['RAG', '向量化']
+                },
+                {
+                    id: 'c14',
+                    num: 14,
+                    sim: 0.72,
+                    content: '向量索引引擎常用FAISS、Milvus、Pinecone，用于快速检索相似向量，是RAG检索匹配的核心组件',
+                    highlightKeywords: ['RAG', '检索匹配']
+                }
+            ];
+            // 初始化当前编辑的片段为原始片段
+            currentChunks = JSON.parse(JSON.stringify(originalChunks));
+        }
+
+        // 初始化拖拽排序（SortableJS）
+        function initSortable() {
+            new Sortable(chunkList, {
+                animation: 150,
+                ghostClass: 'chunk-item-dragging',
+                onEnd: function() {
+                    // 拖拽结束后更新当前片段顺序
+                    updateCurrentChunksFromDom();
+                }
+            });
+        }
+
+        // 绑定事件
+        function bindEvents() {
+            // 构建生成上下文
+            buildContextBtn.addEventListener('click', buildContextAndPrompt);
+            // 重置上下文
+            resetContext.addEventListener('click', resetCurrentChunks);
+            // 刷新Prompt
+            refreshPrompt.addEventListener('click', buildContextAndPrompt);
+            // 清空所有片段
+            clearAllBtn.addEventListener('click', clearAllChunks);
+            // 委托绑定删除按钮事件
+            chunkList.addEventListener('click', e => {
+                if (e.target.closest('.btn-delete')) {
+                    const chunkId = e.target.closest('.btn-delete').dataset.id;
+                    deleteChunk(chunkId);
+                }
+            });
+        }
+
+        // 渲染片段列表
+        function renderChunkList() {
+            if (currentChunks.length === 0) {
+                chunkList.innerHTML = `
+                    <div class="empty-box" style="padding:30px 20px;">
+                        <div class="empty-icon" style="font-size:32px;"><i class="fas fa-list"></i></div>
+                        <p style="margin-top:8px;">暂无上下文片段，可点击「重置上下文」恢复原始检索结果</p>
+                    </div>
+                `;
+                return;
+            }
+            chunkList.innerHTML = currentChunks.map(chunk => {
+                // 高亮关键词
+                let content = chunk.content;
+                chunk.highlightKeywords.forEach(key => {
+                    content = content.replace(new RegExp(key, 'g'), `<span class="highlight">${key}</span>`);
+                });
+                return `
+                    <div class="chunk-item" data-id="${chunk.id}">
+                        <div class="chunk-left">
+                            <span class="chunk-num">${chunk.num}</span>
+                            <span class="chunk-sim">相似度：${chunk.sim}</span>
+                            <div class="chunk-content">${content}</div>
+                        </div>
+                        <button class="btn btn-danger btn-sm btn-delete" data-id="${chunk.id}">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 从DOM更新当前片段顺序（拖拽后）
+        function updateCurrentChunksFromDom() {
+            const chunkItems = document.querySelectorAll('.chunk-item');
+            const newIds = Array.from(chunkItems).map(item => item.dataset.id);
+            currentChunks = newIds.map(id => currentChunks.find(chunk => chunk.id === id));
+        }
+
+        // 删除单个片段
+        function deleteChunk(chunkId) {
+            currentChunks = currentChunks.filter(chunk => chunk.id !== chunkId);
+            renderChunkList();
+            // 实时刷新Prompt
+            buildContextAndPrompt();
+        }
+
+        // 重置当前上下文为原始检索结果
+        function resetCurrentChunks() {
+            currentChunks = JSON.parse(JSON.stringify(originalChunks));
+            renderChunkList();
+            buildContextAndPrompt();
+            alert('上下文已重置为原始检索结果！');
+        }
+
+        // 清空所有片段
+        function clearAllChunks() {
+            if (confirm('确定要清空所有上下文片段吗？清空后将无法生成有效Prompt！')) {
+                currentChunks = [];
+                renderChunkList();
+                buildContextAndPrompt();
+            }
+        }
+
+        // 构建生成上下文并渲染Prompt
+        function buildContextAndPrompt() {
+            // 拼接上下文内容
+            const contextContent = currentChunks.map((chunk, index) => {
+                return `【参考片段${index+1}】${chunk.content}`;
+            }).join('\n');
+            // 拼接完整Prompt
+            const fullPrompt = buildStandardPrompt(contextContent, userQuery);
+            // 渲染Prompt预览
+            renderPromptPreview(fullPrompt);
+            // 更新Prompt状态
+            updatePromptStatus(fullPrompt);
+        }
+
+        // 构建标准化RAG Prompt模板
+        function buildStandardPrompt(context, question) {
+            return `# RAG生成输入模板
+请根据以下参考文档片段，回答用户的问题，仅使用文档中的信息，不要编造内容。如果文档中没有相关信息，请回答"文档中未提及相关内容"。
+
+## 参考文档
+${context || '（无参考文档片段）'}
+
+## 用户问题
+${question}
+
+## 回答要求
+1. 语言简洁、逻辑清晰，分点回答更佳
+2. 严格基于参考文档，不添加额外信息
+3. 保留核心关键词，贴合问题语义`;
+        }
+
+        // 渲染Prompt预览（格式化高亮）
+        function renderPromptPreview(prompt) {
+            // 对Prompt关键部分进行高亮格式化
+            let formattedPrompt = prompt
+                .replace(/# RAG生成输入模板/g, '<span class="prompt-label"># RAG生成输入模板</span>')
+                .replace(/## 参考文档/g, '<span class="prompt-label">## 参考文档</span>')
+                .replace(/## 用户问题/g, '<span class="prompt-label">## 用户问题</span>')
+                .replace(/## 回答要求/g, '<span class="prompt-label">## 回答要求</span>')
+                .replace(new RegExp(userQuery, 'g'), `<span class="prompt-question">${userQuery}</span>`);
+            // 对参考片段标色
+            formattedPrompt = formattedPrompt.replace(/【参考片段\d+】/g, match => {
+                return `<span style="color:var(--success); font-weight:500;">${match}</span>`;
+            });
+            promptPreview.innerHTML = formattedPrompt;
+        }
+
+        // 更新Prompt状态（长度/片段数）
+        function updatePromptStatus(prompt) {
+            const charLength = prompt.replace(/\s/g, '').length;
+            const chunkCount = currentChunks.length;
+            let statusText = '';
+            if (chunkCount === 0) {
+                statusText = `状态：无上下文片段 | Prompt长度：${charLength}字符`;
+                promptStatus.style.color = var(--error);
+            } else {
+                statusText = `状态：已构建上下文（${chunkCount}个片段） | Prompt长度：${charLength}字符`;
+                promptStatus.style.color = var(--success);
+            }
+            promptStatus.innerHTML = statusText;
+        }
+    </script>
+</body>
+</html>

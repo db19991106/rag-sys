@@ -1,0 +1,34 @@
+# ========== 通用排除 ==========
+# Python 缓存/编译文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+
+# 敏感配置文件
+*.env
+.env.local
+.env.*
+
+# 日志文件
+*.log
+logs/
+
+# 数据/模型文件（体积大、无需版本管理）
+backend/data/models/
+backend/data/docs/
+backend/vector_db/
+data/
+
+# ========== 前端排除 ==========
+node_modules/
+dist/
+build/
+*.css.map
+
+# ========== 环境/脚本排除 ==========
+*.sh
+venv/
+*.conda
+autodl-tmp/

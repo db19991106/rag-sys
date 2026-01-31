@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极简登录页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            background: #fff;
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 420px;
+        }
+        .login-title {
+            text-align: center;
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .form-item {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .form-item input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .form-item input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        .form-item label {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+            transition: all 0.3s;
+            background: #fff;
+            padding: 0 5px;
+        }
+        .form-item input:focus ~ label,
+        .form-item input:valid ~ label {
+            top: 0;
+            font-size: 12px;
+            color: #667eea;
+        }
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-login {
+            background: #667eea;
+            color: #fff;
+        }
+        .btn-login:hover {
+            background: #556cd6;
+        }
+        .btn-reset {
+            background: #f3f4f6;
+            color: #333;
+        }
+        .btn-reset:hover {
+            background: #e5e7eb;
+        }
+        .tip {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+        .success-page {
+            display: none;
+            text-align: center;
+            color: #fff;
+            padding: 50px 30px;
+        }
+        .success-page h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        .success-page p {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .back-btn {
+            padding: 10px 30px;
+            background: #fff;
+            color: #667eea;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .back-btn:hover {
+            background: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录表单 -->
+    <div class="login-box" id="loginForm">
+        <h2 class="login-title">用户登录</h2>
+        <div class="form-item">
+            <input type="text" id="username" required>
+            <label for="username">账号/手机号</label>
+        </div>
+        <div class="form-item">
+            <input type="password" id="password" required>
+            <label for="password">密码</label>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-login" onclick="loginCheck()">登录</button>
+            <button class="btn btn-reset" onclick="resetForm()">重置</button>
+        </div>
+        <p class="tip">测试账号：admin | 测试密码：123456</p>
+    </div>
+
+    <!-- 登录成功页面 -->
+    <div class="success-page" id="successPage">
+        <h2>登录成功！</h2>
+        <p>欢迎进入系统，正在为您跳转...</p>
+        <a href="javascript:backLogin()" class="back-btn">返回登录页</a>
+    </div>
+
+    <script>
+        // 登录验证与跳转
+        function loginCheck() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            // 模拟验证（测试账号admin/123456）
+            if (username === 'admin' && password === '123456') {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('successPage').style.display = 'block';
+                // 模拟3秒后跳转到其他页面（可替换为真实地址）
+                setTimeout(() => {
+                    window.location.href = 'https://www.baidu.com'; // 示例跳转地址
+                }, 3000);
+            } else {
+                alert('账号或密码错误，请重试！');
+            }
+        }
+        // 重置表单
+        function resetForm() {
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+        // 返回登录页
+        function backLogin() {
+            document.getElementById('successPage').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            resetForm();
+        }
+    </script>
+</body>
+</html>
