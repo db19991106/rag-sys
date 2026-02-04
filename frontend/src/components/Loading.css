@@ -1,0 +1,37 @@
+/* Loading States */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-8);
+  color: var(--text-tertiary);
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner i {
+  color: var(--accent-primary);
+}
+
+.loading-sm .loading-spinner {
+  font-size: 16px;
+}
+
+.loading-md .loading-spinner {
+  font-size: 24px;
+}
+
+.loading-lg .loading-spinner {
+  font-size: 32px;
+}
+
+.loading-text {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}

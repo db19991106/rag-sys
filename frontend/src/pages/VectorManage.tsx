@@ -55,7 +55,7 @@ const VectorManage: React.FC = () => {
     }
   };
 
-  const handleDeleteChunk = async (vectorId: string, chunkNum: number, documentId: string) => {
+  const handleDeleteChunk = async (vectorId: string, chunkNum: number, _documentId: string) => {
     if (!confirm(`确定要从向量库中删除片段 #${chunkNum} 吗？\n\n此操作不可恢复！`)) {
       return;
     }
@@ -191,7 +191,7 @@ const VectorManage: React.FC = () => {
                         <span>向量片段列表 ({doc.chunks.length})</span>
                       </div>
                       <div className="chunks-list">
-                        {doc.chunks.map((chunk, index) => (
+                        {doc.chunks.map((chunk) => (
                           <div key={chunk.vector_id} className="chunk-item">
                             <div className="chunk-header">
                               <div className="chunk-num">

@@ -32,3 +32,24 @@ build/
 venv/
 *.conda
 autodl-tmp/
+
+# 测试输出文件
+output/
+*.json
+*.md
+!README.md
+!DEPLOYMENT.md
+!USER_MANUAL.md
+!MAINTENANCE_GUIDE.md
+!CHUNKING_GUIDE.md
+
+# 前端构建输出
+frontend/dist/
+frontend/build/
+
+# IDE 配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

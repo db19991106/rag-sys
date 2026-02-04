@@ -40,9 +40,18 @@ scipy==1.14.1
 aiofiles==24.1.0
 python-dotenv==1.0.1
 
+# 文档解析增强
+tqdm==4.66.4
+transformers==4.46.1
+html2text==2024.2.26
+python-pptx==0.6.23
+openpyxl==3.1.5
+pandas==2.2.2
+
 # 认证和安全
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
+cryptography==42.0.5
 
 # RAGFlow 风格切分功能
 tiktoken>=0.5.0  # 精确的 Token 计算

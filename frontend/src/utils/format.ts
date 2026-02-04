@@ -5,15 +5,35 @@ export function formatFileSize(bytes: number): string {
   else return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
 }
 
-// 格式化时间
-export function formatTime(date: Date): string {
-  const y = date.getFullYear();
-  const m = (date.getMonth() + 1).toString().padStart(2, '0');
-  const d = date.getDate().toString().padStart(2, '0');
-  const h = date.getHours().toString().padStart(2, '0');
-  const min = date.getMinutes().toString().padStart(2, '0');
-  const s = date.getSeconds().toString().padStart(2, '0');
-  return `${y}-${m}-${d} ${h}:${min}:${s}`;
+/**
+ * XSS防护 - 转义HTML特殊字符
+ * 防止XSS攻击，当需要渲染用户输入内容时必须使用此函数
+ */
+export function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/**
+ * 安全地渲染Markdown内容
+ * 防止XSS攻击同时保留Markdown格式
+ */
+export function safeRenderMarkdown(content: string): string {
+  // 先转义HTML特殊字符
+  const escaped = escapeHtml(content);
+  
+  // 然后允许安全的Markdown语法（代码块、粗体、斜体等）
+  // 注意：这里只实现基本的Markdown语法，不直接渲染HTML标签
+  return escaped
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+    .replace(/\n/g, '<br>');
 }
 
 // 提取关键词
@@ -27,11 +47,22 @@ export function extractKeywords(query: string): string[] {
     .slice(0, 5);
 }
 
-// 高亮匹配关键词
+/**
+ * 安全地高亮匹配关键词
+ * 防止XSS攻击
+ */
 export function highlightContent(content: string, keywords: string[]): string {
-  if (keywords.length === 0) return content;
-  const reg = new RegExp(`(${keywords.join('|')})`, 'g');
-  return content.replace(reg, '<span class="highlight">$1</span>');
+  if (keywords.length === 0) return escapeHtml(content);
+  
+  // 先转义内容防止XSS
+  const escapedContent = escapeHtml(content);
+  
+  // 转义关键词中的特殊字符
+  const escapedKeywords = keywords.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  
+  // 高亮匹配的关键词
+  const reg = new RegExp(`(${escapedKeywords.join('|')})`, 'g');
+  return escapedContent.replace(reg, '<span class="highlight">$1</span>');
 }
 
 // 获取相似度分数样式类

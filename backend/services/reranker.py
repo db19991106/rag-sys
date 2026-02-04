@@ -256,9 +256,23 @@ class RerankerManager:
             if reranker_type == "none":
                 self.reranker = NoReranker()
             elif reranker_type == "bge":
-                self.reranker = BGEReranker(model_name or "BAAI/bge-reranker-v2-m3", device)
+                # 提供多种BGE模型选项
+                if not model_name:
+                    # 根据设备选择合适的模型
+                    if "cuda" in device:
+                        model_name = "BAAI/bge-reranker-v2-m3"  # 更大的模型
+                    else:
+                        model_name = "BAAI/bge-reranker-v2-m3"  # 平衡性能和效果
+                self.reranker = BGEReranker(model_name, device)
             elif reranker_type == "cross-encoder":
-                self.reranker = CrossEncoderReranker(model_name or "cross-encoder/ms-marco-MiniLM-L-6-v2", device)
+                # 提供多种CrossEncoder模型选项
+                if not model_name:
+                    # 根据设备选择合适的模型
+                    if "cuda" in device:
+                        model_name = "cross-encoder/ms-marco-MiniLM-L-12-v2"  # 更大的模型
+                    else:
+                        model_name = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # 更快的模型
+                self.reranker = CrossEncoderReranker(model_name, device)
             else:
                 logger.warning(f"未知重排序器类型: {reranker_type}，使用无重排序模式")
                 self.reranker = NoReranker()
@@ -288,8 +302,15 @@ class RerankerManager:
             return results
 
         try:
+            import time
+            start_time = time.time()
+            
             # 提取文档内容
             documents = [r.content for r in results]
+            
+            # 限制文档长度，避免处理过长的文档
+            max_doc_length = 1000  # 最大文档长度
+            documents = [doc[:max_doc_length] for doc in documents]
             
             # 执行重排序
             reranked_indices = self.reranker.rerank(query, documents, self.reranker_top_k)
@@ -304,11 +325,19 @@ class RerankerManager:
                 
                 # 复制结果并更新相似度分数
                 result = results[original_idx]
-                # 可以选择更新相似度分数，或者保留原始分数
-                # result.similarity = score
+                # 更新相似度分数为排序分数，提高后续处理的准确性
+                result.similarity = score
                 reranked_results.append(result)
             
-            logger.info(f"重排序完成: {len(results)} -> {len(reranked_results)} 个结果")
+            # 如果重排序后结果太少，补充原始结果
+            if len(reranked_results) < min(self.reranker_top_k, 5):
+                # 收集未被选中的原始结果
+                selected_indices = {idx for idx, _ in reranked_indices}
+                supplementary_results = [r for i, r in enumerate(results) if i not in selected_indices][:5 - len(reranked_results)]
+                reranked_results.extend(supplementary_results)
+            
+            rerank_time = time.time() - start_time
+            logger.info(f"重排序完成: {len(results)} -> {len(reranked_results)} 个结果，耗时: {rerank_time:.4f}s")
             
             return reranked_results
 

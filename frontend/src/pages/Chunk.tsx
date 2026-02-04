@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppData } from '../contexts/AppDataContext';
 import { chunkingApi, documentApi, retrievalApi } from '../services/api';
-import type { Chunk, ChunkConfig, ChunkTemplate } from '../types';
+import type { Chunk, ChunkConfig } from '../types';
 import './Chunk.css';
 
 const Chunk: React.FC = () => {
   const navigate = useNavigate();
-  const { selectedDocument, setSelectedDocument, setChunks, chunks, chunkTemplates, addChunkTemplate, updateChunkTemplate, deleteChunkTemplate, exportChunkTemplate, documents, addDocuments, batchDeleteDocuments } = useAppData();
+  const { selectedDocument, setSelectedDocument, setChunks, chunks, documents, addDocuments, batchDeleteDocuments } = useAppData();
 
   const [config, setConfig] = useState<ChunkConfig>({
-    type: 'naive',
+    type: 'intelligent',
     chunkTokenSize: 512,
     delimiters: ['\n', '。', '；', '！', '？'],
     childrenDelimiters: [],
@@ -18,39 +18,28 @@ const Chunk: React.FC = () => {
     overlappedPercent: 0.1,
     tableContextSize: 0,
     imageContextSize: 0,
-    // 兼容旧版本
     length: 500,
     overlap: 50,
     customRule: ''
   });
 
-  // 相似度阈值配置
   const [similarityThreshold, setSimilarityThreshold] = useState(0.7);
-
   const [docContent, setDocContent] = useState('');
   const [selectedChunks, setSelectedChunks] = useState<Set<string>>(new Set());
-  const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [showQualityModal, setShowQualityModal] = useState(false);
-  const [showSuggestionModal, setShowSuggestionModal] = useState(false);
   const [showOriginalDocModal, setShowOriginalDocModal] = useState(false);
   const [showSimilarModal, setShowSimilarModal] = useState(false);
-  const [templateName, setTemplateName] = useState('');
-  const [editingTemplate, setEditingTemplate] = useState<ChunkTemplate | null>(null);
-  const [previewTemplate, setPreviewTemplate] = useState<ChunkTemplate | null>(null);
-  const [qualityMetrics, setQualityMetrics] = useState<any>(null);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [similarChunks, setSimilarChunks] = useState<any[]>([]);
   const [currentSimilarChunkId, setCurrentSimilarChunkId] = useState<string>('');
   const [currentSimilarChunkContent, setCurrentSimilarChunkContent] = useState<string>('');
   const [showDocSelector, setShowDocSelector] = useState(false);
+  const [expandedChunks, setExpandedChunks] = useState<Set<string>>(new Set());
 
-  // 加载文档列表
   useEffect(() => {
     const loadDocuments = async () => {
       try {
         const docs = await documentApi.list();
         if (docs) {
-          const currentDocIds = documents.map(d => d.id as number);
+          const currentDocIds = documents.map(d => String(d.id));
           if (currentDocIds.length > 0) {
             batchDeleteDocuments(currentDocIds);
           }
@@ -82,7 +71,6 @@ const Chunk: React.FC = () => {
     const loadDocumentContent = async () => {
       try {
         setDocContent(`# ${selectedDocument.name}\n\n加载中...`);
-
         const contentResponse = await documentApi.getContent(String(selectedDocument.id));
         if (contentResponse) {
           setDocContent(contentResponse.content);
@@ -105,7 +93,6 @@ const Chunk: React.FC = () => {
     }
 
     try {
-      // 转换配置格式以匹配后端API
       const backendConfig = {
         type: config.type,
         chunk_token_size: config.chunkTokenSize,
@@ -115,13 +102,12 @@ const Chunk: React.FC = () => {
         overlapped_percent: config.overlappedPercent,
         table_context_size: config.tableContextSize,
         image_context_size: config.imageContextSize,
-        // 兼容旧版本
         length: config.length,
         overlap: config.overlap,
         custom_rule: config.customRule
       };
 
-      const response = await chunkingApi.split(String(selectedDocument.id), backendConfig);
+      const response = await chunkingApi.split(String(selectedDocument.id), backendConfig as any);
 
       const newChunks: Chunk[] = response.chunks.map(chunk => ({
         id: chunk.id,
@@ -132,10 +118,19 @@ const Chunk: React.FC = () => {
 
       setChunks(newChunks);
       setSelectedChunks(new Set());
-      alert(`切分完成!共生成 ${newChunks.length} 个片段`);
+      
+      try {
+        console.log('开始自动向量化...');
+        const embedResponse = await chunkingApi.embed(String(selectedDocument.id));
+        console.log('自动向量化完成:', embedResponse);
+        alert(`✅ 切分完成！共生成 ${newChunks.length} 个片段，并已自动向量化完成，现在可以用于问答了。`);
+      } catch (embedError) {
+        console.error('自动向量化失败:', embedError);
+        alert(`⚠️ 切分完成！共生成 ${newChunks.length} 个片段，但自动向量化失败。\n\n请手动点击"向量化"按钮完成向量化，否则文档无法用于问答。`);
+      }
     } catch (error) {
       console.error('切分失败:', error);
-      alert(`切分失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      alert(`❌ 切分失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
   };
 
@@ -145,7 +140,7 @@ const Chunk: React.FC = () => {
         chunkId,
         chunkContent,
         similarityThreshold,
-        5 // 返回前5个相似片段
+        5
       );
 
       setCurrentSimilarChunkId(chunkId);
@@ -154,7 +149,7 @@ const Chunk: React.FC = () => {
       setShowSimilarModal(true);
     } catch (error) {
       console.error('查找相似片段失败:', error);
-      alert(`查找相似片段失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      alert(`❌ 查找相似片段失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
   };
 
@@ -224,16 +219,12 @@ const Chunk: React.FC = () => {
 
     const mergedChunk: Chunk = {
       id: `merged_${Date.now()}`,
-      document_id: selectedChunksList[0].document_id,
       num: Math.min(...selectedChunksList.map(c => c.num)),
       content: mergedContent,
-      length: mergedContent.length,
-      embedding_status: 'pending'
+      length: mergedContent.length
     };
 
-    // 删除选中的片段
     setChunks(chunks.filter(c => !selectedChunks.has(c.id)));
-    // 添加合并后的片段
     setChunks([...chunks.filter(c => !selectedChunks.has(c.id)), mergedChunk]);
     setSelectedChunks(new Set());
 
@@ -262,73 +253,14 @@ const Chunk: React.FC = () => {
     }
   };
 
-  const handleEvaluateQuality = () => {
-    if (chunks.length === 0) {
-      alert('请先执行切分');
-      return;
+  const handleToggleExpand = (chunkId: string) => {
+    const newExpandedChunks = new Set(expandedChunks);
+    if (newExpandedChunks.has(chunkId)) {
+      newExpandedChunks.delete(chunkId);
+    } else {
+      newExpandedChunks.add(chunkId);
     }
-
-    const totalChunks = chunks.length;
-    const avgLength = chunks.reduce((sum, c) => sum + c.length, 0) / totalChunks;
-    const variance = chunks.reduce((sum, c) => sum + Math.pow(c.length - avgLength, 2), 0) / totalChunks;
-    const stdDev = Math.sqrt(variance);
-
-    const lengthDistribution = {
-      tooShort: chunks.filter(c => c.length < 100).length,
-      short: chunks.filter(c => c.length >= 100 && c.length < 300).length,
-      optimal: chunks.filter(c => c.length >= 300 && c.length < 800).length,
-      long: chunks.filter(c => c.length >= 800).length,
-      tooLong: chunks.filter(c => c.length >= 1500).length
-    };
-
-    setQualityMetrics({
-      qualityScore: Math.max(0, Math.min(100, 100 - stdDev / 10 - lengthDistribution.tooShort * 2 - lengthDistribution.tooLong * 2)).toFixed(1),
-      totalChunks,
-      avgLength: Math.round(avgLength),
-      stdDev: Math.round(stdDev),
-      lengthVariance: Math.round(variance),
-      lengthDistribution,
-      overlapRatio: config.overlappedPercent * 100
-    });
-    setShowQualityModal(true);
-  };
-
-  const handleGenerateSuggestions = () => {
-    const suggestions = [
-      { title: '增大chunk大小', description: '当前平均长度偏小，建议增大chunk_token_size到512-1024' },
-      { title: '使用段落切分', description: '文档结构清晰，建议使用paragraph切分方式' },
-      { title: '启用重叠', description: '建议设置overlappedPercent为0.1，避免信息丢失' }
-    ];
-    setSuggestions(suggestions);
-    setShowSuggestionModal(true);
-  };
-
-  const handleSaveTemplate = () => {
-    if (!templateName.trim()) {
-      alert('请输入模板名称');
-      return;
-    }
-    const newTemplate: ChunkTemplate = {
-      id: Date.now().toString(),
-      name: templateName.trim(),
-      config: { ...config },
-      createTime: new Date().toLocaleString('zh-CN')
-    };
-    addChunkTemplate(newTemplate);
-    setTemplateName('');
-    setShowTemplateModal(false);
-    alert('模板保存成功!');
-  };
-
-  const handleLoadTemplate = (template: ChunkTemplate) => {
-    setConfig(template.config);
-    alert(`已应用模板: ${template.name}`);
-  };
-
-  const handleDeleteTemplate = (templateId: string) => {
-    if (confirm('确定要删除此模板吗?')) {
-      deleteChunkTemplate(templateId);
-    }
+    setExpandedChunks(newExpandedChunks);
   };
 
   if (!selectedDocument) {
@@ -367,7 +299,6 @@ const Chunk: React.FC = () => {
         </h1>
       </div>
 
-      {/* 切分策略配置 */}
       <div className="card">
         <div className="card-header">
           <h3 className="card-title">
@@ -389,7 +320,6 @@ const Chunk: React.FC = () => {
         </div>
         <div className="card-body">
           <div className="chunk-config-grid">
-            {/* 切分方式选择 */}
             <div className="config-card config-card-full">
               <div className="config-card-header">
                 <i className="fas fa-th-list"></i>
@@ -402,6 +332,8 @@ const Chunk: React.FC = () => {
               >
                 <optgroup label="基础切分">
                   <option value="naive">📝 朴素切分（推荐）</option>
+                  <option value="intelligent">🤖 智能切分</option>
+                  <option value="enhanced">🚀 增强型切分</option>
                   <option value="char">📝 按字符切分</option>
                   <option value="sentence">💬 按句子切分</option>
                   <option value="paragraph">📄 按段落切分</option>
@@ -419,7 +351,6 @@ const Chunk: React.FC = () => {
               </select>
             </div>
 
-            {/* Token数量 */}
             <div className="config-card">
               <div className="config-card-header">
                 <i className="fas fa-ruler-horizontal"></i>
@@ -437,7 +368,6 @@ const Chunk: React.FC = () => {
               <div className="config-hint">tokens</div>
             </div>
 
-            {/* 重叠百分比 */}
             <div className="config-card">
               <div className="config-card-header">
                 <i className="fas fa-layer-group"></i>
@@ -455,7 +385,6 @@ const Chunk: React.FC = () => {
               <div className="config-hint">%</div>
             </div>
 
-            {/* 主分隔符 */}
             <div className="config-card config-card-full">
               <div className="config-card-header">
                 <i className="fas fa-code"></i>
@@ -471,7 +400,6 @@ const Chunk: React.FC = () => {
               <div className="config-hint">多个分隔符用逗号分隔</div>
             </div>
 
-            {/* 子分隔符 */}
             <div className="config-card config-card-full">
               <div className="config-card-header">
                 <i className="fas fa-code-branch"></i>
@@ -499,7 +427,6 @@ const Chunk: React.FC = () => {
               </div>
             </div>
 
-            {/* 相似度阈值 */}
             <div className="config-card">
               <div className="config-card-header">
                 <i className="fas fa-chart-line"></i>
@@ -518,7 +445,6 @@ const Chunk: React.FC = () => {
               <div className="config-hint">0-1</div>
             </div>
 
-            {/* 表格上下文 */}
             {config.type === 'table' && (
               <div className="config-card">
                 <div className="config-card-header">
@@ -538,7 +464,6 @@ const Chunk: React.FC = () => {
               </div>
             )}
 
-            {/* 图片上下文 */}
             {config.type === 'picture' && (
               <div className="config-card">
                 <div className="config-card-header">
@@ -569,12 +494,6 @@ const Chunk: React.FC = () => {
               </button>
             </div>
             <div className="action-bar-right">
-              <button className="btn btn-icon-only" onClick={() => setShowTemplateModal(true)} title="保存模板">
-                <i className="fas fa-save"></i>
-              </button>
-              <button className="btn btn-icon-only" onClick={handleGenerateSuggestions} title="智能建议">
-                <i className="fas fa-lightbulb"></i>
-              </button>
               <button className="btn btn-icon-only" onClick={() => setShowOriginalDocModal(true)} title="查看原文档">
                 <i className="fas fa-file-alt"></i>
               </button>
@@ -583,7 +502,6 @@ const Chunk: React.FC = () => {
         </div>
       </div>
 
-      {/* 切分结果 */}
       <div className="card">
         <div className="card-header">
           <h3 className="card-title">
@@ -592,13 +510,6 @@ const Chunk: React.FC = () => {
               <span className="badge badge-primary">{chunks.length}</span>
             )}
           </h3>
-          <div className="header-actions">
-            {chunks.length > 0 && (
-              <button className="btn btn-sm btn-outline-primary" onClick={handleEvaluateQuality}>
-                <i className="fas fa-chart-pie"></i> 质量评估
-              </button>
-            )}
-          </div>
         </div>
         <div className="card-body">
           <div className="toolbar">
@@ -648,8 +559,15 @@ const Chunk: React.FC = () => {
                     </label>
                     <span className="chunk-number">#{chunk.num}</span>
                     <span className="chunk-length">{chunk.length} 字符</span>
+                    <button 
+                      className="btn btn-sm btn-outline-info"
+                      onClick={() => handleToggleExpand(chunk.id)}
+                      title={expandedChunks.has(chunk.id) ? "收起" : "展开"}
+                    >
+                      <i className={`fas ${expandedChunks.has(chunk.id) ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                    </button>
                   </div>
-                  <div className="chunk-card-body">
+                  <div className={`chunk-card-body ${expandedChunks.has(chunk.id) ? 'expanded' : ''}`}>
                     <div className="chunk-content">
                       {chunk.content}
                     </div>
@@ -670,42 +588,6 @@ const Chunk: React.FC = () => {
         </div>
       </div>
 
-      {/* 模板保存模态框 */}
-      {showTemplateModal && (
-        <div className="modal-mask" onClick={() => setShowTemplateModal(false)}>
-          <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-title">
-              <span>保存切分模板</span>
-              <button className="modal-close" onClick={() => setShowTemplateModal(false)}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="modal-body">
-              <label className="form-label" htmlFor="templateName">
-                模板名称
-              </label>
-              <input
-                type="text"
-                className="form-input"
-                id="templateName"
-                value={templateName}
-                onChange={e => setTemplateName(e.target.value)}
-                placeholder="请输入模板名称"
-              />
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-default" onClick={() => setShowTemplateModal(false)}>
-                取消
-              </button>
-              <button className="btn btn-primary" onClick={handleSaveTemplate}>
-                <i className="fas fa-save"></i> 保存
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 相似片段展示模态框 */}
       {showSimilarModal && (
         <div className="modal-mask modal-large" onClick={() => setShowSimilarModal(false)}>
           <div className="modal-box modal-large-box" onClick={e => e.stopPropagation()}>
@@ -718,7 +600,6 @@ const Chunk: React.FC = () => {
               </button>
             </div>
             <div className="modal-body">
-              {/* 相似度阈值控制 */}
               <div className="similar-threshold-control" style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <label style={{ fontWeight: '500', color: '#333', marginBottom: '0' }}>
                   <i className="fas fa-chart-line" style={{ marginRight: '5px' }}></i>
@@ -779,7 +660,6 @@ const Chunk: React.FC = () => {
         </div>
       )}
 
-      {/* 原文档预览模态框 */}
       {showOriginalDocModal && (
         <div className="modal-mask modal-large" onClick={() => setShowOriginalDocModal(false)}>
           <div className="modal-box modal-large-box" onClick={e => e.stopPropagation()}>
@@ -805,92 +685,6 @@ const Chunk: React.FC = () => {
         </div>
       )}
 
-      {/* 智能建议模态框 */}
-      {showSuggestionModal && suggestions.length > 0 && (
-        <div className="modal-mask" onClick={() => setShowSuggestionModal(false)}>
-          <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-title">
-              <span>
-                <i className="fas fa-lightbulb"></i> 智能建议
-              </span>
-              <button className="modal-close" onClick={() => setShowSuggestionModal(false)}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="suggestions-list">
-                {suggestions.map((suggestion, index) => (
-                  <div key={index} className="suggestion-item">
-                    <div className="suggestion-icon">
-                      <i className="fas fa-lightbulb"></i>
-                    </div>
-                    <div className="suggestion-content">
-                      <h4>{suggestion.title}</h4>
-                      <p>{suggestion.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-default" onClick={() => setShowSuggestionModal(false)}>
-                关闭
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 质量评估模态框 */}
-      {showQualityModal && qualityMetrics && (
-        <div className="modal-mask" onClick={() => setShowQualityModal(false)}>
-          <div className="modal-box modal-large" onClick={e => e.stopPropagation()}>
-            <div className="modal-title">
-              <span>
-                <i className="fas fa-chart-pie"></i> 切分质量评估
-              </span>
-              <button className="modal-close" onClick={() => setShowQualityModal(false)}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="quality-overview">
-                <div className="quality-score-card">
-                  <div className="score-ring">
-                    <div className="score-value">{qualityMetrics.qualityScore}</div>
-                    <div className="score-label">质量评分</div>
-                  </div>
-                </div>
-                <div className="quality-details">
-                  <div className="detail-item">
-                    <span className="detail-label">片段总数</span>
-                    <span className="detail-value">{qualityMetrics.totalChunks}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">平均长度</span>
-                    <span className="detail-value">{qualityMetrics.avgLength} 字符</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">标准差</span>
-                    <span className="detail-value">{qualityMetrics.stdDev}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">重叠率</span>
-                    <span className="detail-value">{qualityMetrics.overlapRatio}%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-default" onClick={() => setShowQualityModal(false)}>
-                关闭
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 文档选择器 */}
       {showDocSelector && (
         <div className="modal-mask" onClick={() => setShowDocSelector(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
@@ -942,7 +736,6 @@ const Chunk: React.FC = () => {
   );
 };
 
-// 辅助函数：相似度徽章样式
 function similarityBadgeClass(similarity: number): string {
   if (similarity >= 0.8) return 'badge-success';
   if (similarity >= 0.6) return 'badge-warning';

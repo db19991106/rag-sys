@@ -178,7 +178,7 @@ async def initialize_reranker(
         success = reranker_manager.initialize(
             reranker_type=reranker_type,
             model_name=model_name,
-            device="cpu",
+            device="cuda",
             top_k=top_k,
             threshold=threshold
         )

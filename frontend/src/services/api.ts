@@ -1,13 +1,16 @@
 // API 客户端服务
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+// 修改点：改为 /api 前缀，通过 Vite 代理转发到后端
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // 通用请求函数
 async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  // 确保 endpoint 以 / 开头
+  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${API_BASE_URL}${normalizedEndpoint}`;
 
   const defaultOptions: RequestInit = {
     headers: {
@@ -27,7 +30,7 @@ async function request<T>(
 
 // ========== 文档管理 API ==========
 export const documentApi = {
-  // 上传文档
+  // 上传文档（注意：FormData 不需要设置 Content-Type）
   upload: async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -35,6 +38,7 @@ export const documentApi = {
     const response = await fetch(`${API_BASE_URL}/documents/upload`, {
       method: 'POST',
       body: formData,
+      // 不要手动设置 Content-Type，让浏览器自动设置（包含 boundary）
     });
 
     if (!response.ok) {
@@ -45,29 +49,25 @@ export const documentApi = {
     return response.json();
   },
 
-  // 获取文档列表
+  // 其他方法保持不变...
   list: async () => {
     return request<Document[]>('/documents/list');
   },
 
-  // 获取文档详情
   get: async (docId: string) => {
     return request<Document>(`/documents/${docId}`);
   },
 
-  // 获取文档内容
   getContent: async (docId: string) => {
     return request<{ content: string }>(`/documents/${docId}/content`);
   },
 
-  // 删除文档
   delete: async (docId: string) => {
     return request<{ success: boolean; message: string }>(`/documents/${docId}`, {
       method: 'DELETE',
     });
   },
 
-  // 批量删除文档
   batchDelete: async (docIds: string[]) => {
     return request<{ success: boolean; message: string }>('/documents/batch-delete', {
       method: 'POST',
@@ -78,7 +78,6 @@ export const documentApi = {
 
 // ========== 文档切分 API ==========
 export const chunkingApi = {
-  // 切分文档
   split: async (docId: string, config: ChunkConfig) => {
     return request<{ chunks: Chunk[]; total: number }>(`/chunking/split?doc_id=${docId}`, {
       method: 'POST',
@@ -86,7 +85,6 @@ export const chunkingApi = {
     });
   },
 
-  // 向量化片段
   embed: async (docId: string) => {
     return request<{ success: boolean; message: string }>(`/chunking/embed?doc_id=${docId}`, {
       method: 'POST',
@@ -96,7 +94,6 @@ export const chunkingApi = {
 
 // ========== 向量嵌入 API ==========
 export const embeddingApi = {
-  // 加载嵌入模型
   load: async (config: EmbeddingConfig) => {
     return request<{
       model_name: string;
@@ -110,7 +107,6 @@ export const embeddingApi = {
     });
   },
 
-  // 获取嵌入模型状态
   getStatus: async () => {
     return request<{ success: boolean; message: string; data: any }>('/embedding/status');
   },
@@ -118,7 +114,6 @@ export const embeddingApi = {
 
 // ========== 向量数据库 API ==========
 export const vectorDbApi = {
-  // 初始化向量数据库
   init: async (config: VectorDBConfig) => {
     return request<{ success: boolean; message: string }>('/vector-db/init', {
       method: 'POST',
@@ -126,7 +121,6 @@ export const vectorDbApi = {
     });
   },
 
-  // 获取向量数据库状态
   getStatus: async () => {
     return request<{
       db_type: string;
@@ -136,14 +130,12 @@ export const vectorDbApi = {
     }>('/vector-db/status');
   },
 
-  // 保存向量数据库
   save: async () => {
     return request<{ success: boolean; message: string }>('/vector-db/save', {
       method: 'POST',
     });
   },
 
-  // 获取向量库文档列表
   getDocuments: async () => {
     return request<{
       success: boolean;
@@ -156,14 +148,12 @@ export const vectorDbApi = {
     }>('/vector-db/documents');
   },
 
-  // 删除向量库文档
   deleteDocument: async (documentId: string) => {
     return request<{ success: boolean; message: string; data?: any }>(`/vector-db/documents/${documentId}`, {
       method: 'DELETE',
     });
   },
 
-  // 删除单个向量片段
   deleteChunk: async (vectorId: string) => {
     return request<{ success: boolean; message: string; data?: any }>(`/vector-db/chunks/${vectorId}`, {
       method: 'DELETE',
@@ -173,7 +163,6 @@ export const vectorDbApi = {
 
 // ========== 重排序器 API ==========
 export const rerankerApi = {
-  // 初始化重排序器
   initialize: async (params: {
     reranker_type: 'cross_encoder' | 'colbert' | 'mmr';
     model_name: string;
@@ -191,7 +180,6 @@ export const rerankerApi = {
     });
   },
 
-  // 获取重排序器状态
   getStatus: async () => {
     return request<{
       is_loaded: boolean;
@@ -205,7 +193,6 @@ export const rerankerApi = {
 
 // ========== 系统设置 API ==========
 export const settingsApi = {
-  // 获取系统设置
   get: async () => {
     return request<{
       embedding_model_type: string;
@@ -226,7 +213,6 @@ export const settingsApi = {
     }>('/settings/');
   },
 
-  // 更新系统设置
   update: async (settings: any) => {
     return request('/settings/', {
       method: 'POST',
@@ -234,7 +220,6 @@ export const settingsApi = {
     });
   },
 
-  // 重置系统设置
   reset: async () => {
     return request<{ success: boolean; message: string }>('/settings/reset', {
       method: 'POST',
@@ -244,7 +229,6 @@ export const settingsApi = {
 
 // ========== 检索 API ==========
 export const retrievalApi = {
-  // 执行检索
   search: async (query: string, config: RetrievalConfig) => {
     return request<{
       query: string;
@@ -257,7 +241,6 @@ export const retrievalApi = {
     });
   },
 
-  // 查找相似片段
   findSimilarChunks: async (chunkId: string, content: string, similarityThreshold: number, topK: number = 5) => {
     return request<{
       chunk_id: string;
@@ -277,7 +260,6 @@ export const retrievalApi = {
 
 // ========== RAG 生成 API ==========
 export const ragApi = {
-  // 生成回答
   generate: async (requestData: RAGRequest) => {
     return request<{
       query: string;
@@ -293,7 +275,6 @@ export const ragApi = {
     });
   },
 
-  // 识别意图
   recognizeIntent: async (query: string) => {
     return request<{
       intent: string;
@@ -329,10 +310,17 @@ export interface Chunk {
 }
 
 export interface ChunkConfig {
-  type: 'char' | 'sentence' | 'paragraph' | 'custom';
+  type: 'naive' | 'intelligent' | 'enhanced' | 'char' | 'sentence' | 'paragraph' | 'qa' | 'paper' | 'laws' | 'book' | 'table' | 'custom';
+  chunkTokenSize: number;
+  delimiters: string[];
+  childrenDelimiters: string[];
+  enableChildren: boolean;
+  overlappedPercent: number;
+  tableContextSize: number;
+  imageContextSize: number;
   length: number;
   overlap: number;
-  custom_rule: string;
+  customRule: string;
 }
 
 export interface EmbeddingConfig {
@@ -395,6 +383,7 @@ export interface RAGRequest {
   query: string;
   retrieval_config: RetrievalConfig;
   generation_config: GenerationConfig;
+  conversation_id?: string;  // 多轮对话ID，用于保持上下文
 }
 
 export interface VectorDocument {
@@ -415,9 +404,5 @@ export interface VectorDocument {
   document_id: string;
   document_name: string;
   chunk_count: number;
-  chunks: {
-    vector_id: string;
-    chunk_num: number;
-    content: string;
-  }[];
+  chunks: VectorChunk[];
 }

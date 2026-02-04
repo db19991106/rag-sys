@@ -1,58 +1,360 @@
-2026-01-29 21:02:35 - rag_backend - INFO - 加载了 12 个文档
-INFO:     Started server process [142390]
-INFO:     Waiting for application startup.
-2026-01-29 21:02:37 - rag_backend - INFO - 启动 RAG Backend v1.0.0
-2026-01-29 21:02:37 - rag_backend - INFO - 初始化 FAISS 索引: HNSW (维度: 768)
-2026-01-29 21:02:37 - rag_backend - INFO - FAISS 索引文件已加载: vector_db/faiss_index
-2026-01-29 21:02:37 - rag_backend - INFO - 已加载 70 条元数据
-2026-01-29 21:02:37 - rag_backend - INFO - FAISS 索引已加载: 70 个向量，70 条元数据
-2026-01-29 21:02:37 - rag_backend - INFO - 向量数据库初始化成功: VectorDBType.FAISS
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-2026-01-29 21:03:03 - rag_backend - INFO - ================================================================================
-2026-01-29 21:03:03 - rag_backend - INFO - 收到智能对话请求
-2026-01-29 21:03:03 - rag_backend - INFO - 用户查询: 测试修复后的系统
-2026-01-29 21:03:03 - rag_backend - INFO - 检索配置: top_k=3, 阈值=0.6, 算法=SimilarityAlgorithm.COSINE
-2026-01-29 21:03:03 - rag_backend - INFO - 生成配置: provider=local, model=Qwen2.5-0.5B-Instruct, temperature=0.7
-2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 开始处理查询: '测试修复后的系统'
-2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 步骤1/4: 开始检索相关文档...
-2026-01-29 21:03:03 - rag_backend - ERROR - 检索失败: 模型未加载，请先调用 load_model
-Traceback (most recent call last):
-  File "/root/autodl-tmp/rag/backend/services/retriever.py", line 33, in retrieve
-    query_vector = embedding_service.encode([query])[0]
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/autodl-tmp/rag/backend/services/embedding.py", line 271, in encode
-    raise ValueError("模型未加载，请先调用 load_model")
-ValueError: 模型未加载，请先调用 load_model
-
-2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 检索完成: 找到 0 个相关片段, 耗时 2.17ms
-2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 步骤2/4: 构建上下文...
-2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 上下文构建完成, 长度: 9 字符 (限制: 6000)
-2026-01-29 21:03:03 - rag_backend - INFO - [RAG生成] 步骤3/4: 构建 Prompt...
-2026-01-29 21:03:04 - rag_backend - INFO - [RAG生成] 步骤4/4: 使用 LLM 生成回答...
-2026-01-29 21:03:04 - rag_backend - INFO - [RAG生成] LLM 配置: provider=local, model=Qwen2.5-0.5B-Instruct
-2026-01-29 21:03:07 - rag_backend - INFO - 加载本地 LLM 模型: ./data/models/Qwen2.5-0.5B-Instruct
-`torch_dtype` is deprecated! Use `dtype` instead!
-2026-01-29 21:03:08 - rag_backend - INFO - 本地 LLM 模型加载完成，设备: cpu
-2026-01-29 21:03:20 - rag_backend - INFO - [RAG生成] 生成完成: 回答长度=355字符, 耗时 16619.56ms
-2026-01-29 21:03:20 - rag_backend - INFO - [RAG生成] 总耗时: 16622.59ms (检索: 2.17ms, 生成: 16619.56ms)
-2026-01-29 21:03:20 - rag_backend - INFO - RAG 生成完成
-2026-01-29 21:03:20 - rag_backend - INFO -   - 查询: 测试修复后的系统
-2026-01-29 21:03:20 - rag_backend - INFO -   - 检索耗时: 2.17ms
-2026-01-29 21:03:20 - rag_backend - INFO -   - 生成耗时: 16619.56ms
-2026-01-29 21:03:20 - rag_backend - INFO -   - 总耗时: 16622.59ms
-2026-01-29 21:03:20 - rag_backend - INFO -   - 检索到上下文片段数: 0
-2026-01-29 21:03:20 - rag_backend - INFO -   - 生成回答: 测试修复后的系统需要进行详细的检查和验证，以确保其功能正常，并且没有任何潜在的问题存在。这个过程通常包括以下几个步骤：
-
-1. 系统性能测试：使用各种工具和方法来评估系统的运行效率和处理能力。
-2. 应用程序测试：对应用程序进行全面的测试，以确保它们能够正确地执行用户需求。
-3. 安全性测试：对系统中的所有安全模块进行测试，以确保数据的安全性和完整性。
-4. 性能优化：通过调整配置参数、更改代码等...
-2026-01-29 21:03:20 - rag_backend - INFO - ================================================================================
-INFO:     127.0.0.1:57234 - "POST /rag/generate HTTP/1.1" 200 OK
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-2026-01-29 21:05:05 - rag_backend - INFO - 关闭应用
-2026-01-29 21:05:05 - rag_backend - INFO - FAISS 索引已保存: vector_db/faiss_index
-INFO:     Application shutdown complete.
-INFO:     Finished server process [142390]
+Smart rotating file handler created successfully for: /root/autodl-tmp/rag/logs/app.log
+Rotating logger setup complete with 2 handlers
+DEBUG: log_file = ./logs/app.log
+DEBUG: log_level = INFO
+DEBUG: Clearing existing handlers: 2
+DEBUG: Using hardcoded log file path: /root/autodl-tmp/rag/logs/app.log
+DEBUG: Smart rotating file handler created successfully
+DEBUG: Adding console handler
+DEBUG: Adding file handler
+DEBUG: Total handlers: 2
+2026-02-03 22:29:46.421 - INFO - rag_backend - 
+2026-02-03 22:29:46.421 - INFO - rag_backend - === 日志系统自检 ===
+2026-02-03 22:29:46.421 - INFO - rag_backend - 处理器数量: 2
+2026-02-03 22:29:46.421 - INFO - rag_backend - 处理器 0: StreamHandler
+2026-02-03 22:29:46.421 - INFO - rag_backend - 处理器 1: SmartRotatingFileHandler
+2026-02-03 22:29:46.421 - INFO - rag_backend -   日志文件: /root/autodl-tmp/rag/logs/app.log
+2026-02-03 22:29:46.421 - INFO - rag_backend -   目录存在: /root/autodl-tmp/rag/logs
+2026-02-03 22:29:46.421 - INFO - rag_backend -   文件可写: /root/autodl-tmp/rag/logs/app.log
+2026-02-03 22:29:46.421 - INFO - rag_backend - 日志级别: INFO
+2026-02-03 22:29:46.421 - INFO - rag_backend - 测试日志输出...
+2026-02-03 22:29:46.422 - INFO - rag_backend - 日志系统自检测试消息
+2026-02-03 22:29:46.422 - INFO - rag_backend -   测试日志输出成功
+2026-02-03 22:29:46.422 - INFO - rag_backend - 检查标准输出重定向...
+2026-02-03 22:29:46.422 - INFO - rag_backend -   标准输出重定向测试
+2026-02-03 22:29:46.422 - ERROR - rag_backend -   标准错误重定向测试
+2026-02-03 22:29:46.422 - INFO - rag_backend -   标准输出重定向成功
+2026-02-03 22:29:46.422 - INFO - rag_backend - 
+2026-02-03 22:29:46.422 - INFO - rag_backend - === 自检结果: 有效 ===
+2026-02-03 22:29:46.423 - INFO - rag_backend - 加载了 6 条状态变化日志
+2026-02-03 22:29:46.826 - INFO - rag_backend - 加载了 7 个文档
+2026-02-03 22:29:46.826 - INFO - rag_backend - 加载了版本信息: 12 个文档有版本记录
+2026-02-03 22:29:46.826 - INFO - rag_backend - 加载了 12 条更新历史记录
+2026-02-03 22:29:48.959 - ERROR - rag_backend - INFO:     Will watch for changes in these directories: ['/root/autodl-tmp/rag/backend']
+2026-02-03 22:29:48.959 - ERROR - rag_backend - INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-02-03 22:29:48.959 - ERROR - rag_backend - INFO:     Started reloader process [259656] using WatchFiles
+Smart rotating file handler created successfully for: /root/autodl-tmp/rag/logs/app.log
+Rotating logger setup complete with 2 handlers
+DEBUG: log_file = ./logs/app.log
+DEBUG: log_level = INFO
+DEBUG: Clearing existing handlers: 2
+DEBUG: Using hardcoded log file path: /root/autodl-tmp/rag/logs/app.log
+DEBUG: Smart rotating file handler created successfully
+DEBUG: Adding console handler
+DEBUG: Adding file handler
+DEBUG: Total handlers: 2
+2026-02-03 22:29:49.573 - INFO - rag_backend - 
+2026-02-03 22:29:49.573 - INFO - rag_backend - === 日志系统自检 ===
+2026-02-03 22:29:49.573 - INFO - rag_backend - 处理器数量: 2
+2026-02-03 22:29:49.573 - INFO - rag_backend - 处理器 0: StreamHandler
+2026-02-03 22:29:49.573 - INFO - rag_backend - 处理器 1: SmartRotatingFileHandler
+2026-02-03 22:29:49.573 - INFO - rag_backend -   日志文件: /root/autodl-tmp/rag/logs/app.log
+2026-02-03 22:29:49.573 - INFO - rag_backend -   目录存在: /root/autodl-tmp/rag/logs
+2026-02-03 22:29:49.574 - INFO - rag_backend -   文件可写: /root/autodl-tmp/rag/logs/app.log
+2026-02-03 22:29:49.574 - INFO - rag_backend - 日志级别: INFO
+2026-02-03 22:29:49.574 - INFO - rag_backend - 测试日志输出...
+2026-02-03 22:29:49.574 - INFO - rag_backend - 日志系统自检测试消息
+2026-02-03 22:29:49.574 - INFO - rag_backend -   测试日志输出成功
+2026-02-03 22:29:49.574 - INFO - rag_backend - 检查标准输出重定向...
+2026-02-03 22:29:49.574 - INFO - rag_backend -   标准输出重定向测试
+2026-02-03 22:29:49.574 - ERROR - rag_backend -   标准错误重定向测试
+2026-02-03 22:29:49.574 - INFO - rag_backend -   标准输出重定向成功
+2026-02-03 22:29:49.574 - INFO - rag_backend - 
+2026-02-03 22:29:49.574 - INFO - rag_backend - === 自检结果: 有效 ===
+2026-02-03 22:29:49.575 - INFO - rag_backend - 加载了 6 条状态变化日志
+2026-02-03 22:29:49.972 - INFO - rag_backend - 加载了 7 个文档
+2026-02-03 22:29:49.973 - INFO - rag_backend - 加载了版本信息: 12 个文档有版本记录
+2026-02-03 22:29:49.973 - INFO - rag_backend - 加载了 12 条更新历史记录
+2026-02-03 22:29:52.060 - ERROR - rag_backend - INFO:     Started server process [259738]
+2026-02-03 22:29:52.060 - ERROR - rag_backend - INFO:     Waiting for application startup.
+2026-02-03 22:29:52.060 - INFO - rag_backend - 启动 RAG Backend v1.0.0
+2026-02-03 22:29:52.060 - INFO - rag_backend - 系统状态: application - starting
+2026-02-03 22:29:52.060 - INFO - rag_backend - 系统状态: vector_db - initializing
+2026-02-03 22:29:52.086 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-03 22:29:52.087 - INFO - rag_backend - FAISS 索引文件不存在，使用空索引
+2026-02-03 22:29:52.087 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-03 22:29:52.087 - INFO - rag_backend - 向量数据库初始化成功: VectorDBType.FAISS
+2026-02-03 22:29:52.087 - INFO - rag_backend - 系统状态: vector_db - initialized
+2026-02-03 22:29:52.087 - INFO - rag_backend - 系统状态: embedding - loading
+2026-02-03 22:29:52.087 - INFO - rag_backend - 正在加载默认嵌入模型: BAAI/bge-base-zh-v1.5
+2026-02-03 22:29:52.087 - INFO - rag_backend - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: EmbeddingModelType.BGE) 
+2026-02-03 22:29:55.930 - INFO - rag_backend - 找到本地模型目录: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-03 22:29:55.930 - INFO - rag_backend - 从本地路径加载 BGE 模型: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-03 22:29:56.096 - ERROR - rag_backend - BertModel LOAD REPORT from: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-03 22:29:56.096 - ERROR - rag_backend - Key                     | Status     |  |
+2026-02-03 22:29:56.096 - ERROR - rag_backend - ------------------------+------------+--+-
+2026-02-03 22:29:56.096 - ERROR - rag_backend - embeddings.position_ids | UNEXPECTED |  |
+2026-02-03 22:29:56.096 - ERROR - rag_backend - 
+2026-02-03 22:29:56.096 - ERROR - rag_backend - Notes:
+2026-02-03 22:29:56.096 - ERROR - rag_backend - - UNEXPECTED	:can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+2026-02-03 22:29:56.431 - INFO - rag_backend - 成功加载 BGE 模型: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-03 22:29:56.432 - INFO - rag_backend - 默认嵌入模型加载成功: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-03 22:29:56.432 - INFO - rag_backend - 系统状态: embedding - loaded
+2026-02-03 22:29:56.432 - INFO - rag_backend - 系统状态: application - running
+2026-02-03 22:29:56.433 - ERROR - rag_backend - INFO:     Application startup complete.
+2026-02-03 22:30:30.667 - INFO - rag_backend - INFO:     127.0.0.1:46242 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:30:40.693 - INFO - rag_backend - INFO:     127.0.0.1:36314 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:30:50.713 - INFO - rag_backend - INFO:     127.0.0.1:55794 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:31:00.734 - INFO - rag_backend - INFO:     127.0.0.1:38000 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:31:10.757 - INFO - rag_backend - INFO:     127.0.0.1:57360 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:31:20.781 - INFO - rag_backend - INFO:     127.0.0.1:50066 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:31:30.801 - INFO - rag_backend - INFO:     127.0.0.1:37988 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:31:40.822 - INFO - rag_backend - INFO:     127.0.0.1:36714 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:31:50.845 - INFO - rag_backend - INFO:     127.0.0.1:36144 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:32:00.864 - INFO - rag_backend - INFO:     127.0.0.1:58202 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:32:10.885 - INFO - rag_backend - INFO:     127.0.0.1:37922 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:32:20.907 - INFO - rag_backend - INFO:     127.0.0.1:45708 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:32:34.583 - INFO - rag_backend - INFO:     127.0.0.1:38388 - "GET /docs HTTP/1.1" 200 OK
+2026-02-03 22:32:41.477 - INFO - rag_backend - INFO:     127.0.0.1:57192 - "GET /api/vector_db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:32:44.448 - INFO - rag_backend - INFO:     127.0.0.1:57196 - "GET /api/vector-db/status HTTP/1.1" 404 Not Found
+2026-02-03 22:33:05.922 - INFO - rag_backend - INFO:     127.0.0.1:33834 - "GET /vector-db/status HTTP/1.1" 200 OK
+2026-02-03 22:33:30.309 - INFO - rag_backend - INFO:     127.0.0.1:50506 - "GET /api/documents/list HTTP/1.1" 404 Not Found
+2026-02-03 22:33:47.970 - INFO - rag_backend - INFO:     127.0.0.1:35910 - "GET /documents/list HTTP/1.1" 200 OK
+2026-02-03 22:33:57.208 - ERROR - rag_backend - WARNING:  WatchFiles detected changes in 'batch_embed.py'. Reloading...
+2026-02-03 22:33:57.224 - ERROR - rag_backend - INFO:     Shutting down
+2026-02-03 22:33:57.325 - ERROR - rag_backend - INFO:     Waiting for application shutdown.
+2026-02-03 22:33:57.326 - INFO - rag_backend - 关闭应用
+2026-02-03 22:33:57.326 - INFO - rag_backend - 系统状态: application - stopping
+2026-02-03 22:33:57.327 - INFO - rag_backend - FAISS 索引已保存: vector_db/faiss_index
+2026-02-03 22:33:57.328 - INFO - rag_backend - 系统状态: vector_db - saved
+2026-02-03 22:33:57.328 - INFO - rag_backend - 系统状态: application - stopped
+2026-02-03 22:33:57.328 - INFO - rag_backend - =========
+2026-02-03 22:33:57.329 - ERROR - rag_backend - INFO:     Application shutdown complete.
+2026-02-03 22:33:57.330 - ERROR - rag_backend - INFO:     Finished server process [259738]
+2026-02-03 22:33:57.991 - ERROR - rag_backend - WARNING:  WatchFiles detected changes in 'batch_embed.py'. Reloading...
+Smart rotating file handler created successfully for: /root/autodl-tmp/rag/logs/app.log
+Rotating logger setup complete with 2 handlers
+DEBUG: log_file = ./logs/app.log
+DEBUG: log_level = INFO
+DEBUG: Clearing existing handlers: 2
+DEBUG: Using hardcoded log file path: /root/autodl-tmp/rag/logs/app.log
+DEBUG: Smart rotating file handler created successfully
+DEBUG: Adding console handler
+DEBUG: Adding file handler
+DEBUG: Total handlers: 2
+2026-02-03 22:33:58.653 - INFO - rag_backend - 
+2026-02-03 22:33:58.653 - INFO - rag_backend - === 日志系统自检 ===
+2026-02-03 22:33:58.653 - INFO - rag_backend - 处理器数量: 2
+2026-02-03 22:33:58.653 - INFO - rag_backend - 处理器 0: StreamHandler
+2026-02-03 22:33:58.654 - INFO - rag_backend - 处理器 1: SmartRotatingFileHandler
+2026-02-03 22:33:58.654 - INFO - rag_backend -   日志文件: /root/autodl-tmp/rag/logs/app.log
+2026-02-03 22:33:58.654 - INFO - rag_backend -   目录存在: /root/autodl-tmp/rag/logs
+2026-02-03 22:33:58.654 - INFO - rag_backend -   文件可写: /root/autodl-tmp/rag/logs/app.log
+2026-02-03 22:33:58.654 - INFO - rag_backend - 日志级别: INFO
+2026-02-03 22:33:58.654 - INFO - rag_backend - 测试日志输出...
+2026-02-03 22:33:58.654 - INFO - rag_backend - 日志系统自检测试消息
+2026-02-03 22:33:58.654 - INFO - rag_backend -   测试日志输出成功
+2026-02-03 22:33:58.654 - INFO - rag_backend - 检查标准输出重定向...
+2026-02-03 22:33:58.654 - INFO - rag_backend -   标准输出重定向测试
+2026-02-03 22:33:58.654 - ERROR - rag_backend -   标准错误重定向测试
+2026-02-03 22:33:58.654 - INFO - rag_backend -   标准输出重定向成功
+2026-02-03 22:33:58.654 - INFO - rag_backend - 
+2026-02-03 22:33:58.654 - INFO - rag_backend - === 自检结果: 有效 ===
+2026-02-03 22:33:58.655 - INFO - rag_backend - 加载了 15 条状态变化日志
+2026-02-03 22:33:58.750 - ERROR - rag_backend - WARNING:  WatchFiles detected changes in 'batch_embed.py'. Reloading...
+Smart rotating file handler created successfully for: /root/autodl-tmp/rag/logs/app.log
+Rotating logger setup complete with 2 handlers
+DEBUG: log_file = ./logs/app.log
+DEBUG: log_level = INFO
+DEBUG: Clearing existing handlers: 2
+DEBUG: Using hardcoded log file path: /root/autodl-tmp/rag/logs/app.log
+DEBUG: Smart rotating file handler created successfully
+DEBUG: Adding console handler
+DEBUG: Adding file handler
+DEBUG: Total handlers: 2
+2026-02-03 22:33:59.446 - INFO - rag_backend - 
+2026-02-03 22:33:59.446 - INFO - rag_backend - === 日志系统自检 ===
+2026-02-03 22:33:59.447 - INFO - rag_backend - 处理器数量: 2
+2026-02-03 22:33:59.447 - INFO - rag_backend - 处理器 0: StreamHandler
+2026-02-03 22:33:59.447 - INFO - rag_backend - 处理器 1: SmartRotatingFileHandler
+2026-02-03 22:33:59.447 - INFO - rag_backend -   日志文件: /root/autodl-tmp/rag/logs/app.log
+2026-02-03 22:33:59.447 - INFO - rag_backend -   目录存在: /root/autodl-tmp/rag/logs
+2026-02-03 22:33:59.447 - INFO - rag_backend -   文件可写: /root/autodl-tmp/rag/logs/app.log
+2026-02-03 22:33:59.447 - INFO - rag_backend - 日志级别: INFO
+2026-02-03 22:33:59.447 - INFO - rag_backend - 测试日志输出...
+2026-02-03 22:33:59.447 - INFO - rag_backend - 日志系统自检测试消息
+2026-02-03 22:33:59.447 - INFO - rag_backend -   测试日志输出成功
+2026-02-03 22:33:59.447 - INFO - rag_backend - 检查标准输出重定向...
+2026-02-03 22:33:59.447 - INFO - rag_backend -   标准输出重定向测试
+2026-02-03 22:33:59.447 - ERROR - rag_backend -   标准错误重定向测试
+2026-02-03 22:33:59.447 - INFO - rag_backend -   标准输出重定向成功
+2026-02-03 22:33:59.448 - INFO - rag_backend - 
+2026-02-03 22:33:59.448 - INFO - rag_backend - === 自检结果: 有效 ===
+2026-02-03 22:33:59.449 - INFO - rag_backend - 加载了 15 条状态变化日志
+2026-02-03 22:33:59.911 - INFO - rag_backend - 加载了 7 个文档
+2026-02-03 22:33:59.912 - INFO - rag_backend - 加载了版本信息: 12 个文档有版本记录
+2026-02-03 22:33:59.912 - INFO - rag_backend - 加载了 12 条更新历史记录
+2026-02-03 22:34:02.408 - ERROR - rag_backend - INFO:     Started server process [266367]
+2026-02-03 22:34:02.409 - ERROR - rag_backend - INFO:     Waiting for application startup.
+2026-02-03 22:34:02.409 - INFO - rag_backend - 启动 RAG Backend v1.0.0
+2026-02-03 22:34:02.409 - INFO - rag_backend - 系统状态: application - starting
+2026-02-03 22:34:02.409 - INFO - rag_backend - 系统状态: vector_db - initializing
+2026-02-03 22:34:02.430 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-03 22:34:02.430 - INFO - rag_backend - FAISS 索引文件已加载: vector_db/faiss_index
+2026-02-03 22:34:02.430 - INFO - rag_backend - 已加载 0 条元数据
+2026-02-03 22:34:02.430 - INFO - rag_backend - FAISS 索引已加载: 0 个向量，0 条元数据
+2026-02-03 22:34:02.431 - WARNING - rag_backend - 加载的索引为空，重新初始化
+2026-02-03 22:34:02.431 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-03 22:34:02.431 - INFO - rag_backend - 向量数据库初始化成功: VectorDBType.FAISS
+2026-02-03 22:34:02.431 - INFO - rag_backend - 系统状态: vector_db - initialized
+2026-02-03 22:34:02.431 - INFO - rag_backend - 系统状态: embedding - loading
+2026-02-03 22:34:02.431 - INFO - rag_backend - 正在加载默认嵌入模型: BAAI/bge-base-zh-v1.5
+2026-02-03 22:34:02.431 - INFO - rag_backend - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: EmbeddingModelType.BGE) 
+2026-02-03 22:34:05.966 - INFO - rag_backend - 找到本地模型目录: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-03 22:34:05.966 - INFO - rag_backend - 从本地路径加载 BGE 模型: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-03 22:34:06.116 - ERROR - rag_backend - BertModel LOAD REPORT from: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-03 22:34:06.116 - ERROR - rag_backend - Key                     | Status     |  |
+2026-02-03 22:34:06.116 - ERROR - rag_backend - ------------------------+------------+--+-
+2026-02-03 22:34:06.116 - ERROR - rag_backend - embeddings.position_ids | UNEXPECTED |  |
+2026-02-03 22:34:06.117 - ERROR - rag_backend - 
+2026-02-03 22:34:06.117 - ERROR - rag_backend - Notes:
+2026-02-03 22:34:06.117 - ERROR - rag_backend - - UNEXPECTED	:can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+2026-02-03 22:34:06.459 - INFO - rag_backend - 成功加载 BGE 模型: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-03 22:34:06.460 - INFO - rag_backend - 默认嵌入模型加载成功: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-03 22:34:06.460 - INFO - rag_backend - 系统状态: embedding - loaded
+2026-02-03 22:34:06.460 - INFO - rag_backend - 系统状态: application - running
+2026-02-03 22:34:06.462 - ERROR - rag_backend - INFO:     Application startup complete.
+2026-02-03 22:34:26.863 - ERROR - rag_backend - WARNING:  WatchFiles detected changes in 'batch_embed.py'. Reloading...
+2026-02-03 22:34:26.922 - ERROR - rag_backend - INFO:     Shutting down
+2026-02-03 22:34:27.023 - ERROR - rag_backend - INFO:     Waiting for application shutdown.
+2026-02-03 22:34:27.023 - INFO - rag_backend - 关闭应用
+2026-02-03 22:34:27.023 - INFO - rag_backend - 系统状态: application - stopping
+2026-02-03 22:34:27.024 - INFO - rag_backend - FAISS 索引已保存: vector_db/faiss_index
+2026-02-03 22:34:27.024 - INFO - rag_backend - 系统状态: vector_db - saved
+2026-02-03 22:34:27.024 - INFO - rag_backend - 系统状态: application - stopped
+2026-02-03 22:34:27.024 - INFO - rag_backend - =========
+2026-02-03 22:34:27.024 - ERROR - rag_backend - INFO:     Application shutdown complete.
+2026-02-03 22:34:27.025 - ERROR - rag_backend - INFO:     Finished server process [266367]
+Smart rotating file handler created successfully for: /root/autodl-tmp/rag/logs/app.log
+Rotating logger setup complete with 2 handlers
+DEBUG: log_file = ./logs/app.log
+DEBUG: log_level = INFO
+DEBUG: Clearing existing handlers: 2
+DEBUG: Using hardcoded log file path: /root/autodl-tmp/rag/logs/app.log
+DEBUG: Smart rotating file handler created successfully
+DEBUG: Adding console handler
+DEBUG: Adding file handler
+DEBUG: Total handlers: 2
+2026-02-03 22:34:27.897 - INFO - rag_backend - 
+2026-02-03 22:34:27.897 - INFO - rag_backend - === 日志系统自检 ===
+2026-02-03 22:34:27.897 - INFO - rag_backend - 处理器数量: 2
+2026-02-03 22:34:27.897 - INFO - rag_backend - 处理器 0: StreamHandler
+2026-02-03 22:34:27.897 - INFO - rag_backend - 处理器 1: SmartRotatingFileHandler
+2026-02-03 22:34:27.897 - INFO - rag_backend -   日志文件: /root/autodl-tmp/rag/logs/app.log
+2026-02-03 22:34:27.897 - INFO - rag_backend -   目录存在: /root/autodl-tmp/rag/logs
+2026-02-03 22:34:27.897 - INFO - rag_backend -   文件可写: /root/autodl-tmp/rag/logs/app.log
+2026-02-03 22:34:27.897 - INFO - rag_backend - 日志级别: INFO
+2026-02-03 22:34:27.897 - INFO - rag_backend - 测试日志输出...
+2026-02-03 22:34:27.897 - INFO - rag_backend - 日志系统自检测试消息
+2026-02-03 22:34:27.897 - INFO - rag_backend -   测试日志输出成功
+2026-02-03 22:34:27.898 - INFO - rag_backend - 检查标准输出重定向...
+2026-02-03 22:34:27.898 - INFO - rag_backend -   标准输出重定向测试
+2026-02-03 22:34:27.898 - ERROR - rag_backend -   标准错误重定向测试
+2026-02-03 22:34:27.898 - INFO - rag_backend -   标准输出重定向成功
+2026-02-03 22:34:27.898 - INFO - rag_backend - 
+2026-02-03 22:34:27.898 - INFO - rag_backend - === 自检结果: 有效 ===
+2026-02-03 22:34:27.899 - INFO - rag_backend - 加载了 21 条状态变化日志
+2026-02-03 22:34:28.298 - INFO - rag_backend - 加载了 7 个文档
+2026-02-03 22:34:28.299 - INFO - rag_backend - 加载了版本信息: 12 个文档有版本记录
+2026-02-03 22:34:28.299 - INFO - rag_backend - 加载了 12 条更新历史记录
+2026-02-03 22:34:30.387 - ERROR - rag_backend - INFO:     Started server process [267214]
+2026-02-03 22:34:30.388 - ERROR - rag_backend - INFO:     Waiting for application startup.
+2026-02-03 22:34:30.388 - INFO - rag_backend - 启动 RAG Backend v1.0.0
+2026-02-03 22:34:30.388 - INFO - rag_backend - 系统状态: application - starting
+2026-02-03 22:34:30.388 - INFO - rag_backend - 系统状态: vector_db - initializing
+2026-02-03 22:34:30.414 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-03 22:34:30.414 - INFO - rag_backend - FAISS 索引文件已加载: vector_db/faiss_index
+2026-02-03 22:34:30.415 - INFO - rag_backend - 已加载 0 条元数据
+2026-02-03 22:34:30.415 - INFO - rag_backend - FAISS 索引已加载: 0 个向量，0 条元数据
+2026-02-03 22:34:30.415 - WARNING - rag_backend - 加载的索引为空，重新初始化
+2026-02-03 22:34:30.415 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-03 22:34:30.415 - INFO - rag_backend - 向量数据库初始化成功: VectorDBType.FAISS
+2026-02-03 22:34:30.415 - INFO - rag_backend - 系统状态: vector_db - initialized
+2026-02-03 22:34:30.415 - INFO - rag_backend - 系统状态: embedding - loading
+2026-02-03 22:34:30.415 - INFO - rag_backend - 正在加载默认嵌入模型: BAAI/bge-base-zh-v1.5
+2026-02-03 22:34:30.416 - INFO - rag_backend - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: EmbeddingModelType.BGE) 
+2026-02-03 22:34:34.139 - INFO - rag_backend - 找到本地模型目录: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-03 22:34:34.139 - INFO - rag_backend - 从本地路径加载 BGE 模型: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-03 22:34:34.311 - ERROR - rag_backend - BertModel LOAD REPORT from: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-03 22:34:34.311 - ERROR - rag_backend - Key                     | Status     |  |
+2026-02-03 22:34:34.311 - ERROR - rag_backend - ------------------------+------------+--+-
+2026-02-03 22:34:34.311 - ERROR - rag_backend - embeddings.position_ids | UNEXPECTED |  |
+2026-02-03 22:34:34.311 - ERROR - rag_backend - 
+2026-02-03 22:34:34.311 - ERROR - rag_backend - Notes:
+2026-02-03 22:34:34.312 - ERROR - rag_backend - - UNEXPECTED	:can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+2026-02-03 22:34:34.658 - INFO - rag_backend - 成功加载 BGE 模型: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-03 22:34:34.658 - INFO - rag_backend - 默认嵌入模型加载成功: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-03 22:34:34.659 - INFO - rag_backend - 系统状态: embedding - loaded
+2026-02-03 22:34:34.659 - INFO - rag_backend - 系统状态: application - running
+2026-02-03 22:34:34.661 - ERROR - rag_backend - INFO:     Application startup complete.
+2026-02-03 22:34:34.664 - INFO - rag_backend - INFO:     127.0.0.1:56756 - "GET /documents/list HTTP/1.1" 200 OK
+2026-02-03 22:34:35.156 - INFO - rag_backend - 片段 01 | 长度:  891 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.156 - INFO - rag_backend - 片段 02 | 长度:  805 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.156 - INFO - rag_backend - 片段 03 | 长度:  819 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.156 - INFO - rag_backend - 片段 04 | 长度:  799 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.156 - INFO - rag_backend - 片段 05 | 长度:  821 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.156 - INFO - rag_backend - 片段 06 | 长度:  838 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.157 - INFO - rag_backend - 片段 07 | 长度:  835 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.157 - INFO - rag_backend - 片段 08 | 长度:  825 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.157 - INFO - rag_backend - 片段 09 | 长度:  801 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.157 - INFO - rag_backend - 片段 10 | 长度:  790 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.157 - INFO - rag_backend - 片段 11 | 长度:  804 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.157 - INFO - rag_backend - 片段 12 | 长度:  802 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.157 - INFO - rag_backend - 片段 13 | 长度:  784 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.157 - INFO - rag_backend - 片段 14 | 长度:  807 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.157 - INFO - rag_backend - 片段 15 | 长度:  817 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.157 - INFO - rag_backend - 片段 16 | 长度:  767 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.157 - INFO - rag_backend - 片段 17 | 长度:  133 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.158 - INFO - rag_backend - ✓ 切分结果已保存: /root/autodl-tmp/rag/backend/data/json/chunks_da23ff1668ba791c5da0f6d3431ba768.json (共 17 个片段)
+2026-02-03 22:34:35.158 - INFO - rag_backend - 从文件加载已切分的片段: vector_db/chunks_da23ff1668ba791c5da0f6d3431ba768.json
+2026-02-03 22:34:35.158 - INFO - rag_backend - 成功加载 1 个片段
+2026-02-03 22:34:35.373 - INFO - rag_backend - 添加批次 1/1，数量: 1
+2026-02-03 22:34:35.373 - INFO - rag_backend - 添加 1 个向量到 FAISS (总数: 1) 
+2026-02-03 22:34:35.373 - INFO - rag_backend - FAISS 索引已保存: vector_db/faiss_index
+2026-02-03 22:34:35.374 - ERROR - rag_backend - /root/miniconda3/lib/python3.12/site-packages/pydantic/main.py:426: UserWarning: Pydantic serializer warnings:
+2026-02-03 22:34:35.374 - ERROR - rag_backend -   Expected `enum` but got `str` with value `'indexed'` - serialized value may not be as expected
+2026-02-03 22:34:35.374 - ERROR - rag_backend -   return self.__pydantic_serializer__.to_python(
+2026-02-03 22:34:35.375 - INFO - rag_backend - 文档向量化成功: da23ff1668ba791c5da0f6d3431ba768, 1 个片段
+2026-02-03 22:34:35.375 - INFO - rag_backend - INFO:     127.0.0.1:56760 - "POST /chunking/embed?doc_id=da23ff1668ba791c5da0f6d3431ba768 HTTP/1.1" 200 OK
+2026-02-03 22:34:35.883 - INFO - rag_backend - 片段 01 | 长度:  999 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.884 - INFO - rag_backend - 片段 02 | 长度: 1004 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.884 - INFO - rag_backend - 片段 03 | 长度:  922 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.884 - INFO - rag_backend - 片段 04 | 长度:  952 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.885 - INFO - rag_backend - 片段 05 | 长度:  456 | 类型: text            | 层级: ...
+2026-02-03 22:34:35.886 - INFO - rag_backend - ✓ 切分结果已保存: /root/autodl-tmp/rag/backend/data/json/chunks_b2daab3855cd81985cb7c692629cf9c6.json (共 5 个片段)
+2026-02-03 22:34:35.886 - INFO - rag_backend - 从文件加载已切分的片段: vector_db/chunks_b2daab3855cd81985cb7c692629cf9c6.json
+2026-02-03 22:34:35.887 - INFO - rag_backend - 成功加载 11 个片段
+2026-02-03 22:34:36.045 - INFO - rag_backend - 编码 11 个文本，耗时: 0.1586s, 缓存命中率: 0.00
+2026-02-03 22:34:36.046 - INFO - rag_backend - 添加批次 1/1，数量: 11
+2026-02-03 22:34:36.046 - INFO - rag_backend - 添加 11 个向量到 FAISS (总数: 12) 
+2026-02-03 22:34:36.047 - INFO - rag_backend - FAISS 索引已保存: vector_db/faiss_index
+2026-02-03 22:34:36.047 - INFO - rag_backend - 文档向量化成功: b2daab3855cd81985cb7c692629cf9c6, 11 个片段
+2026-02-03 22:34:36.048 - INFO - rag_backend - INFO:     127.0.0.1:56768 - "POST /chunking/embed?doc_id=b2daab3855cd81985cb7c692629cf9c6 HTTP/1.1" 200 OK
+2026-02-03 22:34:36.554 - INFO - rag_backend - 片段 01 | 长度: 1277 | 类型: text            | 层级: ...
+2026-02-03 22:34:36.555 - INFO - rag_backend - 片段 02 | 长度: 1135 | 类型: text            | 层级: ...
+2026-02-03 22:34:36.555 - INFO - rag_backend - 片段 03 | 长度:  967 | 类型: text            | 层级: ...
+2026-02-03 22:34:36.555 - INFO - rag_backend - 片段 04 | 长度:  774 | 类型: text            | 层级: ...
+2026-02-03 22:34:36.555 - INFO - rag_backend - 片段 05 | 长度:  767 | 类型: text            | 层级: ...
+2026-02-03 22:34:36.556 - INFO - rag_backend - ✓ 切分结果已保存: /root/autodl-tmp/rag/backend/data/json/chunks_2328842c05b1ac8945499c08a1ba57b0.json (共 5 个片段)
+2026-02-03 22:34:36.556 - INFO - rag_backend - 从文件加载已切分的片段: vector_db/chunks_2328842c05b1ac8945499c08a1ba57b0.json
+2026-02-03 22:34:36.557 - INFO - rag_backend - 成功加载 22 个片段
+2026-02-03 22:34:36.729 - INFO - rag_backend - 编码 22 个文本，耗时: 0.1726s, 缓存命中率: 0.00
+2026-02-03 22:34:36.730 - INFO - rag_backend - 添加批次 1/1，数量: 22
+2026-02-03 22:34:36.730 - INFO - rag_backend - 添加 22 个向量到 FAISS (总数: 34) 
+2026-02-03 22:34:36.731 - INFO - rag_backend - FAISS 索引已保存: vector_db/faiss_index
+2026-02-03 22:34:36.732 - INFO - rag_backend - 文档向量化成功: 2328842c05b1ac8945499c08a1ba57b0, 22 个片段
+2026-02-03 22:34:36.732 - INFO - rag_backend - INFO:     127.0.0.1:35884 - "POST /chunking/embed?doc_id=2328842c05b1ac8945499c08a1ba57b0 HTTP/1.1" 200 OK
+2026-02-03 22:34:37.568 - INFO - rag_backend - 片段 01 | 长度: 1056 | 类型: text            | 层级: ...
+2026-02-03 22:34:37.568 - INFO - rag_backend - 片段 02 | 长度:  605 | 类型: text            | 层级: ...
+2026-02-03 22:34:37.568 - INFO - rag_backend - 片段 03 | 长度:  574 | 类型: text            | 层级: ...
+2026-02-03 22:34:37.569 - INFO - rag_backend - ✓ 切分结果已保存: /root/autodl-tmp/rag/backend/data/json/chunks_74c2068ee6b0a50ca358a2a5db11b8d0.json (共 3 个片段)
+2026-02-03 22:34:37.569 - INFO - rag_backend - 从文件加载已切分的片段: vector_db/chunks_74c2068ee6b0a50ca358a2a5db11b8d0.json
+2026-02-03 22:34:37.569 - INFO - rag_backend - 成功加载 1 个片段
+2026-02-03 22:34:37.588 - INFO - rag_backend - 添加批次 1/1，数量: 1
+2026-02-03 22:34:37.588 - INFO - rag_backend - 添加 1 个向量到 FAISS (总数: 35) 
+2026-02-03 22:34:37.589 - INFO - rag_backend - FAISS 索引已保存: vector_db/faiss_index
+2026-02-03 22:34:37.590 - INFO - rag_backend - 文档向量化成功: 74c2068ee6b0a50ca358a2a5db11b8d0, 1 个片段
+2026-02-03 22:34:37.590 - INFO - rag_backend - INFO:     127.0.0.1:35894 - "POST /chunking/embed?doc_id=74c2068ee6b0a50ca358a2a5db11b8d0 HTTP/1.1" 200 OK
+2026-02-03 22:34:38.095 - INFO - rag_backend - INFO:     127.0.0.1:35896 - "GET /vector-db/status HTTP/1.1" 200 OK
+/root/miniconda3/lib/python3.12/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 3 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

@@ -1,144 +1,278 @@
+/* =========================================
+   Login Page Styles
+   Enterprise Design System
+   ========================================= */
+
 .login-container {
-  background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: var(--space-6) var(--space-6);
 }
 
 .login-box {
-  background: #fff;
-  padding: 40px 30px;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  background: var(--bg-primary);
+  padding: var(--space-8) var(--space-6);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
   width: 100%;
   max-width: 420px;
+  border: 1px solid var(--border-primary);
+  animation: slideUp var(--transition-normal) ease-out;
 }
 
 .login-title {
   text-align: center;
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 30px;
-  font-weight: 600;
+  font-size: var(--text-2xl);
+  color: var(--text-primary);
+  margin-bottom: var(--space-6);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
 }
 
+/* =========================================
+   Form Input Styles with Floating Labels
+   ========================================= */
 .login-box .form-item {
-  margin-bottom: 25px;
+  margin-bottom: var(--space-5);
   position: relative;
 }
 
 .login-box .form-item input {
   width: 100%;
-  padding: 12px 15px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  background: var(--bg-primary);
   outline: none;
-  transition: all 0.3s;
+  transition: all var(--transition-fast);
+  font-family: var(--font-sans);
+}
+
+.login-box .form-item input::placeholder {
+  color: transparent;
 }
 
 .login-box .form-item input:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+.login-box .form-item input:hover:not(:disabled) {
+  border-color: var(--border-focus);
 }
 
 .login-box .form-item label {
   position: absolute;
-  left: 15px;
+  left: var(--space-4);
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--text-tertiary);
   pointer-events: none;
-  transition: all 0.3s;
-  background: #fff;
-  padding: 0 5px;
+  transition: all var(--transition-normal);
+  background: var(--bg-primary);
+  padding: 0 var(--space-1);
+  font-size: var(--text-sm);
 }
 
 .login-box .form-item input:focus ~ label,
-.login-box .form-item input:valid ~ label {
+.login-box .form-item input:not(:placeholder-shown) ~ label {
   top: 0;
-  font-size: 12px;
-  color: #667eea;
+  font-size: var(--text-xs);
+  color: var(--accent-primary);
 }
 
+/* =========================================
+   Button Group Styles
+   ========================================= */
 .login-box .btn-group {
   display: flex;
-  gap: 15px;
-  margin-top: 10px;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 
 .btn-login {
   flex: 1;
-  padding: 12px 0;
+  padding: var(--space-3) var(--space-4);
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
   cursor: pointer;
-  transition: all 0.3s;
-  background: #667eea;
-  color: #fff;
+  transition: all var(--transition-fast);
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  font-family: var(--font-sans);
+  box-shadow: var(--shadow-sm);
 }
 
-.btn-login:hover {
-  background: #556cd6;
+.btn-login:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-login:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-login:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-reset {
   flex: 1;
-  padding: 12px 0;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
   cursor: pointer;
-  transition: all 0.3s;
-  background: #f3f4f6;
-  color: #333;
+  transition: all var(--transition-fast);
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
 }
 
-.btn-reset:hover {
-  background: #e5e7eb;
+.btn-reset:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-focus);
+}
+
+.btn-reset:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-reset:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .login-box .tip {
   text-align: center;
-  margin-top: 20px;
-  font-size: 14px;
-  color: #9ca3af;
+  margin-top: var(--space-5);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
 }
 
+/* =========================================
+   Success Page Styles
+   ========================================= */
 .success-page {
   text-align: center;
-  color: #fff;
-  padding: 50px 30px;
+  color: var(--text-primary);
+  padding: var(--space-12) var(--space-6);
+  animation: fadeIn var(--transition-normal) ease-out;
 }
 
 .success-page h2 {
-  font-size: 32px;
-  margin-bottom: 20px;
+  font-size: var(--text-3xl);
+  margin-bottom: var(--space-5);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  color: var(--success);
+}
+
+.success-page h2::before {
+  content: '✓ ';
 }
 
 .success-page p {
-  font-size: 18px;
-  margin-bottom: 30px;
+  font-size: var(--text-base);
+  margin-bottom: var(--space-8);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
 }
 
 .back-btn {
-  padding: 10px 30px;
-  background: #fff;
-  color: #667eea;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: all 0.3s;
+  padding: var(--space-2) var(--space-6);
+  background: var(--accent-primary);
+  color: var(--text-inverse);
   border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-medium);
+  transition: all var(--transition-fast);
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+  box-shadow: var(--shadow-sm);
 }
 
-.back-btn:hover {
-  background: #f3f4f6;
+.back-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.back-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* =========================================
+   Error Message Styles
+   ========================================= */
+.error-message {
+  background: var(--error-bg);
+  color: var(--error);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-4);
+  text-align: center;
+  animation: shake 200ms ease-in-out;
+}
+
+/* =========================================
+   Loading Spinner in Button
+   ========================================= */
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid var(--border-primary);
+  border-top-color: var(--text-inverse);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =========================================
+   Responsive Styles
+   ========================================= */
+@media (max-width: 480px) {
+  .login-container {
+    padding: var(--space-4);
+  }
+  
+  .login-box {
+    padding: var(--space-6) var(--space-4);
+  }
+  
+  .login-title {
+    font-size: var(--text-xl);
+  }
+  
+  .btn-group {
+    flex-direction: column;
+  }
 }

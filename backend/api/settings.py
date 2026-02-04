@@ -23,7 +23,7 @@ class SystemSettings(BaseModel):
     # 嵌入模型配置
     embedding_model_type: str = "bge"
     embedding_model_name: str = "BAAI/bge-base-zh-v1.5"
-    embedding_device: str = "cpu"
+    embedding_device: str = "cuda"
     embedding_batch_size: int = 32
     
     # 重排序配置
@@ -40,6 +40,14 @@ class SystemSettings(BaseModel):
     vector_db_host: Optional[str] = None
     vector_db_port: Optional[int] = None
     vector_db_collection_name: Optional[str] = None
+    
+    # 智能切分配置
+    intelligent_splitting_enabled: bool = True
+    splitting_strategy: str = "intelligent"
+    intelligent_splitting_sensitivity: float = 0.6
+    min_chunk_size: int = 100
+    max_chunk_size: int = 1000
+    special_rules_enabled: bool = True
 
 
 # 设置文件路径

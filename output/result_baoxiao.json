@@ -1,0 +1,826 @@
+{
+  "status": "success",
+  "pdf_type": "text",
+  "chunks": [
+    {
+      "chunk_id": "title_0",
+      "type": "title",
+      "content": "## 第四章 发票与凭证要求",
+      "metadata": {
+        "page": 3,
+        "element_type": "title",
+        "level": "h2"
+      }
+    },
+    {
+      "chunk_id": "text_1",
+      "type": "text",
+      "content": "2.5 培训与会议",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_2",
+      "type": "text",
+      "content": "城市类别 一线城市（北上广深） 新一线/省会 其他城市\n\n其他员工 500 350 300",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_3",
+      "type": "text",
+      "content": "外部培训：须事前提交《培训申请表》，含预算、课程大纲、预期收益",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_4",
+      "type": "text",
+      "content": "4.1 发票合规性",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_5",
+      "type": "text",
+      "content": "财务报销管理制度",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_6",
+      "type": "text",
+      "content": "会议费：需提供会议通知、议程、签到表、现场照片",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_7",
+      "type": "text",
+      "content": "注：同性两人出差应住标准间，住宿标准按人均计算；旺季（展会期间）可上浮20%",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_8",
+      "type": "text",
+      "content": "必须要素：",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "title_9",
+      "type": "title",
+      "content": "## 第三章 报销流程与审批权限",
+      "metadata": {
+        "page": 2,
+        "element_type": "title",
+        "level": "h2"
+      }
+    },
+    {
+      "chunk_id": "text_10",
+      "type": "text",
+      "content": "差旅补贴（包干制，无需发票）：",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "title_11",
+      "type": "title",
+      "content": "## 第一章 总则",
+      "metadata": {
+        "page": 0,
+        "element_type": "title",
+        "level": "h2"
+      }
+    },
+    {
+      "chunk_id": "text_12",
+      "type": "text",
+      "content": "发票抬头：公司全称（与营业执照一致），税号正确",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_13",
+      "type": "text",
+      "content": "3.1 报销流程",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_14",
+      "type": "text",
+      "content": "发票专用章：清晰完整，与开票单位一致",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_15",
+      "type": "text",
+      "content": "一线城市：180元/天（餐补120+市内交通60）",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_16",
+      "type": "text",
+      "content": "1.1 适用范围",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_17",
+      "type": "text",
+      "content": "内容明细：不得笼统开具\"办公用品\"\"礼品\"，须附销货清单（税务系统开具）",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_18",
+      "type": "text",
+      "content": "其他城市：150元/天（餐补100+市内交通50）",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_19",
+      "type": "text",
+      "content": "Step 1 整理单据：分类粘贴发票→填写《费用报销单》→关联事前申请单（如有）",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_20",
+      "type": "text",
+      "content": "全体员工因公发生的费用支出，包括差旅费、业务招待费、办公费、通讯费、培训费、会议费等。",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_21",
+      "type": "text",
+      "content": "真伪验证：财务通过税务系统查验，假发票一律退回并通报",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_22",
+      "type": "text",
+      "content": "Step 2 线上提交：拍照上传发票至费控系统（如汇联易、每刻）→OCR识别→提交审批",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_23",
+      "type": "text",
+      "content": "当天往返且公司提供午餐：补贴减半",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_24",
+      "type": "text",
+      "content": "Step 3 审批流：",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_25",
+      "type": "text",
+      "content": "宴请客户：扣除当日餐补的50%",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_26",
+      "type": "text",
+      "content": "1.2 管理原则",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_27",
+      "type": "text",
+      "content": "电子发票：须打印纸质件报销，或按财务要求上传PDF原件（重复报销风险由申请人承担）",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_28",
+      "type": "text",
+      "content": "2.2 业务招待费",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_29",
+      "type": "text",
+      "content": "申请人→直属经理（业务真实性）→部门总监（预算审核）→财务审核（票据合规性）→出纳付款",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_30",
+      "type": "text",
+      "content": "预算控制：超预算部门原则上不予报销（特殊情况需CEO特批）",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_31",
+      "type": "text",
+      "content": "4.2 附件要求",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_32",
+      "type": "text",
+      "content": "事前审批：大额支出（>5000元）须事前申请，事后审批不予报销",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_33",
+      "type": "text",
+      "content": "适用场景：宴请客户、赠送礼品、商务接待",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_34",
+      "type": "text",
+      "content": "Step 4 票据移交：审批通过后3个工作日内将纸质单据递交财务，否则驳回",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_35",
+      "type": "text",
+      "content": "差旅费：出差申请单、机票行程单、住宿水单、会议通知/邀请函",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_36",
+      "type": "text",
+      "content": "据实报销：严禁虚开发票、虚报金额，发票内容须真实反映业务实质",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_37",
+      "type": "text",
+      "content": "Step 5 付款：对公转账（供应商）或工资卡转账（个人垫付），每周二、五付款",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_38",
+      "type": "text",
+      "content": "标准：人均≤300元（含酒水），总监及以上可放宽至500元/人",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_39",
+      "type": "text",
+      "content": "招待费：招待申请单、消费水单、客户名单（注明单位、职务）",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_40",
+      "type": "text",
+      "content": "及时性：费用发生后30日内报销，跨季度发票原则上不予报销（特殊情况说明原因）",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_41",
+      "type": "text",
+      "content": "事前审批：单次>2000元需提前在OA提交《招待费申请单》",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_42",
+      "type": "text",
+      "content": "交通费：网约车需附行程单（起止地点、时间需与出差日期吻合）",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_43",
+      "type": "text",
+      "content": "3.2 审批权限矩阵",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_44",
+      "type": "text",
+      "content": "陪客人数：严格控制，原则上不超过客户人数的50%",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "title_45",
+      "type": "title",
+      "content": "## 第二章 报销标准与范围",
+      "metadata": {
+        "page": 0,
+        "element_type": "title",
+        "level": "h2"
+      }
+    },
+    {
+      "chunk_id": "text_46",
+      "type": "text",
+      "content": "礼品费：礼品清单、签收单（客户签字）",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_47",
+      "type": "text",
+      "content": "发票要求：须附水单（消费明细），仅提供定额发票需说明原因",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_48",
+      "type": "text",
+      "content": "金额区间 审批人 备注",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_49",
+      "type": "text",
+      "content": "4.3 不合规票据处理",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_50",
+      "type": "text",
+      "content": "2.1 差旅费标准（按职级区分）",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_51",
+      "type": "text",
+      "content": "≤2000元 直属经理→财务 常规报销",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_52",
+      "type": "text",
+      "content": "2.3 通讯费补贴（限额报销）",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_53",
+      "type": "text",
+      "content": "过期发票：跨年度发票（12月31日后报上年发票）原则上不受理",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_54",
+      "type": "text",
+      "content": "交通工具：",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_55",
+      "type": "text",
+      "content": "2000-5000元 直属经理→部门总监→财务 中等金额",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_56",
+      "type": "text",
+      "content": "总监及以上：实报实销（上限800元/月）",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_57",
+      "type": "text",
+      "content": "连号发票：同一单位连号发票分拆报销视为违规",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_58",
+      "type": "text",
+      "content": "5000-20000元 直属经理→部门总监→财务经理→CEO 大额支出",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_59",
+      "type": "text",
+      "content": "职级 飞机 火车 市内交通",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_60",
+      "type": "text",
+      "content": "经理级：300元/月",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_61",
+      "type": "text",
+      "content": "个人消费：与工作无关的餐饮、购物、娱乐发票不予报销",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_62",
+      "type": "text",
+      "content": ">20000元 须事前申请，按上述流程+事前审批 超预算需说明",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_63",
+      "type": "text",
+      "content": "主管及以下：150元/月",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_64",
+      "type": "text",
+      "content": "总监及以上 商务舱/头等舱 高铁商务座 实报实销（含出租车）",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_65",
+      "type": "text",
+      "content": "白条/收据：非正规发票（除政府规费、小额零星采购<500元）不予报销",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_66",
+      "type": "text",
+      "content": "3.3 借款管理",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_67",
+      "type": "text",
+      "content": "需提供运营商发票（个人名头或公司名头均可）",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_68",
+      "type": "text",
+      "content": "经理级 经济舱 高铁一等座 实报实销（优先地铁/公交）",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "title_69",
+      "type": "title",
+      "content": "## 第五章 违规处理",
+      "metadata": {
+        "page": 3,
+        "element_type": "title",
+        "level": "h2"
+      }
+    },
+    {
+      "chunk_id": "text_70",
+      "type": "text",
+      "content": "主管及以下 经济舱（6折以上需说明） 高铁二等座 地铁/公交/打车（限额200元/天）",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_71",
+      "type": "text",
+      "content": "2.4 办公费用",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_72",
+      "type": "text",
+      "content": "备用金：销售人员、项目经理可申请5000-20000元备用金，季度清理",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_73",
+      "type": "text",
+      "content": "虚报金额：追回款项，处以2倍罚款，视情节给予警告至开除处分",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_74",
+      "type": "text",
+      "content": "临时借款：因公务急需借款，须在业务完成后7日内冲销，余款退还",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_75",
+      "type": "text",
+      "content": "住宿标准（单间/标准间，单位：元/晚）：",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_76",
+      "type": "text",
+      "content": "日常办公：文具、打印纸等由行政统一采购，个人不得报销",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_77",
+      "type": "text",
+      "content": "假发票：一律辞退，涉嫌违法的移送司法机关",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_78",
+      "type": "text",
+      "content": "逾期处理：借款超3个月未还，从工资中扣回，并暂停新借款权限",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_79",
+      "type": "text",
+      "content": "书籍资料：专业书籍≤500元/本可报销，须入库登记；超500元需申请",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_80",
+      "type": "text",
+      "content": "重复报销：电子发票重复报销，系统发现后追回款项并通报批评",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_81",
+      "type": "text",
+      "content": "城市类别 一线城市（北上广深） 新一线/省会 其他城市",
+      "metadata": {
+        "page": 0,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_82",
+      "type": "text",
+      "content": "软件/会员：工作必需的专业软件、行业数据库会员，需IT审批后报销",
+      "metadata": {
+        "page": 1,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_83",
+      "type": "text",
+      "content": "超标准消费：超标部分由个人承担，超标严重（如住总统套房）需书面说明",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_84",
+      "type": "text",
+      "content": "总监及以上 800 600 500\n\n经理级 600 450 350\n\n## 第四章 发票与凭证要求\n\n2.5 培训与会议\n\n城市类别 一线城市（北上广深） 新一线/省会 其他城市\n\n其他员工 500 350 300\n\n外部培训：须事前提交《培训申请表》，含预算、课程大纲、预期收益\n\n4.1 发票合规性\n\n财务报销管理制度\n\n会议费：需提供会议通知、议程、签到表、现场照片\n\n注：同性两人出差应住标准间，住宿标准按人均计算；旺季（展会期间）可上浮20%\n\n必须要素：\n\n## 第三章 报销流程与审批权限\n\n差旅补贴（包干制，无需发票）：\n\n## 第一章 总则\n\n发票抬头：公司全称（与营业执照一致），税号正确\n\n3.1 报销流程\n\n发票专用章：清晰完整，与开票单位一致\n\n一线城市：180元/天（餐补120+市内交通60）\n\n1.1 适用范围\n\n内容明细：不得笼统开具\"办公用品\"\"礼品\"，须附销货清单（税务系统开具）\n\n其他城市：150元/天（餐补100+市内交通50）",
+      "metadata": {
+        "page": 0,
+        "element_type": "text",
+        "level": "h2"
+      }
+    },
+    {
+      "chunk_id": "text_85",
+      "type": "text",
+      "content": "Step 1 整理单据：分类粘贴发票→填写《费用报销单》→关联事前申请单（如有）\n\n全体员工因公发生的费用支出，包括差旅费、业务招待费、办公费、通讯费、培训费、会议费等。\n\n真伪验证：财务通过税务系统查验，假发票一律退回并通报\n\nStep 2 线上提交：拍照上传发票至费控系统（如汇联易、每刻）→OCR识别→提交审批\n\n当天往返且公司提供午餐：补贴减半\n\nStep 3 审批流：\n\n宴请客户：扣除当日餐补的50%\n\n1.2 管理原则\n\n电子发票：须打印纸质件报销，或按财务要求上传PDF原件（重复报销风险由申请人承担）\n\n2.2 业务招待费\n\n申请人→直属经理（业务真实性）→部门总监（预算审核）→财务审核（票据合规性）→出纳付款\n\n预算控制：超预算部门原则上不予报销（特殊情况需CEO特批）\n\n4.2 附件要求\n\n事前审批：大额支出（>5000元）须事前申请，事后审批不予报销\n\n适用场景：宴请客户、赠送礼品、商务接待",
+      "metadata": {
+        "page": 2,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_86",
+      "type": "text",
+      "content": "Step 4 票据移交：审批通过后3个工作日内将纸质单据递交财务，否则驳回\n\n差旅费：出差申请单、机票行程单、住宿水单、会议通知/邀请函\n\n据实报销：严禁虚开发票、虚报金额，发票内容须真实反映业务实质\n\nStep 5 付款：对公转账（供应商）或工资卡转账（个人垫付），每周二、五付款\n\n标准：人均≤300元（含酒水），总监及以上可放宽至500元/人\n\n招待费：招待申请单、消费水单、客户名单（注明单位、职务）\n\n及时性：费用发生后30日内报销，跨季度发票原则上不予报销（特殊情况说明原因）\n\n事前审批：单次>2000元需提前在OA提交《招待费申请单》\n\n交通费：网约车需附行程单（起止地点、时间需与出差日期吻合）\n\n3.2 审批权限矩阵\n\n陪客人数：严格控制，原则上不超过客户人数的50%\n\n## 第二章 报销标准与范围\n\n礼品费：礼品清单、签收单（客户签字）\n\n发票要求：须附水单（消费明细），仅提供定额发票需说明原因\n\n金额区间 审批人 备注",
+      "metadata": {
+        "page": 2,
+        "element_type": "text",
+        "level": "h2"
+      }
+    },
+    {
+      "chunk_id": "text_87",
+      "type": "text",
+      "content": "4.3 不合规票据处理\n\n2.1 差旅费标准（按职级区分）\n\n≤2000元 直属经理→财务 常规报销\n\n2.3 通讯费补贴（限额报销）\n\n过期发票：跨年度发票（12月31日后报上年发票）原则上不受理\n\n交通工具：\n\n2000-5000元 直属经理→部门总监→财务 中等金额\n\n总监及以上：实报实销（上限800元/月）\n\n连号发票：同一单位连号发票分拆报销视为违规\n\n5000-20000元 直属经理→部门总监→财务经理→CEO 大额支出\n\n职级 飞机 火车 市内交通\n\n经理级：300元/月\n\n个人消费：与工作无关的餐饮、购物、娱乐发票不予报销\n\n>20000元 须事前申请，按上述流程+事前审批 超预算需说明\n\n主管及以下：150元/月\n\n总监及以上 商务舱/头等舱 高铁商务座 实报实销（含出租车）\n\n白条/收据：非正规发票（除政府规费、小额零星采购<500元）不予报销\n\n3.3 借款管理\n\n需提供运营商发票（个人名头或公司名头均可）",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    },
+    {
+      "chunk_id": "text_88",
+      "type": "text",
+      "content": "经理级 经济舱 高铁一等座 实报实销（优先地铁/公交）\n\n## 第五章 违规处理\n\n主管及以下 经济舱（6折以上需说明） 高铁二等座 地铁/公交/打车（限额200元/天）\n\n2.4 办公费用\n\n备用金：销售人员、项目经理可申请5000-20000元备用金，季度清理\n\n虚报金额：追回款项，处以2倍罚款，视情节给予警告至开除处分\n\n临时借款：因公务急需借款，须在业务完成后7日内冲销，余款退还\n\n住宿标准（单间/标准间，单位：元/晚）：\n\n日常办公：文具、打印纸等由行政统一采购，个人不得报销\n\n假发票：一律辞退，涉嫌违法的移送司法机关\n\n逾期处理：借款超3个月未还，从工资中扣回，并暂停新借款权限\n\n书籍资料：专业书籍≤500元/本可报销，须入库登记；超500元需申请\n\n重复报销：电子发票重复报销，系统发现后追回款项并通报批评\n\n城市类别 一线城市（北上广深） 新一线/省会 其他城市\n\n软件/会员：工作必需的专业软件、行业数据库会员，需IT审批后报销",
+      "metadata": {
+        "page": 0,
+        "element_type": "text",
+        "level": "h2"
+      }
+    },
+    {
+      "chunk_id": "text_89",
+      "type": "text",
+      "content": "超标准消费：超标部分由个人承担，超标严重（如住总统套房）需书面说明\n\n总监及以上 800 600 500\n\n经理级 600 450 350",
+      "metadata": {
+        "page": 3,
+        "element_type": "text"
+      }
+    }
+  ],
+  "total_chunks": 90,
+  "markdown_content": "## 第四章 发票与凭证要求\n\n2.5 培训与会议\n\n城市类别 一线城市（北上广深） 新一线/省会 其他城市\n\n其他员工 500 350 300\n\n外部培训：须事前提交《培训申请表》，含预算、课程大纲、预期收益\n\n4.1 发票合规性\n\n财务报销管理制度\n\n会议费：需提供会议通知、议程、签到表、现场照片\n\n注：同性两人出差应住标准间，住宿标准按人均计算；旺季（展会期间）可上浮20%\n\n必须要素：\n\n## 第三章 报销流程与审批权限\n\n差旅补贴（包干制，无需发票）：\n\n## 第一章 总则\n\n发票抬头：公司全称（与营业执照一致），税号正确\n\n3.1 报销流程\n\n发票专用章：清晰完整，与开票单位一致\n\n一线城市：180元/天（餐补120+市内交通60）\n\n1.1 适用范围\n\n内容明细：不得笼统开具\"办公用品\"\"礼品\"，须附销货清单（税务系统开具）\n\n其他城市：150元/天（餐补100+市内交通50）\n\nStep 1 整理单据：分类粘贴发票→填写《费用报销单》→关联事前申请单（如有）\n\n全体员工因公发生的费用支出，包括差旅费、业务招待费、办公费、通讯费、培训费、会议费等。\n\n真伪验证：财务通过税务系统查验，假发票一律退回并通报\n\nStep 2 线上提交：拍照上传发票至费控系统（如汇联易、每刻）→OCR识别→提交审批\n\n当天往返且公司提供午餐：补贴减半\n\nStep 3 审批流：\n\n宴请客户：扣除当日餐补的50%\n\n1.2 管理原则\n\n电子发票：须打印纸质件报销，或按财务要求上传PDF原件（重复报销风险由申请人承担）\n\n2.2 业务招待费\n\n申请人→直属经理（业务真实性）→部门总监（预算审核）→财务审核（票据合规性）→出纳付款\n\n预算控制：超预算部门原则上不予报销（特殊情况需CEO特批）\n\n4.2 附件要求\n\n事前审批：大额支出（>5000元）须事前申请，事后审批不予报销\n\n适用场景：宴请客户、赠送礼品、商务接待\n\nStep 4 票据移交：审批通过后3个工作日内将纸质单据递交财务，否则驳回\n\n差旅费：出差申请单、机票行程单、住宿水单、会议通知/邀请函\n\n据实报销：严禁虚开发票、虚报金额，发票内容须真实反映业务实质\n\nStep 5 付款：对公转账（供应商）或工资卡转账（个人垫付），每周二、五付款\n\n标准：人均≤300元（含酒水），总监及以上可放宽至500元/人\n\n招待费：招待申请单、消费水单、客户名单（注明单位、职务）\n\n及时性：费用发生后30日内报销，跨季度发票原则上不予报销（特殊情况说明原因）\n\n事前审批：单次>2000元需提前在OA提交《招待费申请单》\n\n交通费：网约车需附行程单（起止地点、时间需与出差日期吻合）\n\n3.2 审批权限矩阵\n\n陪客人数：严格控制，原则上不超过客户人数的50%\n\n## 第二章 报销标准与范围\n\n礼品费：礼品清单、签收单（客户签字）\n\n发票要求：须附水单（消费明细），仅提供定额发票需说明原因\n\n金额区间 审批人 备注\n\n4.3 不合规票据处理\n\n2.1 差旅费标准（按职级区分）\n\n≤2000元 直属经理→财务 常规报销\n\n2.3 通讯费补贴（限额报销）\n\n过期发票：跨年度发票（12月31日后报上年发票）原则上不受理\n\n交通工具：\n\n2000-5000元 直属经理→部门总监→财务 中等金额\n\n总监及以上：实报实销（上限800元/月）\n\n连号发票：同一单位连号发票分拆报销视为违规\n\n5000-20000元 直属经理→部门总监→财务经理→CEO 大额支出\n\n职级 飞机 火车 市内交通\n\n经理级：300元/月\n\n个人消费：与工作无关的餐饮、购物、娱乐发票不予报销\n\n>20000元 须事前申请，按上述流程+事前审批 超预算需说明\n\n主管及以下：150元/月\n\n总监及以上 商务舱/头等舱 高铁商务座 实报实销（含出租车）\n\n白条/收据：非正规发票（除政府规费、小额零星采购<500元）不予报销\n\n3.3 借款管理\n\n需提供运营商发票（个人名头或公司名头均可）\n\n经理级 经济舱 高铁一等座 实报实销（优先地铁/公交）\n\n## 第五章 违规处理\n\n主管及以下 经济舱（6折以上需说明） 高铁二等座 地铁/公交/打车（限额200元/天）\n\n2.4 办公费用\n\n备用金：销售人员、项目经理可申请5000-20000元备用金，季度清理\n\n虚报金额：追回款项，处以2倍罚款，视情节给予警告至开除处分\n\n临时借款：因公务急需借款，须在业务完成后7日内冲销，余款退还\n\n住宿标准（单间/标准间，单位：元/晚）：\n\n日常办公：文具、打印纸等由行政统一采购，个人不得报销\n\n假发票：一律辞退，涉嫌违法的移送司法机关\n\n逾期处理：借款超3个月未还，从工资中扣回，并暂停新借款权限\n\n书籍资料：专业书籍≤500元/本可报销，须入库登记；超500元需申请\n\n重复报销：电子发票重复报销，系统发现后追回款项并通报批评\n\n城市类别 一线城市（北上广深） 新一线/省会 其他城市\n\n软件/会员：工作必需的专业软件、行业数据库会员，需IT审批后报销\n\n超标准消费：超标部分由个人承担，超标严重（如住总统套房）需书面说明\n\n总监及以上 800 600 500\n\n经理级 600 450 350\n\n## 第四章 发票与凭证要求\n\n2.5 培训与会议\n\n城市类别 一线城市（北上广深） 新一线/省会 其他城市\n\n其他员工 500 350 300\n\n外部培训：须事前提交《培训申请表》，含预算、课程大纲、预期收益\n\n4.1 发票合规性\n\n财务报销管理制度\n\n会议费：需提供会议通知、议程、签到表、现场照片\n\n注：同性两人出差应住标准间，住宿标准按人均计算；旺季（展会期间）可上浮20%\n\n必须要素：\n\n## 第三章 报销流程与审批权限\n\n差旅补贴（包干制，无需发票）：\n\n## 第一章 总则\n\n发票抬头：公司全称（与营业执照一致），税号正确\n\n3.1 报销流程\n\n发票专用章：清晰完整，与开票单位一致\n\n一线城市：180元/天（餐补120+市内交通60）\n\n1.1 适用范围\n\n内容明细：不得笼统开具\"办公用品\"\"礼品\"，须附销货清单（税务系统开具）\n\n其他城市：150元/天（餐补100+市内交通50）\n\nStep 1 整理单据：分类粘贴发票→填写《费用报销单》→关联事前申请单（如有）\n\n全体员工因公发生的费用支出，包括差旅费、业务招待费、办公费、通讯费、培训费、会议费等。\n\n真伪验证：财务通过税务系统查验，假发票一律退回并通报\n\nStep 2 线上提交：拍照上传发票至费控系统（如汇联易、每刻）→OCR识别→提交审批\n\n当天往返且公司提供午餐：补贴减半\n\nStep 3 审批流：\n\n宴请客户：扣除当日餐补的50%\n\n1.2 管理原则\n\n电子发票：须打印纸质件报销，或按财务要求上传PDF原件（重复报销风险由申请人承担）\n\n2.2 业务招待费\n\n申请人→直属经理（业务真实性）→部门总监（预算审核）→财务审核（票据合规性）→出纳付款\n\n预算控制：超预算部门原则上不予报销（特殊情况需CEO特批）\n\n4.2 附件要求\n\n事前审批：大额支出（>5000元）须事前申请，事后审批不予报销\n\n适用场景：宴请客户、赠送礼品、商务接待\n\nStep 4 票据移交：审批通过后3个工作日内将纸质单据递交财务，否则驳回\n\n差旅费：出差申请单、机票行程单、住宿水单、会议通知/邀请函\n\n据实报销：严禁虚开发票、虚报金额，发票内容须真实反映业务实质\n\nStep 5 付款：对公转账（供应商）或工资卡转账（个人垫付），每周二、五付款\n\n标准：人均≤300元（含酒水），总监及以上可放宽至500元/人\n\n招待费：招待申请单、消费水单、客户名单（注明单位、职务）\n\n及时性：费用发生后30日内报销，跨季度发票原则上不予报销（特殊情况说明原因）\n\n事前审批：单次>2000元需提前在OA提交《招待费申请单》\n\n交通费：网约车需附行程单（起止地点、时间需与出差日期吻合）\n\n3.2 审批权限矩阵\n\n陪客人数：严格控制，原则上不超过客户人数的50%\n\n## 第二章 报销标准与范围\n\n礼品费：礼品清单、签收单（客户签字）\n\n发票要求：须附水单（消费明细），仅提供定额发票需说明原因\n\n金额区间 审批人 备注\n\n4.3 不合规票据处理\n\n2.1 差旅费标准（按职级区分）\n\n≤2000元 直属经理→财务 常规报销\n\n2.3 通讯费补贴（限额报销）\n\n过期发票：跨年度发票（12月31日后报上年发票）原则上不受理\n\n交通工具：\n\n2000-5000元 直属经理→部门总监→财务 中等金额\n\n总监及以上：实报实销（上限800元/月）\n\n连号发票：同一单位连号发票分拆报销视为违规\n\n5000-20000元 直属经理→部门总监→财务经理→CEO 大额支出\n\n职级 飞机 火车 市内交通\n\n经理级：300元/月\n\n个人消费：与工作无关的餐饮、购物、娱乐发票不予报销\n\n>20000元 须事前申请，按上述流程+事前审批 超预算需说明\n\n主管及以下：150元/月\n\n总监及以上 商务舱/头等舱 高铁商务座 实报实销（含出租车）\n\n白条/收据：非正规发票（除政府规费、小额零星采购<500元）不予报销\n\n3.3 借款管理\n\n需提供运营商发票（个人名头或公司名头均可）\n\n经理级 经济舱 高铁一等座 实报实销（优先地铁/公交）\n\n## 第五章 违规处理\n\n主管及以下 经济舱（6折以上需说明） 高铁二等座 地铁/公交/打车（限额200元/天）\n\n2.4 办公费用\n\n备用金：销售人员、项目经理可申请5000-20000元备用金，季度清理\n\n虚报金额：追回款项，处以2倍罚款，视情节给予警告至开除处分\n\n临时借款：因公务急需借款，须在业务完成后7日内冲销，余款退还\n\n住宿标准（单间/标准间，单位：元/晚）：\n\n日常办公：文具、打印纸等由行政统一采购，个人不得报销\n\n假发票：一律辞退，涉嫌违法的移送司法机关\n\n逾期处理：借款超3个月未还，从工资中扣回，并暂停新借款权限\n\n书籍资料：专业书籍≤500元/本可报销，须入库登记；超500元需申请\n\n重复报销：电子发票重复报销，系统发现后追回款项并通报批评\n\n城市类别 一线城市（北上广深） 新一线/省会 其他城市\n\n软件/会员：工作必需的专业软件、行业数据库会员，需IT审批后报销\n\n超标准消费：超标部分由个人承担，超标严重（如住总统套房）需书面说明\n\n总监及以上 800 600 500\n\n经理级 600 450 350"
+}

@@ -23,6 +23,14 @@ interface SystemSettings {
   vector_db_host: string | null;
   vector_db_port: number | null;
   vector_db_collection_name: string | null;
+  
+  // 智能切分配置
+  intelligent_splitting_enabled?: boolean;
+  splitting_strategy?: string;
+  intelligent_splitting_sensitivity?: number;
+  min_chunk_size?: number;
+  max_chunk_size?: number;
+  special_rules_enabled?: boolean;
 }
 
 // 可用的嵌入模型列表
@@ -48,7 +56,7 @@ const Settings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<'embedding' | 'reranker' | 'vector_db'>('embedding');
+  const [activeTab, setActiveTab] = useState<'embedding' | 'reranker' | 'vector_db' | 'content_organization'>('embedding');
 
   useEffect(() => {
     loadSettings();
@@ -175,6 +183,12 @@ const Settings: React.FC = () => {
           >
             <i className="fas fa-database"></i> 向量数据库
           </button>
+          <button
+            className={`tab-btn ${activeTab === 'content_organization' ? 'active' : ''}`}
+            onClick={() => setActiveTab('content_organization')}
+          >
+            <i className="fas fa-align-left"></i> 内容组织
+          </button>
         </div>
 
         {/* 向量索引模型设置 */}
@@ -205,11 +219,7 @@ const Settings: React.FC = () => {
                     className="form-select"
                     value={settings.embedding_model_name}
                     onChange={(e) => {
-                      const selectedModel = EMBEDDING_MODELS.find(m => m.name === e.target.value);
                       setSettings({ ...settings, embedding_model_name: e.target.value });
-                      if (selectedModel) {
-                        setVectorDimension(selectedModel.dimension);
-                      }
                     }}
                   >
                     {EMBEDDING_MODELS.map((model) => (
@@ -415,6 +425,108 @@ const Settings: React.FC = () => {
                       />
                     </div>
                   )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 内容组织配置 */}
+        {activeTab === 'content_organization' && (
+          <div className="settings-panel">
+            <div className="panel-header">
+              <h3>内容组织配置</h3>
+              <p>配置内容切分策略和智能切分参数</p>
+            </div>
+            <div className="panel-body">
+              <div className="form-section">
+                <h4>智能切分设置</h4>
+                <div className="form-item">
+                  <label className="form-label">启用智能切分</label>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={settings.intelligent_splitting_enabled}
+                      onChange={(e) => setSettings({ ...settings, intelligent_splitting_enabled: e.target.checked })}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <small className="form-hint">启用后会根据文件类型自动选择切分策略</small>
+                </div>
+                
+                <div className="form-item">
+                  <label className="form-label">切分策略</label>
+                  <select
+                    className="form-select"
+                    value={settings.splitting_strategy}
+                    onChange={(e) => setSettings({ ...settings, splitting_strategy: e.target.value })}
+                  >
+                    <option value="intelligent">智能切分 (推荐)</option>
+                    <option value="size_based">基于大小</option>
+                    <option value="section_based">基于章节</option>
+                    <option value="page_based">基于页面</option>
+                  </select>
+                  <small className="form-hint">选择内容切分的策略</small>
+                </div>
+              </div>
+
+              {settings.intelligent_splitting_enabled && (
+                <div className="form-section">
+                  <h4>智能切分参数</h4>
+                  <div className="form-item">
+                    <label className="form-label">敏感度</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={settings.intelligent_splitting_sensitivity}
+                      onChange={(e) => setSettings({ ...settings, intelligent_splitting_sensitivity: parseFloat(e.target.value) })}
+                      min="0.1"
+                      max="1.0"
+                      step="0.1"
+                    />
+                    <small className="form-hint">文件类型识别的敏感度，值越高识别越严格</small>
+                  </div>
+                  
+                  <div className="form-item">
+                    <label className="form-label">最小切分单元大小</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={settings.min_chunk_size}
+                      onChange={(e) => setSettings({ ...settings, min_chunk_size: parseInt(e.target.value) })}
+                      min="50"
+                      max="500"
+                      step="50"
+                    />
+                    <small className="form-hint">每个切分单元的最小字符数</small>
+                  </div>
+                  
+                  <div className="form-item">
+                    <label className="form-label">最大切分单元大小</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={settings.max_chunk_size}
+                      onChange={(e) => setSettings({ ...settings, max_chunk_size: parseInt(e.target.value) })}
+                      min="200"
+                      max="2000"
+                      step="100"
+                    />
+                    <small className="form-hint">每个切分单元的最大字符数</small>
+                  </div>
+                  
+                  <div className="form-item">
+                    <label className="form-label">启用特殊规则</label>
+                    <label className="toggle-switch">
+                      <input
+                        type="checkbox"
+                        checked={settings.special_rules_enabled}
+                        onChange={(e) => setSettings({ ...settings, special_rules_enabled: e.target.checked })}
+                      />
+                      <span className="toggle-slider"></span>
+                    </label>
+                    <small className="form-hint">启用针对特定文件类型的特殊切分规则</small>
+                  </div>
                 </div>
               )}
             </div>

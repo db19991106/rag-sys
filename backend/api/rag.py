@@ -51,7 +51,8 @@ async def generate_answer(request: RAGRequest):
         response = rag_generator.generate(
             request.query,
             adjusted_config,
-            request.generation_config
+            request.generation_config,
+            request.conversation_id
         )
 
         logger.info(f"RAG 生成完成")
@@ -81,17 +82,32 @@ async def generate_answer(request: RAGRequest):
 
 
 @router.post("/recognize-intent", response_model=IntentResult)
-async def recognize_intent(query: str):
+async def recognize_intent(request: dict):
     """
     识别用户查询的意图
     
     Args:
-        query: 用户查询文本
+        request: 包含query字段的请求体
     """
     try:
+        query = request.get("query", "")
+        if not query:
+            raise HTTPException(status_code=400, detail="查询内容不能为空")
+        
         # 确保意图识别器已初始化
-        if not intent_recognizer._initialized and embedding_service.is_loaded():
-            intent_recognizer.initialize(embedding_service)
+        if not intent_recognizer._initialized:
+            # 使用默认生成配置初始化意图识别器
+            from models import GenerationConfig
+            default_config = GenerationConfig(
+                llm_provider="local",
+                llm_model="Qwen2.5-0.5B-Instruct",
+                temperature=0.1,
+                max_tokens=100,
+                top_p=1.0,
+                frequency_penalty=0.0,
+                presence_penalty=0.0
+            )
+            intent_recognizer.initialize_with_config(default_config)
         
         intent, confidence, details = intent_recognizer.recognize(query)
         

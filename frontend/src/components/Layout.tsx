@@ -1,128 +1,110 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import Chat from '../pages/Chat';
 import './Layout.css';
 
 const Layout: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const menuItems = [
-
-      { path: '/chat', label: '智能对话', icon: 'fa-comments', desc: 'RAG 智能问答' },
-
-      { path: '/documents', label: '知识文档管理', icon: 'fa-file-alt', desc: '上传与管理文档' },
-
-      { path: '/chunk', label: '文档切分', icon: 'fa-scissors', desc: '智能切分与编辑' },
-
-      { path: '/embedding', label: '向量入库', icon: 'fa-vector-square', desc: '向量化与索引' },
-
-      { path: '/vector', label: '向量库管理', icon: 'fa-database', desc: '向量库管理' },
-
-      { path: '/retrieval', label: '查询检索', icon: 'fa-search', desc: '智能检索与策略' },
-
-      { path: '/generate', label: '上下文构建', icon: 'fa-layer-group', desc: '上下文与生成' },
-
-      { path: '/history', label: '历史记录', icon: 'fa-history', desc: '操作历史追踪' },
-
-    ];
+  const navItems = [
+    { path: '/chat', label: '对话', icon: 'fa-message' },
+    { path: '/documents', label: '文档', icon: 'fa-file-lines' },
+    { path: '/chunk', label: '切分', icon: 'fa-scissors' },
+    { path: '/embedding', label: '向量', icon: 'fa-vector-square' },
+    { path: '/vector', label: '库管理', icon: 'fa-database' },
+    { path: '/retrieval', label: '检索', icon: 'fa-magnifying-glass' },
+    { path: '/generate', label: '生成', icon: 'fa-wand-magic-sparkles' },
+    { path: '/settings', label: '设置', icon: 'fa-gear' },
+  ];
 
   useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname]);
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.user-menu')) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <div className="layout">
-      {/* 顶部导航栏 */}
-      <header className="top-nav">
-        <div className="nav-container">
-          {/* Logo区域 */}
-          <div className="nav-logo">
-            <Link to="/chat" className="logo-link">
-              <div className="logo-icon-wrapper">
-                <i className="fas fa-brain"></i>
-              </div>
-              <div className="logo-text">
-                <h2>RAG助手</h2>
-                <span>Retrieval-Augmented Generation</span>
-              </div>
-            </Link>
-          </div>
+      {/* Header */}
+      <header className="header">
+        <div className="header-container">
+          {/* Logo */}
+          <Link to="/chat" className="logo-link">
+            <div className="logo-icon">
+              <i className="fa-solid fa-brain" />
+            </div>
+            <span className="logo-text">RAG助手</span>
+          </Link>
 
-          {/* 导航菜单 */}
-          <nav className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <ul>
-              {menuItems.map((item, index) => (
-                <li key={item.path} style={{ animationDelay: `${index * 0.1}s` }}>
-                  <Link
-                    to={item.path}
-                    className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
-                  >
-                    <span className="nav-icon">
-                      <i className={`fas ${item.icon}`}></i>
-                    </span>
-                    <span className="nav-text">{item.label}</span>
-                    {location.pathname === item.path && <span className="nav-indicator"></span>}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Desktop Navigation */}
+          <nav className="nav">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`nav-link ${isActive(item.path) ? 'active' : ''}`}
+              >
+                <i className={`fa-solid ${item.icon} nav-icon`} />
+                <span>{item.label}</span>
+              </Link>
+            ))}
           </nav>
 
-          {/* 用户区域 */}
-          <div className="nav-user">
-            <div className="user-dropdown">
-              <button
-                className="user-dropdown-btn"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                <div className="user-avatar-wrapper">
-                  <i className="fas fa-user"></i>
+          {/* User Menu */}
+          <div className="user-menu">
+            <button
+              className="user-menu-button"
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+            >
+              <div className="user-avatar">
+                {user?.username?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <i
+                className={`fa-solid fa-chevron-down user-dropdown-arrow ${userMenuOpen ? 'open' : ''}`}
+              />
+            </button>
+
+            {/* Dropdown Menu */}
+            {userMenuOpen && (
+              <div className="dropdown-menu">
+                <div className="dropdown-user-info">
+                  <div className="dropdown-user-name">
+                    {user?.username || '用户'}
+                  </div>
+                  <div className="dropdown-user-email">
+                    {user?.email || 'admin@example.com'}
+                  </div>
                 </div>
-                <div className="user-info-text">
-                  <span className="user-name">{user?.username || '用户'}</span>
-                  <span className="user-role">管理员</span>
-                </div>
-                <i className={`fas fa-chevron-down dropdown-arrow ${dropdownOpen ? 'open' : ''}`}></i>
-              </button>
-              <div className={`dropdown-menu ${dropdownOpen ? 'show' : ''}`}>
-                <Link to="/profile" className="dropdown-item">
-                  <i className="fas fa-user-cog"></i>
-                  个人设置
-                </Link>
-                <Link to="/settings" className="dropdown-item">
-                  <i className="fas fa-cog"></i>
-                  系统设置
-                </Link>
-                <div className="dropdown-divider"></div>
-                <button className="dropdown-item dropdown-item-danger" onClick={handleLogout}>
-                  <i className="fas fa-sign-out-alt"></i>
-                  退出登录
+                <div className="dropdown-divider" />
+                <button
+                  className="dropdown-item dropdown-item-danger"
+                  onClick={handleLogout}
+                >
+                  <i className="fa-solid fa-arrow-right-from-bracket" />
+                  <span>退出登录</span>
                 </button>
               </div>
-            </div>
-
-            {/* 移动端菜单按钮 */}
-            <button
-              className="mobile-menu-btn"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
-            </button>
+            )}
           </div>
         </div>
       </header>
 
-      {/* 主内容区 */}
+      {/* Main Content */}
       <main className="main-content">
         <Outlet />
       </main>

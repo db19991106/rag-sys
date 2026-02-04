@@ -10,10 +10,9 @@ import ChunkPage from './pages/Chunk';
 import Embedding from './pages/Embedding';
 import Retrieval from './pages/Retrieval';
 import Generate from './pages/Generate';
-import History from './pages/History';
 import VectorManage from './pages/VectorManage';
 import Settings from './pages/Settings';
-import './styles/variables.css';
+import './index.css';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = localStorage.getItem('user') !== null;
@@ -25,28 +24,29 @@ const App: React.FC = () => {
     <AuthProvider>
       <AppDataProvider>
         <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Layout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/chat" replace />} />
-              <Route path="chat" element={<Chat />} />
-              <Route path="documents" element={<RagDocManage />} />
-              <Route path="chunk" element={<ChunkPage />} />
-              <Route path="embedding" element={<Embedding />} />
-              <Route path="retrieval" element={<Retrieval />} />
-              <Route path="generate" element={<Generate />} />
-              <Route path="history" element={<History />} />
-              <Route path="vector" element={<VectorManage />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-          </Routes>
+          <div className="fade-in">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Layout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="/chat" replace />} />
+                <Route path="chat" element={<Chat />} />
+                <Route path="documents" element={<RagDocManage />} />
+                <Route path="chunk" element={<ChunkPage />} />
+                <Route path="embedding" element={<Embedding />} />
+                <Route path="retrieval" element={<Retrieval />} />
+                <Route path="generate" element={<Generate />} />
+                <Route path="vector" element={<VectorManage />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+            </Routes>
+          </div>
         </BrowserRouter>
       </AppDataProvider>
     </AuthProvider>

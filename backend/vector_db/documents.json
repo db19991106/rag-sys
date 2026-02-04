@@ -1,134 +1,79 @@
 {
-  "86a794c746c01e0abf6c1db9f2086bec": {
-    "id": "86a794c746c01e0abf6c1db9f2086bec",
-    "name": "rag笔记 - 副本.md",
-    "size": 18104,
-    "status": "indexed",
-    "upload_time": "2026-01-28T21:51:12.328051",
-    "chunk_count": 20,
-    "category": "未分类",
-    "tags": [],
-    "file_path": "rag笔记 - 副本.md"
-  },
-  "09224b1670ff90dc104d7ba2bfc007e5": {
-    "id": "09224b1670ff90dc104d7ba2bfc007e5",
-    "name": "test_rag.md",
-    "size": 476,
-    "status": "pending",
-    "upload_time": "2026-01-28T21:56:32.729519",
-    "chunk_count": 0,
-    "category": "未分类",
-    "tags": [],
-    "file_path": "test_rag.md"
-  },
-  "a12fbf6d725eab30b32f3ca84b93d18a": {
-    "id": "a12fbf6d725eab30b32f3ca84b93d18a",
-    "name": "新建文本文档 (2).txt",
-    "size": 0,
-    "status": "pending",
-    "upload_time": "2026-01-28T21:58:58.961083",
-    "chunk_count": 0,
-    "category": "未分类",
-    "tags": [],
-    "file_path": "新建文本文档 (2).txt"
-  },
-  "80ae8bcd129ca8b5ad78f00811c7515f": {
-    "id": "80ae8bcd129ca8b5ad78f00811c7515f",
-    "name": "需要下载的包.txt",
-    "size": 82,
-    "status": "pending",
-    "upload_time": "2026-01-28T21:59:16.546280",
-    "chunk_count": 0,
-    "category": "未分类",
-    "tags": [],
-    "file_path": "需要下载的包.txt"
-  },
-  "b303a445e76652d58592d83edfa759d8": {
-    "id": "b303a445e76652d58592d83edfa759d8",
-    "name": "test_preview.txt",
-    "size": 94,
-    "status": "pending",
-    "upload_time": "2026-01-28T22:04:10.027241",
-    "chunk_count": 0,
-    "category": "未分类",
-    "tags": [],
-    "file_path": "test_preview.txt"
-  },
   "da23ff1668ba791c5da0f6d3431ba768": {
     "id": "da23ff1668ba791c5da0f6d3431ba768",
     "name": "16laodonghetongfa.pdf",
     "size": 172756,
-    "status": "split",
+    "status": "indexed",
     "upload_time": "2026-01-28T22:17:28.293041",
-    "chunk_count": 30,
+    "chunk_count": 1,
     "category": "未分类",
     "tags": [],
     "file_path": "16laodonghetongfa.pdf"
   },
-  "348b36503299e6758a78eb747b04e9b3": {
-    "id": "348b36503299e6758a78eb747b04e9b3",
-    "name": "rag开发代码.pdf",
-    "size": 504789,
-    "status": "pending",
-    "upload_time": "2026-01-28T22:22:54.491040",
-    "chunk_count": 0,
+  "8374ddf7798647c0585761dacdb46628": {
+    "id": "8374ddf7798647c0585761dacdb46628",
+    "name": "Employee-Handbook.md",
+    "size": 24351,
+    "status": "indexed",
+    "upload_time": "2026-01-31T00:15:22.193861",
+    "chunk_count": 111,
     "category": "未分类",
     "tags": [],
-    "file_path": "rag开发代码.pdf"
+    "file_path": "Employee-Handbook.md"
   },
-  "ac18daca2b6dbc5a6282abb7bdf6d427": {
-    "id": "ac18daca2b6dbc5a6282abb7bdf6d427",
-    "name": "test.txt",
-    "size": 725,
-    "status": "pending",
-    "upload_time": "2026-01-28T22:22:57.683441",
-    "chunk_count": 0,
+  "b2daab3855cd81985cb7c692629cf9c6": {
+    "id": "b2daab3855cd81985cb7c692629cf9c6",
+    "name": "Financial-system.md",
+    "size": 11656,
+    "status": "indexed",
+    "upload_time": "2026-01-31T00:15:24.178630",
+    "chunk_count": 11,
     "category": "未分类",
     "tags": [],
-    "file_path": "test.txt"
+    "file_path": "Financial-system.md"
   },
-  "c5d3039c5b38104a572da2ba8ad3e4e7": {
-    "id": "c5d3039c5b38104a572da2ba8ad3e4e7",
-    "name": "新建文本文档 (2).txt",
-    "size": 0,
-    "status": "pending",
-    "upload_time": "2026-01-28T22:28:45.770682",
-    "chunk_count": 0,
+  "2328842c05b1ac8945499c08a1ba57b0": {
+    "id": "2328842c05b1ac8945499c08a1ba57b0",
+    "name": "Project-documentation.md",
+    "size": 11009,
+    "status": "indexed",
+    "upload_time": "2026-01-31T00:15:25.940189",
+    "chunk_count": 22,
     "category": "未分类",
     "tags": [],
-    "file_path": "新建文本文档 (2).txt"
+    "file_path": "Project-documentation.md"
   },
-  "0dc12595a0b290707325b9d5c4efb1ec": {
-    "id": "0dc12595a0b290707325b9d5c4efb1ec",
-    "name": "董彪彪-辞职报告.docx",
-    "size": 15413,
-    "status": "split",
-    "upload_time": "2026-01-28T22:29:01.030820",
+  "b67d4e93eb283863abdb78a3ec8151dc": {
+    "id": "b67d4e93eb283863abdb78a3ec8151dc",
+    "name": "baoxiao.md",
+    "size": 6017,
+    "status": "indexed",
+    "upload_time": "2026-02-01T18:44:47.146048",
+    "chunk_count": 10,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "baoxiao.md"
+  },
+  "74c2068ee6b0a50ca358a2a5db11b8d0": {
+    "id": "74c2068ee6b0a50ca358a2a5db11b8d0",
+    "name": "baoxiao.pdf",
+    "size": 322450,
+    "status": "indexed",
+    "upload_time": "2026-02-01T21:08:46.674935",
     "chunk_count": 1,
     "category": "未分类",
     "tags": [],
-    "file_path": "董彪彪-辞职报告.docx"
+    "file_path": "baoxiao.pdf"
   },
-  "57e727fefb3ad585a67daae1159ba93a": {
-    "id": "57e727fefb3ad585a67daae1159ba93a",
-    "name": "laodonghetongfa.pdf",
-    "size": 172756,
+  "96dd271ffaae9be8fd20250b05c760dd": {
+    "id": "96dd271ffaae9be8fd20250b05c760dd",
+    "name": "中华人民共和国民法典_20200528.md",
+    "size": 330557,
     "status": "indexed",
-    "upload_time": "2026-01-28T23:09:50.446493",
-    "chunk_count": 30,
+    "upload_time": "2026-02-03T19:34:30.932881",
+    "chunk_count": 140,
     "category": "未分类",
     "tags": [],
-    "file_path": "laodonghetongfa.pdf"
-  },
-  "77cd8d56f82e59475eec15a656f8a6af": {
-    "id": "77cd8d56f82e59475eec15a656f8a6af",
-    "name": "laodonghetongfa.pdf",
-    "size": 172756,
-    "status": "pending",
-    "upload_time": "2026-01-28T23:50:42.540897",
-    "chunk_count": 0,
-    "category": "未分类",
-    "tags": [],
-    "file_path": "laodonghetongfa.pdf"
+    "file_path": "中华人民共和国民法典_20200528.md"
   }
 }

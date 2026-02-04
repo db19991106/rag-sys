@@ -1,5 +1,6 @@
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict, Tuple, Any
 import numpy as np
+import time
 from pathlib import Path
 import json
 from models import VectorDBType, VectorDBConfig, VectorStatus
@@ -57,23 +58,33 @@ class FAISSDatabase(VectorDatabase):
 
         if self.index_type == "HNSW":
             # HNSW 索引 - 高性能
-            self.index = faiss.IndexHNSWFlat(self.dimension, 32)
+            # 优化参数: M=16 (图的连接数), efConstruction=200 (构建时的搜索宽度)
+            self.index = faiss.IndexHNSWFlat(self.dimension, 16)
+            # 设置构建参数
+            self.index.hnsw.efConstruction = 200
+            # 设置搜索参数
+            self.index.hnsw.efSearch = 128
         elif self.index_type == "IVF":
             # IVF 索引 - 倒排文件
+            # 优化参数: nlist=400 (聚类中心数)
             quantizer = faiss.IndexFlatL2(self.dimension)
-            self.index = faiss.IndexIVFFlat(quantizer, self.dimension, 100)
+            nlist = min(400, self.dimension * 2)  # 根据维度动态调整
+            self.index = faiss.IndexIVFFlat(quantizer, self.dimension, nlist)
         elif self.index_type == "PQ":
             # PQ 索引 - 乘积量化
-            self.index = faiss.IndexPQ(self.dimension, 16, 8)
+            # 优化参数: M=8 (子向量数量), nbits=8 (每个子向量的位数)
+            M = min(8, self.dimension // 32)  # 根据维度动态调整
+            self.index = faiss.IndexPQ(self.dimension, M, 8)
         else:
             # 默认使用 Flat 索引
             self.index = faiss.IndexFlatL2(self.dimension)
 
-        logger.info(f"初始化 FAISS 索引: {self.index_type} (维度: {self.dimension})")
+        logger.info(f"初始化 FAISS 索引: {self.index_type} (维度: {self.dimension}) ")
 
     def add_vectors(self, vectors: np.ndarray, metadata: List[Dict]):
         """添加向量"""
         import faiss
+        import time
 
         if not isinstance(vectors, np.ndarray):
             vectors = np.array(vectors, dtype=np.float32)
@@ -84,25 +95,49 @@ class FAISSDatabase(VectorDatabase):
 
         # 训练索引 (如果需要)
         if hasattr(self.index, 'is_trained') and not self.index.is_trained:
+            logger.info(f"训练 IVF 索引，样本数: {len(vectors)}")
+            start_train = time.time()
             self.index.train(vectors)
+            train_time = time.time() - start_train
+            logger.info(f"✓ FAISS 索引训练完成，耗时: {train_time:.2f}s")
+            
+            # 训练后需要重建索引以启用搜索
+            logger.info("重建索引以启用搜索功能...")
+            self.index.reset()
+            self.index.train(vectors)
+            logger.info("✓ 索引重建完成")
 
-        # 添加向量
+        # 批量添加向量 (针对大型数据集)
+        batch_size = 1000
+        total_added = 0
         start_id = self.total_vectors
-        self.index.add(vectors)
-
-        # 保存元数据
-        for i, meta in enumerate(metadata):
-            self.metadata[str(start_id + i)] = meta
+        
+        for i in range(0, len(vectors), batch_size):
+            end = min(i + batch_size, len(vectors))
+            batch_vectors = vectors[i:end]
+            batch_metadata = metadata[i:end]
+            
+            # 添加向量
+            self.index.add(batch_vectors)
+            
+            # 保存元数据
+            for j, meta in enumerate(batch_metadata):
+                self.metadata[str(start_id + i + j)] = meta
+            
+            total_added += len(batch_vectors)
+            logger.info(f"添加批次 {i//batch_size + 1}/{(len(vectors)+batch_size-1)//batch_size}，数量: {len(batch_vectors)}")
 
         self.total_vectors += len(vectors)
-        logger.info(f"添加 {len(vectors)} 个向量到 FAISS (总数: {self.total_vectors})")
+        logger.info(f"添加 {len(vectors)} 个向量到 FAISS (总数: {self.total_vectors}) ")
         
-        # 立即保存以确保持久化
-        self.save()
+        # 定期保存 (每1000个向量或最后一批)
+        if len(vectors) >= 1000 or (len(vectors) > 0 and i + batch_size >= len(vectors)):
+            self.save()
 
     def search(self, query_vector: np.ndarray, top_k: int = 5) -> Tuple[np.ndarray, List[List[Dict]]]:
         """搜索向量"""
         import faiss
+        import time
 
         if not isinstance(query_vector, np.ndarray):
             query_vector = np.array(query_vector, dtype=np.float32)
@@ -111,8 +146,27 @@ class FAISSDatabase(VectorDatabase):
         if query_vector.ndim == 1:
             query_vector = query_vector.reshape(1, -1)
 
+        # 优化搜索参数
+        if hasattr(self.index, 'hnsw'):
+            # HNSW 索引优化
+            original_efSearch = self.index.hnsw.efSearch
+            self.index.hnsw.efSearch = min(128, top_k * 4)  # 根据 top_k 动态调整
+        elif hasattr(self.index, 'nprobe'):
+            # IVF 索引优化
+            original_nprobe = self.index.nprobe
+            self.index.nprobe = min(64, top_k * 2)  # 根据 top_k 动态调整
+
         # 搜索
+        start_search = time.time()
         distances, indices = self.index.search(query_vector, top_k)
+        search_time = time.time() - start_search
+        logger.debug(f"FAISS 搜索完成，耗时: {search_time:.4f}s, 返回: {len(indices[0])} 个结果")
+
+        # 恢复原始参数
+        if hasattr(self.index, 'hnsw'):
+            self.index.hnsw.efSearch = original_efSearch
+        elif hasattr(self.index, 'nprobe'):
+            self.index.nprobe = original_nprobe
 
         # 获取元数据 - 返回嵌套列表结构（每行一个查询的元数据）
         results_metadata = []
@@ -340,6 +394,8 @@ class VectorDatabaseManager:
     def __init__(self):
         self.db: Optional[VectorDatabase] = None
         self.config: Optional[VectorDBConfig] = None
+        self.secondary_indices: Dict[str, VectorDatabase] = {}  # 多级索引
+        self.last_update_time = 0  # 最后更新时间
 
     def initialize(self, config: VectorDBConfig):
         """初始化向量数据库"""
@@ -361,6 +417,9 @@ class VectorDatabaseManager:
             # 尝试加载数据
             self.db.load()
 
+            # 初始化多级索引
+            self._initialize_secondary_indices()
+
             logger.info(f"向量数据库初始化成功: {config.db_type}")
             return True
 
@@ -368,17 +427,94 @@ class VectorDatabaseManager:
             logger.error(f"向量数据库初始化失败: {str(e)}")
             return False
 
+    def _initialize_secondary_indices(self):
+        """初始化多级索引"""
+        # 示例：创建基于文档类型的二级索引
+        if self.config and self.config.db_type == VectorDBType.FAISS:
+            # 可以根据需要创建不同类型的二级索引
+            # 例如：按文档类型、按时间、按主题等
+            pass
+
     def add_vectors(self, vectors: np.ndarray, metadata: List[Dict]):
         """添加向量"""
         if self.db is None:
             raise ValueError("向量数据库未初始化")
-        self.db.add_vectors(vectors, metadata)
+        
+        try:
+            # 验证输入
+            if vectors is None or len(vectors) == 0:
+                logger.warning("尝试添加空向量，跳过操作")
+                return
+            
+            if metadata is None or len(metadata) != len(vectors):
+                logger.warning("向量和元数据长度不匹配，跳过操作")
+                return
+            
+            # 添加向量到主索引
+            self.db.add_vectors(vectors, metadata)
+            
+            # 更新最后更新时间
+            self.last_update_time = time.time()
+            
+            # 可以选择更新二级索引
+            # self._update_secondary_indices(vectors, metadata)
+        except Exception as e:
+            logger.error(f"添加向量失败: {str(e)}")
+            # 不抛出异常，避免系统崩溃
+            return
 
-    def search(self, query_vector: np.ndarray, top_k: int = 5) -> Tuple[np.ndarray, List[Dict]]:
+
+
+    def _apply_filter(self, metadata: Dict, filters: Dict) -> bool:
+        """应用过滤器"""
+        for key, value in filters.items():
+            if key not in metadata:
+                return False
+            if isinstance(value, list):
+                if metadata[key] not in value:
+                    return False
+            else:
+                if metadata[key] != value:
+                    return False
+        return True
+
+    def get_last_update_time(self) -> float:
+        """获取最后更新时间"""
+        return self.last_update_time
+
+    def search(self, query_vector: np.ndarray, top_k: int = 5, filters: Dict = None) -> Tuple[np.ndarray, List[List[Dict]]]:
         """搜索向量"""
         if self.db is None:
             raise ValueError("向量数据库未初始化")
-        return self.db.search(query_vector, top_k)
+        
+        try:
+            # 基本搜索
+            distances, metadata_list = self.db.search(query_vector, top_k)
+            
+            # 如果提供了过滤器，可以在搜索结果上应用
+            if filters:
+                filtered_distances = []
+                filtered_metadata = []
+                for dist, meta_list in zip(distances, metadata_list):
+                    filtered_dist = []
+                    filtered_meta = []
+                    for d, meta in zip(dist, meta_list):
+                        if self._apply_filter(meta, filters):
+                            filtered_dist.append(d)
+                            filtered_meta.append(meta)
+                    if filtered_dist:
+                        filtered_distances.append(filtered_dist)
+                        filtered_metadata.append(filtered_meta)
+                    else:
+                        filtered_distances.append([])
+                        filtered_metadata.append([])
+                return np.array(filtered_distances), filtered_metadata
+            
+            return distances, metadata_list
+        except Exception as e:
+            logger.error(f"搜索向量失败: {str(e)}")
+            # 返回空结果，避免系统崩溃
+            return np.array([[]]), [[]]
 
     def get_status(self) -> VectorStatus:
         """获取状态"""
@@ -400,6 +536,35 @@ class VectorDatabaseManager:
         """加载数据库"""
         if self.db:
             self.db.load()
+
+    def get_all_metadata(self) -> List[Dict[str, Any]]:
+        """
+        获取所有文档片段的元数据
+
+        Returns:
+            文档片段元数据列表
+        """
+        try:
+            if self.db is None:
+                return []
+            
+            # 对于FAISS数据库，直接返回metadata
+            if hasattr(self.db, 'metadata') and isinstance(self.db.metadata, dict):
+                all_metadata = []
+                for key, meta in self.db.metadata.items():
+                    # 确保meta是字典类型
+                    if isinstance(meta, dict):
+                        # 添加chunk_id
+                        meta['chunk_id'] = key
+                        all_metadata.append(meta)
+                logger.info(f"获取到 {len(all_metadata)} 个文档片段元数据")
+                return all_metadata
+            else:
+                logger.warning("当前数据库类型不支持获取所有元数据")
+                return []
+        except Exception as e:
+            logger.error(f"获取所有元数据失败: {str(e)}")
+            return []
 
 
 # 全局向量数据库实例

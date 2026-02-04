@@ -1,8 +1,10 @@
-from typing import List
+from typing import List, Optional
 import time
 import torch
 from models import RAGRequest, RAGResponse, RetrievalResult, GenerationConfig
 from services.retriever import retriever
+from services.context_analyzer import context_analyzer
+from services.conversation_manager import conversation_manager
 from utils.logger import logger
 from config import settings
 
@@ -55,6 +57,107 @@ class OpenAIClient(LLMClient):
             return f"生成失败: {str(e)}"
 
 
+def _check_model_exists(model_path: str) -> bool:
+    """检查模型文件是否存在"""
+    from pathlib import Path
+    
+    path = Path(model_path)
+    if not path.exists():
+        logger.error(f"模型目录不存在: {model_path}")
+        return False
+    
+    # 检查必要的文件
+    required_files = ['config.json']
+    model_files = ['pytorch_model.bin', 'model.safetensors']
+    
+    has_config = (path / 'config.json').exists()
+    has_model = any((path / f).exists() for f in model_files)
+    
+    if not has_config:
+        logger.error(f"缺少配置文件: {path / 'config.json'}")
+    
+    if not has_model:
+        logger.error(f"缺少模型文件，需要以下之一: {', '.join(model_files)}")
+    
+    return has_config and has_model
+
+
+def _detect_device() -> str:
+    """检测可用的计算设备"""
+    import torch
+    
+    # 检查CUDA是否可用
+    if torch.cuda.is_available():
+        device_count = torch.cuda.device_count()
+        device_name = torch.cuda.get_device_name(0)
+        total_memory = torch.cuda.get_device_properties(0).total_memory / (1024**3)  # GB
+        
+        logger.info(f"检测到 CUDA 设备: {device_name}, 显存: {total_memory:.2f}GB")
+        
+        # 7B模型需要约14GB显存（FP16）
+        # 如果显存不足，建议使用8bit量化
+        model_memory_need = 14  # GB for 7B model in FP16
+        if total_memory < model_memory_need:
+            logger.warning(f"显存不足: 需要 {model_memory_need}GB，当前只有 {total_memory:.2f}GB")
+            logger.warning("将尝试使用8bit量化或CPU")
+            # 返回cuda，但后续会尝试8bit量化
+            return "cuda"
+        
+        return "cuda"
+    
+    logger.info("未检测到CUDA设备，将使用CPU")
+    return "cpu"
+
+
+def _check_memory_requirement(model_path: str, device: str) -> dict:
+    """检查内存需求和可用性"""
+    import torch
+    
+    requirements = {
+        "device": device,
+        "load_in_8bit": False,
+        "load_in_4bit": False,
+        "reason": ""
+    }
+    
+    if device == "cpu":
+        requirements["reason"] = "使用CPU设备，无需显存检查"
+        return requirements
+    
+    # CUDA设备检查
+    total_memory = torch.cuda.get_device_properties(0).total_memory / (1024**3)  # GB
+    available_memory = total_memory * 0.8  # 保留20%给系统和其他进程
+    
+    # 根据模型大小估算需求
+    if "7B" in model_path:
+        model_memory = 14  # GB for 7B in FP16
+    elif "0.5B" in model_path:
+        model_memory = 1  # GB for 0.5B in FP16
+    else:
+        model_memory = 10  # 默认估计
+    
+    requirements["required_memory"] = model_memory
+    requirements["available_memory"] = available_memory
+    
+    if available_memory < model_memory:
+        # 尝试8bit量化
+        if available_memory >= model_memory * 0.5:
+            requirements["load_in_8bit"] = True
+            requirements["reason"] = f"显存不足({available_memory:.2f}GB < {model_memory}GB)，启用8bit量化"
+        # 尝试4bit量化
+        elif available_memory >= model_memory * 0.25:
+            requirements["load_in_4bit"] = True
+            requirements["reason"] = f"显存不足({available_memory:.2f}GB < {model_memory}GB)，启用4bit量化"
+        else:
+            requirements["device"] = "cpu"
+            requirements["reason"] = f"显存严重不足({available_memory:.2f}GB)，降级使用CPU"
+    
+    else:
+        requirements["reason"] = f"显存充足({available_memory:.2f}GB >= {model_memory}GB)，使用FP16"
+    
+    return requirements
+
+
 class AnthropicClient(LLMClient):
     """Anthropic 客户端"""
 
@@ -88,51 +191,149 @@ class AnthropicClient(LLMClient):
             return f"生成失败: {str(e)}"
 
 
+def _check_model_exists(self, model_path: str) -> bool:
+        """检查模型文件是否存在"""
+        from pathlib import Path
+        
+        path = Path(model_path)
+        if not path.exists():
+            logger.error(f"模型目录不存在: {model_path}")
+            return False
+        
+        # 检查必要的文件
+        required_files = ['config.json']
+        model_files = ['pytorch_model.bin', 'model.safetensors']
+        
+        has_config = (path / 'config.json').exists()
+        has_model = any((path / f).exists() for f in model_files)
+        
+        if not has_config:
+            logger.error(f"缺少配置文件: {path / 'config.json'}")
+        
+        if not has_model:
+            logger.error(f"缺少模型文件，需要以下之一: {', '.join(model_files)}")
+        
+        return has_config and has_model
+
 class LocalLLMClient(LLMClient):
     """本地 LLM 客户端 (使用 transformers)"""
 
     def __init__(self, config: GenerationConfig):
         super().__init__(config)
         try:
+            import os
+            from pathlib import Path
+            # 设置环境变量以抑制日志和进度条
+            os.environ['TQDM_DISABLE'] = '1'
+            os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '1'
+            os.environ['TRANSFORMERS_VERBOSITY'] = 'error'
+            os.environ['TRANSFORMERS_SILENCE_DEPRECATION_WARNINGS'] = '1'
+            os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+            
             from transformers import AutoTokenizer, AutoModelForCausalLM
 
+            # 1. 确定模型路径
             model_path = getattr(settings, 'local_llm_model_path', None)
-            device = getattr(settings, 'local_llm_device', 'cpu')
-
             if not model_path:
                 raise ValueError("未配置本地模型路径，请在 config.py 中设置 local_llm_model_path")
 
+            # 根据前端指定的模型名称动态调整模型路径
+            if config.llm_model == 'Qwen2.5-7B-Instruct':
+                model_path = "./data/models/Qwen2.5-7B-Instruct"
+            elif config.llm_model == 'Qwen2.5-0.5B-Instruct':
+                model_path = "./data/models/Qwen2.5-0.5B-Instruct"
+
+            # 2. 检查模型文件是否存在
+            if not self._check_model_exists(model_path):
+                error_msg = f"模型文件不存在或损坏: {model_path}\n"
+                error_msg += "请确保已下载模型文件到指定目录\n"
+                error_msg += "下载方法:\n"
+                error_msg += "  huggingface-cli download Qwen/Qwen2.5-7B-Instruct --local-dir ./data/models/Qwen2.5-7B-Instruct"
+                raise FileNotFoundError(error_msg)
+
+            # 3. 检测设备
+            device_preference = getattr(settings, 'local_llm_device', 'auto')
+            if device_preference == 'auto':
+                device = self._detect_device()
+            else:
+                device = device_preference
+                logger.info(f"使用配置的设备: {device}")
+
+            # 4. 检查内存需求
+            memory_requirements = self._check_memory_requirement(model_path, device)
+            logger.info(f"内存需求分析: {memory_requirements['reason']}")
+
+            self.device = memory_requirements["device"]
+            load_in_8bit = memory_requirements["load_in_8bit"]
+            load_in_4bit = memory_requirements["load_in_4bit"]
+
+            # 5. 加载模型
             logger.info(f"加载本地 LLM 模型: {model_path}")
 
-            # 加载 tokenizer
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                model_path,
-                trust_remote_code=True
-            )
+            # 临时重定向stdout和stderr以抑制进度条
+            import sys
+            from io import StringIO
+            
+            # 保存原始的stdout和stderr
+            original_stdout = sys.stdout
+            original_stderr = sys.stderr
+            
+            try:
+                # 重定向到空缓冲区
+                sys.stdout = StringIO()
+                sys.stderr = StringIO()
+                
+                # 加载 tokenizer
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    model_path,
+                    trust_remote_code=True
+                )
 
-            # 加载模型
-            model_kwargs = {
-                "torch_dtype": torch.float16 if device == "cuda" else torch.float32,
-                "device_map": "auto" if device == "cuda" else None,
-            }
+                # 构建模型加载参数
+                model_kwargs = {
+                    "trust_remote_code": True,
+                }
 
-            if getattr(settings, 'local_llm_load_in_8bit', False):
-                model_kwargs["load_in_8bit"] = True
+                if self.device == "cuda":
+                    model_kwargs["torch_dtype"] = torch.float16
+                    if load_in_8bit:
+                        model_kwargs["load_in_8bit"] = True
+                        logger.info("启用8bit量化以节省显存")
+                    elif load_in_4bit:
+                        try:
+                            from bitsandbytes import BitsAndBytesConfig
+                            model_kwargs["quantization_config"] = BitsAndBytesConfig(
+                                load_in_4bit=True,
+                                bnb_4bit_compute_dtype=torch.float16,
+                            )
+                            logger.info("启用4bit量化以节省显存")
+                        except ImportError:
+                            logger.warning("bitsandbytes未安装，无法使用4bit量化，尝试8bit量化")
+                            model_kwargs["load_in_8bit"] = True
+                    else:
+                        # 如果显存足够，尝试使用device_map="auto"以自动分配
+                        model_kwargs["device_map"] = "auto"
+                else:
+                    # CPU设备使用float32
+                    model_kwargs["torch_dtype"] = torch.float32
+                    logger.warning("使用CPU设备，生成速度较慢")
 
-            self.model = AutoModelForCausalLM.from_pretrained(
-                model_path,
-                trust_remote_code=True,
-                **model_kwargs
-            )
+                # 加载模型
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    model_path,
+                    **model_kwargs
+                )
+            finally:
+                # 恢复原始的stdout和stderr
+                sys.stdout = original_stdout
+                sys.stderr = original_stderr
 
-            if device == "cpu":
-                self.model = self.model.to(device)
-
-            logger.info(f"本地 LLM 模型加载完成，设备: {device}")
+            logger.info(f"本地 LLM 模型加载完成，设备: {self.device}")
 
         except Exception as e:
             logger.error(f"初始化本地 LLM 客户端失败: {str(e)}")
             logger.error("请确保已安装 transformers 库: pip install transformers torch")
+            logger.error("如果使用CUDA设备，请确保已安装CUDA和cudatoolkit")
             raise
 
     def generate(self, prompt: str) -> str:
@@ -184,6 +385,31 @@ class LocalLLMClient(LLMClient):
             logger.error(traceback.format_exc())
             return f"生成失败: {str(e)}"
 
+    def unload(self):
+        """卸载模型，释放显存"""
+        try:
+            if hasattr(self, 'model') and self.model is not None:
+                # 移动模型到 CPU 以释放 GPU 内存
+                if self.device == 'cuda' and hasattr(self.model, 'to'):
+                    self.model = self.model.to('cpu')
+                
+                # 删除模型和 tokenizer
+                del self.model
+                self.model = None
+                
+                if hasattr(self, 'tokenizer') and self.tokenizer is not None:
+                    del self.tokenizer
+                    self.tokenizer = None
+                
+                # 清理 PyTorch 缓存
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                    torch.cuda.ipc_collect()
+                
+                logger.info("本地 LLM 模型已卸载，显存已释放")
+        except Exception as e:
+            logger.error(f"卸载本地 LLM 模型失败: {str(e)}")
+
 
 class RAGGenerator:
     """RAG 生成器 - 结合检索和生成"""
@@ -191,7 +417,7 @@ class RAGGenerator:
     def __init__(self):
         pass
 
-    def generate(self, query: str, retrieval_config, generation_config) -> RAGResponse:
+    def generate(self, query: str, retrieval_config, generation_config, conversation_id: Optional[str] = None) -> RAGResponse:
         """
         执行 RAG 生成
 
@@ -199,6 +425,7 @@ class RAGGenerator:
             query: 查询问题
             retrieval_config: 检索配置
             generation_config: 生成配置
+            conversation_id: 对话ID（可选）
 
         Returns:
             RAG 响应
@@ -206,18 +433,35 @@ class RAGGenerator:
         start_time = time.time()
 
         try:
-            logger.info(f"[RAG生成] 开始处理查询: '{query}'")
+            logger.info(f"[RAG生成] 开始处理查询: '{query}', 对话ID: {conversation_id}")
 
-            # 1. 检索相关文档
+            # 1. 获取对话历史并分析上下文
+            conversation_history = []
+            rewritten_query = query
+            context_summary = ""
+            
+            if conversation_id:
+                conversation = conversation_manager.get_conversation(conversation_id)
+                if conversation:
+                    conversation_history = conversation.messages
+                    logger.info(f"[RAG生成] 找到对话历史: {len(conversation_history)} 条消息")
+                    
+                    # 分析上下文并重写查询
+                    context_analysis = context_analyzer.analyze_context(conversation_history, query)
+                    rewritten_query = context_analysis['rewritten_query']
+                    context_summary = context_analysis['context_summary']
+                    logger.info(f"[RAG生成] 上下文分析完成: 重写查询='{rewritten_query}'")
+
+            # 2. 检索相关文档（使用改写后的查询）
             logger.info(f"[RAG生成] 步骤1/4: 开始检索相关文档...")
             retrieval_start = time.time()
-            retrieval_response = retriever.retrieve(query, retrieval_config)
+            retrieval_response = retriever.retrieve(query, retrieval_config, context_summary, rewritten_query)
             retrieval_time = (time.time() - retrieval_start) * 1000
 
             logger.info(f"[RAG生成] 检索完成: 找到 {len(retrieval_response.results)} 个相关片段, "
                        f"耗时 {retrieval_time:.2f}ms")
 
-            # 2. 构建上下文
+            # 3. 构建上下文
             logger.info(f"[RAG生成] 步骤2/4: 构建上下文...")
             # 根据不同的LLM模型设置不同的上下文长度限制
             max_context_length = 4000  # 默认4000字符（约3000 token）
@@ -225,15 +469,23 @@ class RAGGenerator:
                 # 本地模型可能支持更长的上下文
                 max_context_length = 6000  # 约4500 token
             
-            context = self._build_context(retrieval_response.results, max_context_length)
-            logger.info(f"[RAG生成] 上下文构建完成, 长度: {len(context)} 字符 (限制: {max_context_length})")
+            # 构建文档上下文
+            document_context = self._build_context(retrieval_response.results, max_context_length)
+            
+            # 构建完整上下文（包含对话历史和文档上下文）
+            full_context = document_context
+            if context_summary:
+                # 在文档上下文前添加对话历史摘要
+                full_context = f"对话历史摘要: {context_summary}\n\n" + document_context
+                
+            logger.info(f"[RAG生成] 上下文构建完成, 长度: {len(full_context)} 字符 (限制: {max_context_length})")
 
-            # 3. 构建 Prompt
+            # 4. 构建 Prompt
             logger.info(f"[RAG生成] 步骤3/4: 构建 Prompt...")
-            prompt = self._build_prompt(query, context)
+            prompt = self._build_prompt(rewritten_query, full_context)
             logger.debug(f"[RAG生成] Prompt 内容: {prompt[:500]}...")
 
-            # 4. 生成回答
+            # 5. 生成回答
             logger.info(f"[RAG生成] 步骤4/4: 使用 LLM 生成回答...")
             logger.info(f"[RAG生成] LLM 配置: provider={generation_config.llm_provider}, "
                        f"model={generation_config.llm_model}")
@@ -242,12 +494,23 @@ class RAGGenerator:
             answer = llm_client.generate(prompt)
             generation_time = (time.time() - generation_start) * 1000
 
+            # 生成完成后卸载模型，释放显存
+            if hasattr(llm_client, 'unload'):
+                llm_client.unload()
+
             total_time = (time.time() - start_time) * 1000
 
             logger.info(f"[RAG生成] 生成完成: 回答长度={len(answer)}字符, "
                        f"耗时 {generation_time:.2f}ms")
             logger.info(f"[RAG生成] 总耗时: {total_time:.2f}ms "
                        f"(检索: {retrieval_time:.2f}ms, 生成: {generation_time:.2f}ms)")
+
+            # 如果检测到本地存在对应知识库，在回答的下方加入引用
+            if retrieval_response.results:
+                references = "\n\n引用来源："
+                for i, result in enumerate(retrieval_response.results, 1):
+                    references += f"\n[{i}] 文档: {result.document_name}, 相似度: {result.similarity:.4f}"
+                answer += references
 
             return RAGResponse(
                 query=query,
