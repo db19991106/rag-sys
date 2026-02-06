@@ -2,6 +2,135 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ragApi } from '../services/api';
 import './Chat.css';
 
+// 添加console.log的别名logger
+const logger = console;
+
+interface RenameDialogProps {
+  isOpen: boolean;
+  currentTitle: string;
+  onClose: () => void;
+  onConfirm: (newTitle: string) => void;
+}
+
+interface ConfirmDialogProps {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onClose: () => void;
+}
+
+const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ isOpen, title, message, onConfirm, onClose }) => {
+  const confirmButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        confirmButtonRef.current?.focus();
+      }, 100);
+    }
+  }, [isOpen]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="dialog-overlay" onClick={onClose} onKeyDown={handleKeyDown}>
+      <div className="dialog-container dialog-confirm" onClick={(e) => e.stopPropagation()}>
+        <div className="dialog-header">
+          <h3>{title}</h3>
+        </div>
+        <div className="dialog-body">
+          <p>{message}</p>
+        </div>
+        <div className="dialog-actions">
+          <button type="button" className="dialog-button dialog-button-secondary" onClick={onClose}>
+            取消
+          </button>
+          <button
+            type="button"
+            ref={confirmButtonRef}
+            className="dialog-button dialog-button-danger"
+            onClick={() => {
+              onConfirm();
+              onClose();
+            }}
+          >
+            确定
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const RenameDialog: React.FC<RenameDialogProps> = ({ isOpen, currentTitle, onClose, onConfirm }) => {
+  const [title, setTitle] = useState(currentTitle);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTitle(currentTitle);
+      setTimeout(() => {
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }, 100);
+    }
+  }, [isOpen, currentTitle]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (title.trim()) {
+      onConfirm(title.trim());
+      onClose();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="dialog-overlay" onClick={onClose}>
+      <div className="dialog-container" onClick={(e) => e.stopPropagation()}>
+        <div className="dialog-header">
+          <h3>重命名对话</h3>
+        </div>
+        <form onSubmit={handleSubmit} className="dialog-content">
+          <input
+            ref={inputRef}
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="请输入新的对话标题"
+            className="dialog-input"
+            maxLength={100}
+            autoFocus
+          />
+          <div className="dialog-actions">
+            <button type="button" className="dialog-button dialog-button-secondary" onClick={onClose}>
+              取消
+            </button>
+            <button type="submit" className="dialog-button dialog-button-primary" disabled={!title.trim()}>
+              确定
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -55,8 +184,18 @@ const Chat: React.FC = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [deleteConfirmTitle, setDeleteConfirmTitle] = useState('');
+  const [deleteConfirmMessage, setDeleteConfirmMessage] = useState('');
+  const [isClearingChat, setIsClearingChat] = useState(false);
+  const [deletingConversationId, setDeletingConversationId] = useState<string>('');
+  const [renamingConversationId, setRenamingConversationId] = useState<string>('');
+  const [sidebarHidden, setSidebarHidden] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputWrapperRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const conversationsRef = useRef<Conversation[]>(conversations);
   const currentConversationIdRef = useRef<string>(currentConversationId);
 
@@ -95,7 +234,9 @@ const Chat: React.FC = () => {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+      // 只保存有消息的对话
+      const conversationsToSave = conversations.filter(conv => conv.messages.length > 0);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(conversationsToSave));
     } catch (error) {
       console.error('保存对话列表失败:', error);
     }
@@ -114,7 +255,9 @@ const Chat: React.FC = () => {
     return () => {
       if (typeof window === 'undefined') return;
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(conversationsRef.current));
+        // 只保存有消息的对话
+        const conversationsToSave = conversationsRef.current.filter(conv => conv.messages.length > 0);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(conversationsToSave));
         localStorage.setItem(CURRENT_CONVERSATION_KEY, currentConversationIdRef.current);
       } catch (error) {
         console.error('卸载时保存状态失败:', error);
@@ -122,11 +265,48 @@ const Chat: React.FC = () => {
     };
   }, []);
 
+  // 滚动到最新消息
+  const scrollToBottom = useCallback(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'end',
+        inline: 'nearest'
+      });
+    }
+  }, []);
+
+  // 页面加载完成后滚动到最底部
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [currentMessages]);
+    // 延迟执行，确保DOM已经完全渲染
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [scrollToBottom]);
+
+  // 新消息添加时滚动到最底部
+  useEffect(() => {
+    // 延迟执行，确保新消息已经完全渲染到DOM中
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [currentMessages, scrollToBottom]);
 
   const createNewConversation = useCallback(() => {
+    // 检查当前对话是否为空
+    if (currentConversationId) {
+      const currentConv = conversations.find(conv => conv.id === currentConversationId);
+      if (currentConv && currentConv.messages.length === 0) {
+        // 当前对话为空，直接返回它
+        return currentConv;
+      }
+    }
+    
+    // 创建新对话
     const newConversation: Conversation = {
       id: `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       title: '新对话',
@@ -138,7 +318,7 @@ const Chat: React.FC = () => {
     setConversations(prev => [...prev, newConversation]);
     setCurrentConversationId(newConversation.id);
     return newConversation;
-  }, []);
+  }, [currentConversationId, conversations]);
 
   const updateConversation = useCallback((conversationId: string, updates: Partial<Conversation> | ((prevConversation: Conversation) => Partial<Conversation>)) => {
     setConversations(prev => prev.map(conv => {
@@ -177,6 +357,50 @@ const Chat: React.FC = () => {
       timestamp: new Date(),
     };
 
+    // 检查当前对话是否为空
+    const currentConv = getCurrentConversation();
+    const isFirstMessage = currentConv && currentConv.messages.length === 0;
+    
+    // 如果是第一条消息，生成对话标题
+    if (isFirstMessage) {
+      try {
+        // 调用后端API生成摘要
+        const summaryResponse = await ragApi.generateSummary(trimmedInput);
+        const newTitle = summaryResponse.summary;
+        
+        // 更新对话标题
+        updateConversation(currentConversationId, {
+          title: newTitle,
+        });
+      } catch (error) {
+        console.warn('生成对话标题失败，使用默认标题:', error);
+        // 如果API调用失败，使用简单的前端摘要算法
+        let newTitle = trimmedInput;
+        if (newTitle.length > 15) {
+          // 简单摘要算法：取前几个关键词
+          const words = newTitle.split(/[\s，。！？；：,.;:!?]/).filter(word => word.length > 0);
+          if (words.length > 1) {
+            // 取前两个关键词
+            newTitle = words.slice(0, 2).join(' ');
+          } else {
+            // 取前15个字
+            newTitle = newTitle.substring(0, 15);
+          }
+        }
+        // 确保标题长度在5-15字之间
+        if (newTitle.length < 5) {
+          newTitle = newTitle.padEnd(5, ' ');
+        }
+        newTitle = newTitle.trim();
+        
+        // 更新对话标题
+        updateConversation(currentConversationId, {
+          title: newTitle,
+        });
+      }
+    }
+
+    // 添加用户消息
     updateConversation(currentConversationId, (prevConversation) => ({
       messages: [...prevConversation.messages, userMessage],
       inputValue: '',
@@ -225,19 +449,12 @@ const Chat: React.FC = () => {
         timestamp: new Date(),
       };
 
-      const currentConv = getCurrentConversation();
-      if (currentConv && currentConv.messages.length === 1) {
-        const newTitle = trimmedInput.length > 20 
-          ? trimmedInput.substring(0, 20) + '...' 
-          : trimmedInput;
-        updateConversation(currentConversationId, {
-          title: newTitle,
-        });
-      }
-
+      // 添加AI回复
       updateConversation(currentConversationId, (prevConversation) => ({
         messages: [...prevConversation.messages, assistantMessage],
       }));
+      // 发送消息后滚动到底部
+      scrollToBottom();
     } catch (error) {
       console.error('发送消息失败:', error);
       const errorMessage: Message = {
@@ -249,10 +466,12 @@ const Chat: React.FC = () => {
       updateConversation(currentConversationId, (prevConversation) => ({
         messages: [...prevConversation.messages, errorMessage],
       }));
+      // 发送消息后滚动到底部
+      scrollToBottom();
     } finally {
       setIsLoading(false);
     }
-  }, [currentInputValue, currentConversationId, currentMessages, createNewConversation, updateConversation, getCurrentConversation, isLoading]);
+  }, [currentInputValue, currentConversationId, currentMessages, createNewConversation, updateConversation, getCurrentConversation, isLoading, scrollToBottom]);
 
   const getIntentDescription = (intentType: string): string => {
     const descriptions: Record<string, string> = {
@@ -289,38 +508,68 @@ const Chat: React.FC = () => {
 
   const handleClearChat = useCallback(() => {
     if (!currentConversationId) return;
-    if (confirm('确定要清空当前对话记录吗？')) {
-      updateConversation(currentConversationId, {
-        messages: [],
-        inputValue: '',
-      });
-    }
-  }, [currentConversationId, updateConversation]);
+    setDeletingConversationId(currentConversationId);
+    setIsDeleteConfirmOpen(true);
+  }, [currentConversationId]);
 
-  const handleDeleteConversation = useCallback(() => {
-    if (!currentConversationId) return;
-    if (confirm('确定要删除当前对话吗？此操作不可恢复。')) {
-      const conversationIndex = conversations.findIndex(conv => conv.id === currentConversationId);
-      setConversations(prev => prev.filter(conv => conv.id !== currentConversationId));
-      if (conversations.length === 1) {
-        createNewConversation();
-      } else {
-        const newIndex = Math.max(0, conversationIndex - 1);
-        if (conversations[newIndex]) {
-          setCurrentConversationId(conversations[newIndex].id);
-        } else if (conversations[conversationIndex + 1]) {
-          setCurrentConversationId(conversations[conversationIndex + 1].id);
-        }
+  const handleClearChatConfirm = useCallback(() => {
+    if (!deletingConversationId) return;
+    updateConversation(deletingConversationId, {
+      messages: [],
+      inputValue: '',
+    });
+  }, [deletingConversationId, updateConversation]);
+
+  const handleDeleteConversation = useCallback((conversationId?: string) => {
+    const targetId = conversationId || currentConversationId;
+    if (!targetId) return;
+    setDeletingConversationId(targetId);
+    setIsDeleteConfirmOpen(true);
+  }, [currentConversationId]);
+
+  const handleDeleteConversationConfirm = useCallback(async () => {
+    if (!deletingConversationId) return;
+
+    try {
+      // 调用后端API删除对话
+      await ragApi.deleteConversation(deletingConversationId);
+      logger.info(`对话已删除: ${deletingConversationId}`);
+    } catch (error) {
+      console.error('删除对话失败:', error);
+      // 即使后端删除失败，也从本地移除（保持数据一致性）
+    }
+
+    const conversationIndex = conversations.findIndex(conv => conv.id === deletingConversationId);
+    setConversations(prev => prev.filter(conv => conv.id !== deletingConversationId));
+
+    if (conversations.length === 1) {
+      createNewConversation();
+    } else {
+      const newIndex = Math.max(0, conversationIndex - 1);
+      if (conversations[newIndex]) {
+        setCurrentConversationId(conversations[newIndex].id);
+      } else if (conversations[conversationIndex + 1]) {
+        setCurrentConversationId(conversations[conversationIndex + 1].id);
       }
     }
-  }, [currentConversationId, conversations, createNewConversation]);
+  }, [deletingConversationId, conversations, createNewConversation]);
 
-  const handleRenameConversation = useCallback((newTitle: string) => {
-    if (!currentConversationId || !newTitle.trim()) return;
-    updateConversation(currentConversationId, {
+  const handleRenameConversation = useCallback((conversationId: string, newTitle: string) => {
+    if (!conversationId || !newTitle.trim()) return;
+    updateConversation(conversationId, {
       title: newTitle.trim(),
     });
-  }, [currentConversationId, updateConversation]);
+  }, [updateConversation]);
+
+  const openRenameDialog = useCallback((conversationId: string, conversationTitle: string) => {
+    setRenamingConversationId(conversationId);
+    setIsRenameDialogOpen(true);
+  }, []);
+
+  const closeRenameDialog = useCallback(() => {
+    setIsRenameDialogOpen(false);
+    setRenamingConversationId('');
+  }, []);
 
   const handleExampleClick = (question: string) => {
     if (currentConversationId) {
@@ -334,9 +583,55 @@ const Chat: React.FC = () => {
     }
   };
 
+  // 侧边栏切换处理函数
+  const handleToggleSidebar = () => {
+    setSidebarHidden(!sidebarHidden);
+  };
+
+  // 侧边栏悬停显示处理函数
+  const handleSidebarHover = () => {
+    setSidebarHidden(false);
+  };
+
+  // 侧边栏离开隐藏处理函数
+  const handleSidebarLeave = () => {
+    setSidebarHidden(true);
+  };
+
+  // 监听输入区域高度变化，调整消息区域滚动
+  useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (messagesRef.current) {
+          // 当输入区域高度变化时，保持消息区域的滚动位置
+          // 确保最新的消息始终可见
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    });
+
+    if (inputWrapperRef.current) {
+      observer.observe(inputWrapperRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
-    <div className="chat-container">
-      <div className="chat-sidebar">
+    <div className={`chat-container ${sidebarHidden ? 'sidebar-hidden' : ''}`}>
+      {/* 侧边栏悬停显示区域 */}
+      <div 
+        className="sidebar-hover-area"
+        onMouseEnter={handleSidebarHover}
+      />
+      
+      {/* 侧边栏 */}
+      <div 
+        className={`chat-sidebar ${sidebarHidden ? 'hidden' : ''}`}
+        onMouseLeave={sidebarHidden ? handleSidebarLeave : undefined}
+      >
         <div className="sidebar-header">
           <h3>对话</h3>
           <button 
@@ -359,8 +654,8 @@ const Chat: React.FC = () => {
                 <div className="conversation-title">
                   {conversation.title}
                 </div>
-                <div className="conversation-meta">
-                  <span className="message-count">
+                {/* <div className="conversation-meta"> */}
+                  {/* <span className="message-count">
                     {conversation.messages.length} 条消息
                   </span>
                   <span className="last-updated">
@@ -368,34 +663,25 @@ const Chat: React.FC = () => {
                       hour: '2-digit',
                       minute: '2-digit',
                     })}
-                  </span>
-                </div>
+                  </span> */}
+                {/* </div> */}
               </div>
               <div className="conversation-actions">
                 <button 
                   className="action-btn rename-btn"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const newTitle = prompt('请输入新的对话标题:', conversation.title);
-                    if (newTitle) {
-                      handleRenameConversation(newTitle);
-                    }
+                    openRenameDialog(conversation.id, conversation.title);
                   }}
                   title="重命名对话"
                 >
                   <i className="fas fa-edit"></i>
                 </button>
-                <button 
+                <button
                   className="action-btn delete-btn"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (conversation.id === currentConversationId) {
-                      handleDeleteConversation();
-                    } else {
-                      if (confirm('确定要删除此对话吗？')) {
-                        setConversations(prev => prev.filter(conv => conv.id !== conversation.id));
-                      }
-                    }
+                    handleDeleteConversation(conversation.id);
                   }}
                   title="删除对话"
                 >
@@ -410,25 +696,26 @@ const Chat: React.FC = () => {
       <div className="chat-main">
         <div className="chat-header">
           <div className="chat-header-content">
-            <div className="chat-header-icon">
-              <i className="fas fa-comments"></i>
-            </div>
+            <button 
+              className={`sidebar-toggle ${sidebarHidden ? 'active' : ''}`}
+              onClick={handleToggleSidebar}
+              title={sidebarHidden ? '显示侧边栏' : '隐藏侧边栏'}
+            >
+              <i className={`fas ${sidebarHidden ? 'fa-arrow-right' : 'fa-arrow-left'}`}></i>
+            </button>
             <div className="chat-header-text">
               <h2>{getCurrentConversation()?.title || '智能对话'}</h2>
-              <p>基于 RAG 技术的智能问答助手</p>
+              <p>内容由 AI 生成</p>
             </div>
           </div>
           <div className="chat-header-actions">
             <button className="clear-chat-btn" onClick={handleClearChat} title="清空对话">
-              <i className="fas fa-trash-alt"></i>
-            </button>
-            <button className="delete-conversation-btn" onClick={handleDeleteConversation} title="删除对话">
-              <i className="fas fa-times"></i>
+              <i className="el-icon-delete"></i>
             </button>
           </div>
         </div>
 
-        <div className="chat-messages">
+        <div className="chat-messages" ref={messagesRef}>
           {currentMessages.length === 0 ? (
             <div className="chat-empty">
               <div className="empty-icon">
@@ -506,31 +793,46 @@ const Chat: React.FC = () => {
         </div>
 
         <div className="chat-input-area">
-          <div className="input-hint">
-            <span>提示: 上传文档后，我才能基于知识库回答问题</span>
-          </div>
           <div className="input-container">
-            <textarea
-              ref={inputRef}
-              className="chat-input"
-              placeholder="输入您的问题... (按 Enter 发送，Shift + Enter 换行)"
-              value={currentInputValue}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              disabled={isLoading}
-              rows={1}
-            />
-            <button
-              className="send-button"
-              onClick={handleSendMessage}
-              disabled={!currentInputValue.trim() || isLoading}
-              title="发送消息"
-            >
-              <i className={`fas ${isLoading ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`}></i>
-            </button>
+            <div className="input-wrapper" ref={inputWrapperRef}>
+              <textarea
+                ref={inputRef}
+                className="chat-input"
+                placeholder="问点难的，让我多想一步"
+                value={currentInputValue}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                disabled={isLoading}
+                rows={1}
+              />
+              <button className="add-button" title="添加附件">
+                <i className="fas fa-plus"></i>
+              </button>
+              <div className="button-container">
+                <div className="think-dropdown" title="思考模式">
+                  <span>K2.5思考</span>
+                  <i className="fas fa-chevron-down"></i>
+                </div>
+                <button
+                  className="send-button"
+                  onClick={handleSendMessage}
+                  disabled={!currentInputValue.trim() || isLoading}
+                  title="发送消息"
+                >
+                  <i className={`fas ${isLoading ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`}></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <RenameDialog
+        isOpen={isRenameDialogOpen}
+        currentTitle={conversations.find(c => c.id === renamingConversationId)?.title || ''}
+        onClose={closeRenameDialog}
+        onConfirm={(newTitle) => handleRenameConversation(renamingConversationId, newTitle)}
+      />
     </div>
   );
 };

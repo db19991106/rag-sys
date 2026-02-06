@@ -285,6 +285,36 @@ export const ragApi = {
       body: JSON.stringify({ query }),
     });
   },
+
+  generateSummary: async (text: string) => {
+    return request<{
+      summary: string;
+    }>('/summary/generate', {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    });
+  },
+
+  deleteConversation: async (conversationId: string) => {
+    return request<{ success: boolean; message: string }>(`/conversations/${conversationId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  listConversations: async () => {
+    return request<{
+      success: boolean;
+      data: Array<{
+        id: string;
+        title: string;
+        message_count: number;
+        created_at: string;
+        updated_at: string;
+      }>;
+    }>('/conversations/', {
+      method: 'GET',
+    });
+  },
 };
 
 // ========== 类型定义 ==========

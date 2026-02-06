@@ -22,8 +22,11 @@ from api import (
     rag,
     cleaning,
     sync,
+    summary,
+    conversations,
 )
 from api import settings as settings_api
+from api import enhanced_rag
 
 
 # CSRF保护中间件
@@ -241,6 +244,12 @@ app.add_middleware(
 if not settings.debug:
     app.add_middleware(CSRFMiddleware)
 
+# 添加API网关中间件（JWT鉴权、速率限制、请求校验）
+from middleware.gateway import APIGatewayMiddleware, RequestLoggingMiddleware
+
+app.add_middleware(APIGatewayMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
+
 # 添加全局异常处理器
 from utils.error_handler import app_exception_handler, AppError
 from fastapi.exceptions import RequestValidationError
@@ -279,6 +288,15 @@ app.include_router(sync.router)
 
 # 设置操作：限制严格
 app.include_router(settings_api.router)
+
+# 增强版RAG路由
+app.include_router(enhanced_rag.router)
+
+# 摘要生成路由
+app.include_router(summary.router)
+
+# 对话路由
+app.include_router(conversations.router)
 
 # 应用全局速率限制（通过中间件已经配置）
 # 特定端点的速率限制已在各自的路由中配置
