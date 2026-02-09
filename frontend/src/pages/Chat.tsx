@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { ragApi } from '../services/api';
+import { ragApi, documentApi } from '../services/api';
 import './Chat.css';
 
 // 添加console.log的别名logger
@@ -188,10 +188,12 @@ const Chat: React.FC = () => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [deleteConfirmTitle, setDeleteConfirmTitle] = useState('');
   const [deleteConfirmMessage, setDeleteConfirmMessage] = useState('');
-  const [isClearingChat, setIsClearingChat] = useState(false);
   const [deletingConversationId, setDeletingConversationId] = useState<string>('');
   const [renamingConversationId, setRenamingConversationId] = useState<string>('');
   const [sidebarHidden, setSidebarHidden] = useState(false);
+  
+  // 文件上传相关
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const inputWrapperRef = useRef<HTMLDivElement>(null);
@@ -571,6 +573,41 @@ const Chat: React.FC = () => {
     setRenamingConversationId('');
   }, []);
 
+  // 文件上传处理函数
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const supportExt = ['.txt', '.pdf', '.docx', '.md'];
+
+    for (const file of Array.from(files)) {
+      const ext = '.' + file.name.split('.').pop();
+      if (!ext) continue;
+      const extLower = ext.toLowerCase();
+      if (!supportExt.includes(extLower)) {
+        alert(`文件${file.name}格式不支持,仅支持TXT/PDF/DOCX/MD`);
+        continue;
+      }
+
+      try {
+        await documentApi.upload(file);
+        alert(`文档 ${file.name} 上传成功!`);
+      } catch (error) {
+        console.error('上传失败:', error);
+        alert(`文档 ${file.name} 上传失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      }
+    }
+
+    if (fileInputRef.current?.value) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // 触发文件选择
+  const handleAddButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleExampleClick = (question: string) => {
     if (currentConversationId) {
       updateConversation(currentConversationId, {
@@ -633,7 +670,7 @@ const Chat: React.FC = () => {
         onMouseLeave={sidebarHidden ? handleSidebarLeave : undefined}
       >
         <div className="sidebar-header">
-          <h3>对话</h3>
+          <h3>历史对话</h3>
           <button 
             className="new-conversation-btn"
             onClick={createNewConversation}
@@ -805,9 +842,17 @@ const Chat: React.FC = () => {
                 disabled={isLoading}
                 rows={1}
               />
-              <button className="add-button" title="添加附件">
+              <button className="add-button" title="添加附件" onClick={handleAddButtonClick}>
                 <i className="fas fa-plus"></i>
               </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileUpload}
+                multiple
+                accept=".txt,.pdf,.docx,.md"
+                style={{ display: 'none' }}
+              />
               <div className="button-container">
                 <div className="think-dropdown" title="思考模式">
                   <span>K2.5思考</span>
@@ -832,6 +877,14 @@ const Chat: React.FC = () => {
         currentTitle={conversations.find(c => c.id === renamingConversationId)?.title || ''}
         onClose={closeRenameDialog}
         onConfirm={(newTitle) => handleRenameConversation(renamingConversationId, newTitle)}
+      />
+
+      <ConfirmDialog
+        isOpen={isDeleteConfirmOpen}
+        title="确认删除"
+        message="确定要删除这个对话吗？此操作不可撤销。"
+        onConfirm={handleDeleteConversationConfirm}
+        onClose={() => setIsDeleteConfirmOpen(false)}
       />
     </div>
   );

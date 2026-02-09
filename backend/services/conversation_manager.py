@@ -119,12 +119,18 @@ class LLMClient:
 
             # 生成
             with torch.no_grad():
+                # 当temperature=0.0时，使用贪婪解码策略
+                do_sample = True
+                if temperature <= 0.0:
+                    do_sample = False
+                    temperature = 1.0  # 设置一个默认值，避免错误
+                
                 outputs = self.model.generate(
                     **inputs,
                     max_new_tokens=512,
                     temperature=temperature,
                     top_p=0.9,
-                    do_sample=True,
+                    do_sample=do_sample,
                     pad_token_id=self.tokenizer.eos_token_id
                 )
 

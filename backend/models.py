@@ -174,7 +174,10 @@ class SimilarityAlgorithm(str, Enum):
 class RetrievalConfig(BaseModel):
     top_k: int = Field(default=5, ge=1, le=20, description="返回结果数量")
     similarity_threshold: float = Field(
-        default=0.4, ge=0, le=1, description="相似度阈值（降低以获取更多结果）"
+        default=0.2,
+        ge=0,
+        le=1,
+        description="相似度阈值（降低以获取更多结果，财务制度类建议0.2-0.3）",
     )
     algorithm: SimilarityAlgorithm = Field(default=SimilarityAlgorithm.COSINE)
     enable_rerank: bool = Field(default=False, description="是否启用重排序")
@@ -207,6 +210,8 @@ class RetrievalResponse(BaseModel):
 class GenerationConfig(BaseModel):
     llm_provider: str = "openai"
     llm_model: str = "gpt-3.5-turbo"
+    llm_api_key: Optional[str] = None
+    llm_base_url: Optional[str] = None
     temperature: float = 0.7
     max_tokens: int = 2000
     top_p: float = 0.9
@@ -263,6 +268,9 @@ class Conversation(BaseModel):
     user_id: str
     username: str
     messages: List[Message]
+    user_profile: Dict[str, Any] = Field(
+        default_factory=dict, description="用户画像，存储用户身份信息、职位等"
+    )  # 新增
     created_at: datetime
     last_updated: datetime
 

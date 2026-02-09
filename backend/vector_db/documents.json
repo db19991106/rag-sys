@@ -1,79 +1,24 @@
 {
-  "da23ff1668ba791c5da0f6d3431ba768": {
-    "id": "da23ff1668ba791c5da0f6d3431ba768",
-    "name": "16laodonghetongfa.pdf",
-    "size": 172756,
-    "status": "indexed",
-    "upload_time": "2026-01-28T22:17:28.293041",
-    "chunk_count": 1,
-    "category": "未分类",
-    "tags": [],
-    "file_path": "16laodonghetongfa.pdf"
-  },
-  "8374ddf7798647c0585761dacdb46628": {
-    "id": "8374ddf7798647c0585761dacdb46628",
-    "name": "Employee-Handbook.md",
-    "size": 24351,
-    "status": "indexed",
-    "upload_time": "2026-01-31T00:15:22.193861",
-    "chunk_count": 111,
-    "category": "未分类",
-    "tags": [],
-    "file_path": "Employee-Handbook.md"
-  },
-  "b2daab3855cd81985cb7c692629cf9c6": {
-    "id": "b2daab3855cd81985cb7c692629cf9c6",
-    "name": "Financial-system.md",
-    "size": 11656,
-    "status": "indexed",
-    "upload_time": "2026-01-31T00:15:24.178630",
-    "chunk_count": 11,
-    "category": "未分类",
-    "tags": [],
-    "file_path": "Financial-system.md"
-  },
-  "2328842c05b1ac8945499c08a1ba57b0": {
-    "id": "2328842c05b1ac8945499c08a1ba57b0",
-    "name": "Project-documentation.md",
-    "size": 11009,
-    "status": "indexed",
-    "upload_time": "2026-01-31T00:15:25.940189",
-    "chunk_count": 22,
-    "category": "未分类",
-    "tags": [],
-    "file_path": "Project-documentation.md"
-  },
-  "b67d4e93eb283863abdb78a3ec8151dc": {
-    "id": "b67d4e93eb283863abdb78a3ec8151dc",
+  "1a2878777ca687bed1e6eb382941bcb9": {
+    "id": "1a2878777ca687bed1e6eb382941bcb9",
     "name": "baoxiao.md",
-    "size": 6017,
+    "size": 6637,
     "status": "indexed",
-    "upload_time": "2026-02-01T18:44:47.146048",
-    "chunk_count": 10,
+    "upload_time": "2026-02-07T22:50:11.796603",
+    "chunk_count": 14,
     "category": "未分类",
     "tags": [],
     "file_path": "baoxiao.md"
   },
-  "74c2068ee6b0a50ca358a2a5db11b8d0": {
-    "id": "74c2068ee6b0a50ca358a2a5db11b8d0",
-    "name": "baoxiao.pdf",
-    "size": 322450,
-    "status": "indexed",
-    "upload_time": "2026-02-01T21:08:46.674935",
-    "chunk_count": 1,
+  "a6fa7355a561a888c06a677dccd86f96": {
+    "id": "a6fa7355a561a888c06a677dccd86f96",
+    "name": "baoxiao.md",
+    "size": 6444,
+    "status": "pending",
+    "upload_time": "2026-02-08T13:30:17.861373",
+    "chunk_count": 0,
     "category": "未分类",
     "tags": [],
-    "file_path": "baoxiao.pdf"
-  },
-  "96dd271ffaae9be8fd20250b05c760dd": {
-    "id": "96dd271ffaae9be8fd20250b05c760dd",
-    "name": "中华人民共和国民法典_20200528.md",
-    "size": 330557,
-    "status": "indexed",
-    "upload_time": "2026-02-03T19:34:30.932881",
-    "chunk_count": 140,
-    "category": "未分类",
-    "tags": [],
-    "file_path": "中华人民共和国民法典_20200528.md"
+    "file_path": "baoxiao.md"
   }
 }

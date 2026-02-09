@@ -53,3 +53,22 @@ frontend/build/
 *.swp
 *.swo
 *~
+
+
+# 忽略模型文件（常见后缀）
+*.pth
+*.ckpt
+*.bin
+*.pt
+# 忽略数据集/大文件夹
+data/
+dataset/
+# 忽略压缩包
+*.zip
+*.rar
+*.7z
+# 忽略日志/缓存
+*.log
+__pycache__/
+.cache/
+

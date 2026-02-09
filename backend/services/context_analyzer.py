@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Any
 import traceback
 from datetime import datetime
 from models import Message
@@ -19,15 +19,19 @@ class ContextAnalyzer:
         self.max_history_rounds = 10
 
     def analyze_context(
-        self, conversation_history: List[Message], current_query: str
+        self,
+        conversation_history: List[Message],
+        current_query: str,
+        existing_profile: Dict[str, Any] = None,
     ) -> Dict:
         """
         对外核心接口：分析上下文并生成历史感知的改写查询
         Args:
             conversation_history: 对话历史消息列表
             current_query: 当前用户查询
+            existing_profile: 已有的用户画像（累积的身份信息）
         Returns:
-            分析结果字典
+            分析结果字典，包含user_profile字段
         """
         # 初始化返回结果
         analysis_result = {
@@ -37,6 +41,7 @@ class ContextAnalyzer:
             "enhanced_query": current_query,
             "rewritten_query": current_query,
             "context_summary": "",
+            "user_profile": existing_profile or {},  # 返回用户画像
         }
 
         # 无历史对话，直接返回原始查询
@@ -53,17 +58,32 @@ class ContextAnalyzer:
                 logger.info(f"LLM判断：当前查询「{current_query}」不依赖历史上下文")
                 return analysis_result
 
-            # 2. LLM抽取：上下文核心信息（主题/实体/摘要）
-            main_topic, entities, context_summary = self._llm_extract_context_info(
-                conversation_history
+            # 2. LLM抽取：上下文核心信息（主题/实体/摘要/用户身份）
+            main_topic, entities, context_summary, user_identity = (
+                self._llm_extract_context_info(conversation_history)
             )
             analysis_result["main_topic"] = main_topic
             analysis_result["entities"] = entities
             analysis_result["context_summary"] = context_summary
 
-            # 3. LLM改写：生成独立可检索的查询
+            # 合并用户画像（新识别的身份信息合并到已有画像）
+            if user_identity:
+                if existing_profile:
+                    analysis_result["user_profile"] = {
+                        **existing_profile,
+                        **user_identity,
+                    }
+                else:
+                    analysis_result["user_profile"] = user_identity
+                logger.info(f"识别到用户身份信息: {user_identity}")
+
+            # 3. LLM改写：生成独立可检索的查询（传入用户画像）
             rewritten_query = self._llm_rewrite_query(
-                conversation_history, current_query
+                conversation_history,
+                current_query,
+                main_topic,
+                entities,
+                analysis_result["user_profile"],  # 传入用户画像
             )
             analysis_result["rewritten_query"] = rewritten_query
             analysis_result["enhanced_query"] = rewritten_query
@@ -152,12 +172,12 @@ class ContextAnalyzer:
 
     def _llm_extract_context_info(
         self, history: List[Message]
-    ) -> Tuple[str, List[str], str]:
+    ) -> Tuple[str, List[str], str, Dict[str, str]]:
         """
-        LLM抽取：核心主题、关键实体、上下文摘要
+        LLM抽取：核心主题、关键实体、上下文摘要、用户身份信息
 
         Returns:
-            (核心主题, 关键实体列表, 上下文摘要)
+            (核心主题, 关键实体列表, 上下文摘要, 用户身份信息字典)
         """
         history_str = self._format_history(history)
 
@@ -169,11 +189,18 @@ class ContextAnalyzer:
 抽取要求：
 1. 核心主题：总结整个对话的核心议题（一句话，不超过20字）
 2. 关键实体：提取对话中的核心实体（如职位、制度、产品、概念等，用中文逗号分隔）
-3. 上下文摘要：简洁概括对话内容（不超过100字）
+3. 用户身份信息：识别用户的职位、部门、级别等身份信息（格式：属性=值，每行一个）
+   - 特别注意识别用户自述的身份，如"我是高管"、"我是普通员工"、"我在技术部"等
+   - 职位示例：职位=高管、职位=经理、职位=普通员工
+   - 部门示例：部门=技术部、部门=销售部
+4. 上下文摘要：简洁概括对话内容（不超过100字）
 
 输出格式（严格遵守，不要多余内容）：
 核心主题：xxx
 关键实体：实体1,实体2,实体3
+用户身份信息：
+职位=xxx
+部门=xxx
 上下文摘要：xxx"""
 
         resp = self.llm.chat(prompt, temperature=0.0).strip()
@@ -182,18 +209,31 @@ class ContextAnalyzer:
         main_topic = ""
         entities = []
         context_summary = ""
+        user_identity = {}
 
+        in_identity_section = False
         for line in resp.split("\n"):
             line = line.strip()
             if line.startswith("核心主题："):
                 main_topic = line.replace("核心主题：", "").strip()
+                in_identity_section = False
             elif line.startswith("关键实体："):
                 entities_str = line.replace("关键实体：", "").strip()
                 entities = [e.strip() for e in entities_str.split(",") if e.strip()]
+                in_identity_section = False
+            elif line.startswith("用户身份信息："):
+                in_identity_section = True
             elif line.startswith("上下文摘要："):
                 context_summary = line.replace("上下文摘要：", "").strip()
+                in_identity_section = False
+            elif in_identity_section and "=" in line:
+                # 解析用户身份信息
+                key_value = line.replace("-", "").strip()
+                if "=" in key_value:
+                    key, value = key_value.split("=", 1)
+                    user_identity[key.strip()] = value.strip()
 
-        return main_topic, entities, context_summary
+        return main_topic, entities, context_summary, user_identity
 
     def _llm_rewrite_query(
         self,
@@ -201,6 +241,7 @@ class ContextAnalyzer:
         query: str,
         main_topic: str = "",
         entities: List[str] = None,
+        user_profile: Dict[str, str] = None,
     ) -> str:
         """
         LLM改写：将依赖上下文的查询转为独立可检索的查询
@@ -210,6 +251,11 @@ class ContextAnalyzer:
         """
         history_str = self._format_history(history)
         entities_str = ", ".join(entities) if entities else ""
+
+        # 构建用户身份信息字符串
+        user_profile_str = ""
+        if user_profile:
+            user_profile_str = "\n".join([f"{k}={v}" for k, v in user_profile.items()])
 
         prompt = f"""你是RAG系统的查询改写专家，必须将依赖上下文的用户查询改写为独立、完整、无歧义的检索查询。
 
@@ -222,14 +268,18 @@ class ContextAnalyzer:
 【已识别的关键实体】
 {entities_str if entities_str else "（待识别）"}
 
+【用户身份信息】（非常重要，改写时必须考虑）
+{user_profile_str if user_profile_str else "（未识别）"}
+
 【当前用户查询（依赖上下文）】
 {query}
 
 改写要求（必须严格遵守）：
-1. 找出查询中的指代词（那、该、此、这个、那种等），用【核心主题】或【关键实体】替换
-2. 补全省略的主语、宾语、谓语，使查询完整可理解
-3. 保持用户原始意图不变，不要添加额外信息
-4. 改写后的查询必须是一个完整的问句或陈述句，可用于文档检索
+1. 找出查询中的指代词（那、该、此、这个、那种、我、本人等），用【核心主题】或【关键实体】或【用户身份信息】替换
+2. 如果用户用"我"、"本人"指代自己，必须用【用户身份信息】中的具体身份替换
+3. 补全省略的主语、宾语、谓语，使查询完整可理解
+4. 保持用户原始意图不变，不要添加额外信息
+5. 改写后的查询必须是一个完整的问句或陈述句，可用于文档检索
 
 示例：
 历史："通讯费报销标准是什么？" → "主管150元/月"

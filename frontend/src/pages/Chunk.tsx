@@ -332,7 +332,7 @@ const Chunk: React.FC = () => {
               >
                 <optgroup label="基础切分">
                   <option value="naive">📝 朴素切分（推荐）</option>
-                  <option value="intelligent">🤖 智能切分</option>
+                  <option value="intelligent">💰 财务报销制度切分</option>
                   <option value="enhanced">🚀 增强型切分</option>
                   <option value="char">📝 按字符切分</option>
                   <option value="sentence">💬 按句子切分</option>

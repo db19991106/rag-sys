@@ -30,49 +30,49 @@ class IntentConfig:
     CONFIGS = {
         IntentType.QUESTION: {
             "top_k": 5,
-            "similarity_threshold": 0.4,
+            "similarity_threshold": 0.2,
             "description": "问题咨询",
             "prompt_template": "根据以下信息回答问题：",
         },
         IntentType.SEARCH: {
             "top_k": 10,
-            "similarity_threshold": 0.4,
+            "similarity_threshold": 0.2,
             "description": "信息搜索",
             "prompt_template": "以下是搜索到的相关信息：",
         },
         IntentType.SUMMARY: {
             "top_k": 15,
-            "similarity_threshold": 0.4,
+            "similarity_threshold": 0.2,
             "description": "内容总结",
             "prompt_template": "请总结以下内容：",
         },
         IntentType.COMPARISON: {
             "top_k": 8,
-            "similarity_threshold": 0.4,
+            "similarity_threshold": 0.2,
             "description": "对比分析",
             "prompt_template": "对比以下信息：",
         },
         IntentType.PROCEDURE: {
             "top_k": 5,
-            "similarity_threshold": 0.4,
+            "similarity_threshold": 0.2,
             "description": "操作流程",
             "prompt_template": "以下操作步骤：",
         },
         IntentType.DEFINITION: {
             "top_k": 5,
-            "similarity_threshold": 0.4,
+            "similarity_threshold": 0.2,
             "description": "定义说明",
             "prompt_template": "定义如下：",
         },
         IntentType.GREETING: {
             "top_k": 3,
-            "similarity_threshold": 0.4,
+            "similarity_threshold": 0.2,
             "description": "问候",
             "prompt_template": "您好！",
         },
         IntentType.OTHER: {
             "top_k": 5,
-            "similarity_threshold": 0.4,
+            "similarity_threshold": 0.2,
             "description": "其他",
             "prompt_template": "根据以下信息回答：",
         },
@@ -269,7 +269,7 @@ class IntentRecognizer:
 - other: 其他
 
 请以JSON格式返回结果：
-{{"intent": "意图类别", "confidence": 置信度(0-1), "reason": "判断理由"}}
+{"intent": "意图类别", "confidence": 置信度(0-1), "reason": "判断理由"}
 
 注意：只返回JSON，不要其他内容。"""
 
@@ -314,6 +314,23 @@ class IntentRecognizer:
             logger.error(f"LLM意图识别解析失败: {e}")
             # 如果LLM识别失败，返回其他类型
             return IntentType.OTHER, 0.3, {"method": "llm", "error": str(e)}
+
+    def recognize_intent(self, query: str) -> Dict:
+        """
+        识别意图（兼容旧接口）
+
+        Args:
+            query: 用户查询文本
+
+        Returns:
+            Dict: 包含intent、confidence和details的字典
+        """
+        intent, confidence, details = self.recognize(query)
+        return {
+            "intent": intent.value,
+            "confidence": confidence,
+            "details": details
+        }
 
 
 # 全局意图识别器实例

@@ -461,7 +461,7 @@ const Settings: React.FC = () => {
                     value={settings.splitting_strategy}
                     onChange={(e) => setSettings({ ...settings, splitting_strategy: e.target.value })}
                   >
-                    <option value="intelligent">智能切分 (推荐)</option>
+                    <option value="intelligent">财务报销制度切分 (推荐)</option>
                     <option value="size_based">基于大小</option>
                     <option value="section_based">基于章节</option>
                     <option value="page_based">基于页面</option>
