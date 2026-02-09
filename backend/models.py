@@ -253,6 +253,11 @@ class RAGResponse(BaseModel):
     total_time_ms: float
     tokens_used: Optional[int] = None
 
+    @property
+    def sources(self) -> List[RetrievalResult]:
+        """兼容旧代码，sources指向context_chunks"""
+        return self.context_chunks
+
 
 # ========== 对话相关 ==========
 class Message(BaseModel):
