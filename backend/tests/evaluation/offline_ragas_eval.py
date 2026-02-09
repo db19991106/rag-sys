@@ -12,7 +12,7 @@ from typing import List, Dict, Any
 from datetime import datetime
 
 # 添加项目路径
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 # 配置RAGAS使用本地模型
 import os

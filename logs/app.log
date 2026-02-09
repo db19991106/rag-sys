@@ -43255,3 +43255,239 @@ ValueError: 模型未加载，请先调用 load_model
 2026-02-09 18:43:28.840 - INFO - rag_backend - 系统状态: embedding - loaded
 2026-02-09 18:43:28.841 - INFO - rag_backend - 系统状态: application - running
 2026-02-09 18:43:28.843 - ERROR - rag_backend - INFO:     Application startup complete.
+2026-02-09 18:56:05.264 - ERROR - rag_backend - INFO:     Shutting down
+2026-02-09 18:56:05.366 - ERROR - rag_backend - INFO:     Waiting for application shutdown.
+2026-02-09 18:56:05.366 - INFO - rag_backend - 关闭应用
+2026-02-09 18:56:05.367 - INFO - rag_backend - 系统状态: application - stopping
+2026-02-09 18:56:05.368 - INFO - rag_backend - FAISS 索引已保存: vector_db/faiss_index
+2026-02-09 18:56:05.368 - INFO - rag_backend - 系统状态: vector_db - saved
+2026-02-09 18:56:05.369 - INFO - rag_backend - 系统状态: application - stopped
+2026-02-09 18:56:05.369 - INFO - rag_backend - =========
+2026-02-09 18:56:05.370 - ERROR - rag_backend - INFO:     Application shutdown complete.
+2026-02-09 18:56:05.372 - ERROR - rag_backend - INFO:     Finished server process [37820]
+2026-02-09 18:56:08.444 - INFO - rag_backend - 
+2026-02-09 18:56:08.444 - INFO - rag_backend - === 日志系统自检 ===
+2026-02-09 18:56:08.445 - INFO - rag_backend - 处理器数量: 2
+2026-02-09 18:56:08.445 - INFO - rag_backend - 处理器 0: StreamHandler
+2026-02-09 18:56:08.445 - INFO - rag_backend - 处理器 1: SmartRotatingFileHandler
+2026-02-09 18:56:08.445 - INFO - rag_backend -   日志文件: /root/autodl-tmp/rag/logs/app.log
+2026-02-09 18:56:08.445 - INFO - rag_backend -   目录存在: /root/autodl-tmp/rag/logs
+2026-02-09 18:56:08.445 - INFO - rag_backend -   文件可写: /root/autodl-tmp/rag/logs/app.log
+2026-02-09 18:56:08.445 - INFO - rag_backend - 日志级别: INFO
+2026-02-09 18:56:08.445 - INFO - rag_backend - 测试日志输出...
+2026-02-09 18:56:08.445 - INFO - rag_backend - 日志系统自检测试消息
+2026-02-09 18:56:08.445 - INFO - rag_backend -   测试日志输出成功
+2026-02-09 18:56:08.445 - INFO - rag_backend - 检查标准输出重定向...
+2026-02-09 18:56:08.445 - INFO - rag_backend -   标准输出重定向测试
+2026-02-09 18:56:08.445 - ERROR - rag_backend -   标准错误重定向测试
+2026-02-09 18:56:08.446 - INFO - rag_backend -   标准输出重定向成功
+2026-02-09 18:56:08.446 - INFO - rag_backend - 
+2026-02-09 18:56:08.446 - INFO - rag_backend - === 自检结果: 有效 ===
+2026-02-09 18:56:08.447 - INFO - rag_backend - 状态日志文件为空，初始化为空列表
+2026-02-09 18:56:08.771 - INFO - rag_backend - 加载了 2 个文档
+2026-02-09 18:56:08.771 - INFO - rag_backend - 加载了版本信息: 19 个文档有版本记录
+2026-02-09 18:56:08.771 - INFO - rag_backend - 加载了 19 条更新历史记录
+2026-02-09 18:56:09.109 - ERROR - rag_backend - INFO:     Started server process [64332]
+2026-02-09 18:56:09.109 - ERROR - rag_backend - INFO:     Waiting for application startup.
+2026-02-09 18:56:09.110 - INFO - rag_backend - 启动 RAG Backend v1.0.0
+2026-02-09 18:56:09.110 - INFO - rag_backend - 系统状态: application - starting
+2026-02-09 18:56:09.110 - INFO - rag_backend - 系统状态: vector_db - initializing
+2026-02-09 18:56:09.133 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-09 18:56:09.134 - INFO - rag_backend - FAISS 索引文件已加载: vector_db/faiss_index
+2026-02-09 18:56:09.134 - INFO - rag_backend - 已加载 0 条元数据
+2026-02-09 18:56:09.134 - INFO - rag_backend - FAISS 索引已加载: 0 个向量，0 条元数据
+2026-02-09 18:56:09.134 - WARNING - rag_backend - 加载的索引为空，重新初始化
+2026-02-09 18:56:09.134 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-09 18:56:09.134 - INFO - rag_backend - 向量数据库初始化成功: faiss
+2026-02-09 18:56:09.134 - INFO - rag_backend - 系统状态: vector_db - initialized
+2026-02-09 18:56:09.134 - INFO - rag_backend - 系统状态: embedding - loading
+2026-02-09 18:56:09.135 - INFO - rag_backend - 正在加载默认嵌入模型: BAAI/bge-base-zh-v1.5
+2026-02-09 18:56:09.135 - INFO - rag_backend - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: bge) 
+2026-02-09 18:56:10.133 - INFO - rag_backend - 找到本地模型目录: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-09 18:56:10.133 - INFO - rag_backend - 从本地路径加载 BGE 模型: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-09 18:56:11.336 - INFO - rag_backend - 成功加载 BGE 模型: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-09 18:56:11.336 - INFO - rag_backend - 默认嵌入模型加载成功: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-09 18:56:11.336 - INFO - rag_backend - 系统状态: embedding - loaded
+2026-02-09 18:56:11.337 - INFO - rag_backend - 系统状态: application - running
+2026-02-09 18:56:11.338 - ERROR - rag_backend - INFO:     Application startup complete.
+2026-02-09 18:59:35.536 - ERROR - rag_backend - INFO:     Shutting down
+2026-02-09 18:59:35.637 - ERROR - rag_backend - INFO:     Waiting for application shutdown.
+2026-02-09 18:59:35.637 - INFO - rag_backend - 关闭应用
+2026-02-09 18:59:35.638 - INFO - rag_backend - 系统状态: application - stopping
+2026-02-09 18:59:35.639 - INFO - rag_backend - FAISS 索引已保存: vector_db/faiss_index
+2026-02-09 18:59:35.639 - INFO - rag_backend - 系统状态: vector_db - saved
+2026-02-09 18:59:35.639 - INFO - rag_backend - 系统状态: application - stopped
+2026-02-09 18:59:35.640 - INFO - rag_backend - =========
+2026-02-09 18:59:35.641 - ERROR - rag_backend - INFO:     Application shutdown complete.
+2026-02-09 18:59:35.642 - ERROR - rag_backend - INFO:     Finished server process [64332]
+2026-02-09 18:59:38.542 - INFO - rag_backend - 
+2026-02-09 18:59:38.543 - INFO - rag_backend - === 日志系统自检 ===
+2026-02-09 18:59:38.543 - INFO - rag_backend - 处理器数量: 2
+2026-02-09 18:59:38.543 - INFO - rag_backend - 处理器 0: StreamHandler
+2026-02-09 18:59:38.543 - INFO - rag_backend - 处理器 1: SmartRotatingFileHandler
+2026-02-09 18:59:38.543 - INFO - rag_backend -   日志文件: /root/autodl-tmp/rag/logs/app.log
+2026-02-09 18:59:38.543 - INFO - rag_backend -   目录存在: /root/autodl-tmp/rag/logs
+2026-02-09 18:59:38.543 - INFO - rag_backend -   文件可写: /root/autodl-tmp/rag/logs/app.log
+2026-02-09 18:59:38.543 - INFO - rag_backend - 日志级别: INFO
+2026-02-09 18:59:38.544 - INFO - rag_backend - 测试日志输出...
+2026-02-09 18:59:38.544 - INFO - rag_backend - 日志系统自检测试消息
+2026-02-09 18:59:38.544 - INFO - rag_backend -   测试日志输出成功
+2026-02-09 18:59:38.544 - INFO - rag_backend - 检查标准输出重定向...
+2026-02-09 18:59:38.544 - INFO - rag_backend -   标准输出重定向测试
+2026-02-09 18:59:38.544 - ERROR - rag_backend -   标准错误重定向测试
+2026-02-09 18:59:38.544 - INFO - rag_backend -   标准输出重定向成功
+2026-02-09 18:59:38.544 - INFO - rag_backend - 
+2026-02-09 18:59:38.544 - INFO - rag_backend - === 自检结果: 有效 ===
+2026-02-09 18:59:38.545 - INFO - rag_backend - 状态日志文件为空，初始化为空列表
+2026-02-09 18:59:39.036 - INFO - rag_backend - 加载了 2 个文档
+2026-02-09 18:59:39.036 - INFO - rag_backend - 加载了版本信息: 19 个文档有版本记录
+2026-02-09 18:59:39.037 - INFO - rag_backend - 加载了 19 条更新历史记录
+2026-02-09 18:59:39.530 - ERROR - rag_backend - INFO:     Started server process [73837]
+2026-02-09 18:59:39.531 - ERROR - rag_backend - INFO:     Waiting for application startup.
+2026-02-09 18:59:39.531 - INFO - rag_backend - 启动 RAG Backend v1.0.0
+2026-02-09 18:59:39.531 - INFO - rag_backend - 系统状态: application - starting
+2026-02-09 18:59:39.531 - INFO - rag_backend - 系统状态: vector_db - initializing
+2026-02-09 18:59:39.562 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-09 18:59:39.562 - INFO - rag_backend - FAISS 索引文件已加载: vector_db/faiss_index
+2026-02-09 18:59:39.562 - INFO - rag_backend - 已加载 0 条元数据
+2026-02-09 18:59:39.563 - INFO - rag_backend - FAISS 索引已加载: 0 个向量，0 条元数据
+2026-02-09 18:59:39.563 - WARNING - rag_backend - 加载的索引为空，重新初始化
+2026-02-09 18:59:39.563 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-09 18:59:39.563 - INFO - rag_backend - 向量数据库初始化成功: faiss
+2026-02-09 18:59:39.563 - INFO - rag_backend - 系统状态: vector_db - initialized
+2026-02-09 18:59:39.563 - INFO - rag_backend - 系统状态: embedding - loading
+2026-02-09 18:59:39.563 - INFO - rag_backend - 正在加载默认嵌入模型: BAAI/bge-base-zh-v1.5
+2026-02-09 18:59:39.563 - INFO - rag_backend - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: bge) 
+2026-02-09 18:59:40.862 - INFO - rag_backend - 找到本地模型目录: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-09 18:59:40.862 - INFO - rag_backend - 从本地路径加载 BGE 模型: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-09 18:59:42.422 - INFO - rag_backend - 成功加载 BGE 模型: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-09 18:59:42.423 - INFO - rag_backend - 默认嵌入模型加载成功: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-09 18:59:42.423 - INFO - rag_backend - 系统状态: embedding - loaded
+2026-02-09 18:59:42.423 - INFO - rag_backend - 系统状态: application - running
+2026-02-09 18:59:42.425 - ERROR - rag_backend - INFO:     Application startup complete.
+2026-02-09 19:00:01.913 - ERROR - rag_backend - INFO:     Shutting down
+2026-02-09 19:00:02.014 - ERROR - rag_backend - INFO:     Waiting for application shutdown.
+2026-02-09 19:00:02.015 - INFO - rag_backend - 关闭应用
+2026-02-09 19:00:02.015 - INFO - rag_backend - 系统状态: application - stopping
+2026-02-09 19:00:02.015 - INFO - rag_backend - FAISS 索引已保存: vector_db/faiss_index
+2026-02-09 19:00:02.016 - INFO - rag_backend - 系统状态: vector_db - saved
+2026-02-09 19:00:02.016 - INFO - rag_backend - 系统状态: application - stopped
+2026-02-09 19:00:02.016 - INFO - rag_backend - =========
+2026-02-09 19:00:02.016 - ERROR - rag_backend - INFO:     Application shutdown complete.
+2026-02-09 19:00:02.017 - ERROR - rag_backend - INFO:     Finished server process [73837]
+2026-02-09 19:00:05.261 - INFO - rag_backend - 
+2026-02-09 19:00:05.262 - INFO - rag_backend - === 日志系统自检 ===
+2026-02-09 19:00:05.262 - INFO - rag_backend - 处理器数量: 2
+2026-02-09 19:00:05.262 - INFO - rag_backend - 处理器 0: StreamHandler
+2026-02-09 19:00:05.262 - INFO - rag_backend - 处理器 1: SmartRotatingFileHandler
+2026-02-09 19:00:05.262 - INFO - rag_backend -   日志文件: /root/autodl-tmp/rag/logs/app.log
+2026-02-09 19:00:05.262 - INFO - rag_backend -   目录存在: /root/autodl-tmp/rag/logs
+2026-02-09 19:00:05.262 - INFO - rag_backend -   文件可写: /root/autodl-tmp/rag/logs/app.log
+2026-02-09 19:00:05.262 - INFO - rag_backend - 日志级别: INFO
+2026-02-09 19:00:05.262 - INFO - rag_backend - 测试日志输出...
+2026-02-09 19:00:05.262 - INFO - rag_backend - 日志系统自检测试消息
+2026-02-09 19:00:05.263 - INFO - rag_backend -   测试日志输出成功
+2026-02-09 19:00:05.263 - INFO - rag_backend - 检查标准输出重定向...
+2026-02-09 19:00:05.263 - INFO - rag_backend -   标准输出重定向测试
+2026-02-09 19:00:05.263 - ERROR - rag_backend -   标准错误重定向测试
+2026-02-09 19:00:05.263 - INFO - rag_backend -   标准输出重定向成功
+2026-02-09 19:00:05.263 - INFO - rag_backend - 
+2026-02-09 19:00:05.263 - INFO - rag_backend - === 自检结果: 有效 ===
+2026-02-09 19:00:05.264 - INFO - rag_backend - 状态日志文件为空，初始化为空列表
+2026-02-09 19:00:05.747 - INFO - rag_backend - 加载了 2 个文档
+2026-02-09 19:00:05.748 - INFO - rag_backend - 加载了版本信息: 19 个文档有版本记录
+2026-02-09 19:00:05.748 - INFO - rag_backend - 加载了 19 条更新历史记录
+2026-02-09 19:00:06.272 - ERROR - rag_backend - INFO:     Started server process [75059]
+2026-02-09 19:00:06.272 - ERROR - rag_backend - INFO:     Waiting for application startup.
+2026-02-09 19:00:06.272 - INFO - rag_backend - 启动 RAG Backend v1.0.0
+2026-02-09 19:00:06.273 - INFO - rag_backend - 系统状态: application - starting
+2026-02-09 19:00:06.273 - INFO - rag_backend - 系统状态: vector_db - initializing
+2026-02-09 19:00:06.310 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-09 19:00:06.311 - INFO - rag_backend - FAISS 索引文件已加载: vector_db/faiss_index
+2026-02-09 19:00:06.311 - INFO - rag_backend - 已加载 0 条元数据
+2026-02-09 19:00:06.311 - INFO - rag_backend - FAISS 索引已加载: 0 个向量，0 条元数据
+2026-02-09 19:00:06.311 - WARNING - rag_backend - 加载的索引为空，重新初始化
+2026-02-09 19:00:06.311 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-09 19:00:06.312 - INFO - rag_backend - 向量数据库初始化成功: faiss
+2026-02-09 19:00:06.312 - INFO - rag_backend - 系统状态: vector_db - initialized
+2026-02-09 19:00:06.312 - INFO - rag_backend - 系统状态: embedding - loading
+2026-02-09 19:00:06.312 - INFO - rag_backend - 正在加载默认嵌入模型: BAAI/bge-base-zh-v1.5
+2026-02-09 19:00:06.312 - INFO - rag_backend - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: bge) 
+2026-02-09 19:00:07.908 - INFO - rag_backend - 找到本地模型目录: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-09 19:00:07.909 - INFO - rag_backend - 从本地路径加载 BGE 模型: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-09 19:00:09.866 - INFO - rag_backend - 成功加载 BGE 模型: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-09 19:00:09.867 - INFO - rag_backend - 默认嵌入模型加载成功: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-09 19:00:09.867 - INFO - rag_backend - 系统状态: embedding - loaded
+2026-02-09 19:00:09.867 - INFO - rag_backend - 系统状态: application - running
+2026-02-09 19:00:09.870 - ERROR - rag_backend - INFO:     Application startup complete.
+2026-02-09 19:00:31.564 - ERROR - rag_backend - INFO:     Shutting down
+2026-02-09 19:00:31.665 - ERROR - rag_backend - INFO:     Waiting for application shutdown.
+2026-02-09 19:00:31.666 - INFO - rag_backend - 关闭应用
+2026-02-09 19:00:31.666 - INFO - rag_backend - 系统状态: application - stopping
+2026-02-09 19:00:31.667 - INFO - rag_backend - FAISS 索引已保存: vector_db/faiss_index
+2026-02-09 19:00:31.668 - INFO - rag_backend - 系统状态: vector_db - saved
+2026-02-09 19:00:31.668 - INFO - rag_backend - 系统状态: application - stopped
+2026-02-09 19:00:31.668 - INFO - rag_backend - =========
+2026-02-09 19:00:31.669 - ERROR - rag_backend - INFO:     Application shutdown complete.
+2026-02-09 19:00:31.672 - ERROR - rag_backend - INFO:     Finished server process [75059]
+2026-02-09 19:00:34.913 - INFO - rag_backend - 
+2026-02-09 19:00:34.913 - INFO - rag_backend - === 日志系统自检 ===
+2026-02-09 19:00:34.913 - INFO - rag_backend - 处理器数量: 2
+2026-02-09 19:00:34.913 - INFO - rag_backend - 处理器 0: StreamHandler
+2026-02-09 19:00:34.913 - INFO - rag_backend - 处理器 1: SmartRotatingFileHandler
+2026-02-09 19:00:34.913 - INFO - rag_backend -   日志文件: /root/autodl-tmp/rag/logs/app.log
+2026-02-09 19:00:34.913 - INFO - rag_backend -   目录存在: /root/autodl-tmp/rag/logs
+2026-02-09 19:00:34.913 - INFO - rag_backend -   文件可写: /root/autodl-tmp/rag/logs/app.log
+2026-02-09 19:00:34.914 - INFO - rag_backend - 日志级别: INFO
+2026-02-09 19:00:34.914 - INFO - rag_backend - 测试日志输出...
+2026-02-09 19:00:34.914 - INFO - rag_backend - 日志系统自检测试消息
+2026-02-09 19:00:34.914 - INFO - rag_backend -   测试日志输出成功
+2026-02-09 19:00:34.914 - INFO - rag_backend - 检查标准输出重定向...
+2026-02-09 19:00:34.914 - INFO - rag_backend -   标准输出重定向测试
+2026-02-09 19:00:34.914 - ERROR - rag_backend -   标准错误重定向测试
+2026-02-09 19:00:34.914 - INFO - rag_backend -   标准输出重定向成功
+2026-02-09 19:00:34.914 - INFO - rag_backend - 
+2026-02-09 19:00:34.914 - INFO - rag_backend - === 自检结果: 有效 ===
+2026-02-09 19:00:34.916 - INFO - rag_backend - 加载了 9 条状态变化日志
+2026-02-09 19:00:35.428 - INFO - rag_backend - 加载了 2 个文档
+2026-02-09 19:00:35.429 - INFO - rag_backend - 加载了版本信息: 19 个文档有版本记录
+2026-02-09 19:00:35.429 - INFO - rag_backend - 加载了 19 条更新历史记录
+2026-02-09 19:00:35.962 - ERROR - rag_backend - INFO:     Started server process [76399]
+2026-02-09 19:00:35.963 - ERROR - rag_backend - INFO:     Waiting for application startup.
+2026-02-09 19:00:35.963 - INFO - rag_backend - 启动 RAG Backend v1.0.0
+2026-02-09 19:00:35.964 - INFO - rag_backend - 系统状态: application - starting
+2026-02-09 19:00:35.964 - INFO - rag_backend - 系统状态: vector_db - initializing
+2026-02-09 19:00:36.003 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-09 19:00:36.003 - INFO - rag_backend - FAISS 索引文件已加载: vector_db/faiss_index
+2026-02-09 19:00:36.003 - INFO - rag_backend - 已加载 0 条元数据
+2026-02-09 19:00:36.004 - INFO - rag_backend - FAISS 索引已加载: 0 个向量，0 条元数据
+2026-02-09 19:00:36.004 - WARNING - rag_backend - 加载的索引为空，重新初始化
+2026-02-09 19:00:36.004 - INFO - rag_backend - 初始化 FAISS 索引: HNSW (维度: 768) 
+2026-02-09 19:00:36.004 - INFO - rag_backend - 向量数据库初始化成功: faiss
+2026-02-09 19:00:36.004 - INFO - rag_backend - 系统状态: vector_db - initialized
+2026-02-09 19:00:36.004 - INFO - rag_backend - 系统状态: embedding - loading
+2026-02-09 19:00:36.004 - INFO - rag_backend - 正在加载默认嵌入模型: BAAI/bge-base-zh-v1.5
+2026-02-09 19:00:36.004 - INFO - rag_backend - 准备加载模型: BAAI/bge-base-zh-v1.5 (类型: bge) 
+2026-02-09 19:00:37.487 - INFO - rag_backend - 找到本地模型目录: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-09 19:00:37.487 - INFO - rag_backend - 从本地路径加载 BGE 模型: data/models/BAAI--bge-base-zh-v1.5/models--BAAI--bge-base-zh-v1.5/snapshots/f03589ceff5aac7111bd60cfc7d497ca17ecac65
+2026-02-09 19:00:39.400 - INFO - rag_backend - 成功加载 BGE 模型: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-09 19:00:39.400 - INFO - rag_backend - 默认嵌入模型加载成功: BAAI/bge-base-zh-v1.5 (维度: 768)
+2026-02-09 19:00:39.401 - INFO - rag_backend - 系统状态: embedding - loaded
+2026-02-09 19:00:39.401 - INFO - rag_backend - 系统状态: application - running
+2026-02-09 19:00:39.404 - ERROR - rag_backend - INFO:     Application startup complete.
+2026-02-09 19:00:41.326 - INFO - rag_backend - 
+2026-02-09 19:00:41.326 - INFO - rag_backend - === 日志系统自检 ===
+2026-02-09 19:00:41.327 - INFO - rag_backend - 处理器数量: 2
+2026-02-09 19:00:41.327 - INFO - rag_backend - 处理器 0: StreamHandler
+2026-02-09 19:00:41.327 - INFO - rag_backend - 处理器 1: SmartRotatingFileHandler
+2026-02-09 19:00:41.327 - INFO - rag_backend -   日志文件: /root/autodl-tmp/rag/logs/app.log
+2026-02-09 19:00:41.327 - INFO - rag_backend -   目录存在: /root/autodl-tmp/rag/logs
+2026-02-09 19:00:41.327 - INFO - rag_backend -   文件可写: /root/autodl-tmp/rag/logs/app.log
+2026-02-09 19:00:41.327 - INFO - rag_backend - 日志级别: INFO
+2026-02-09 19:00:41.327 - INFO - rag_backend - 测试日志输出...
+2026-02-09 19:00:41.327 - INFO - rag_backend - 日志系统自检测试消息
+2026-02-09 19:00:41.327 - INFO - rag_backend -   测试日志输出成功
+2026-02-09 19:00:41.327 - INFO - rag_backend - 检查标准输出重定向...
+2026-02-09 19:00:41.327 - INFO - rag_backend -   标准输出重定向测试
+2026-02-09 19:00:41.327 - ERROR - rag_backend -   标准错误重定向测试
+2026-02-09 19:00:41.328 - INFO - rag_backend -   标准输出重定向成功

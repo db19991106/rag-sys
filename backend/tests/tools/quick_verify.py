@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from datetime import datetime
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from services.rag_generator import rag_generator
 from services.embedding import embedding_service

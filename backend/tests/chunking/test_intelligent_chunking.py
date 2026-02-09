@@ -3,6 +3,11 @@
 验证智能切分选项是否与PDF切分使用相同的逻辑
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 from services.chunker import Chunker
 from models import ChunkConfig, ChunkType
 

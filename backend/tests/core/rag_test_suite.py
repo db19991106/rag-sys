@@ -16,7 +16,7 @@ from typing import List, Dict, Tuple, Any
 from datetime import datetime
 
 # 添加项目路径
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from services.retriever import retriever
 from services.embedding import embedding_service

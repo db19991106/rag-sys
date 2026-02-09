@@ -3,6 +3,11 @@
 测试PDF智能切分策略
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 import os
 from services.chunker import RAGFlowChunker
 from models import ChunkConfig, ChunkType
