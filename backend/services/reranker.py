@@ -16,7 +16,9 @@ class Reranker:
         self.device = device
         self.model = None
 
-    def rerank(self, query: str, documents: List[str], top_k: Optional[int] = None) -> List[Tuple[int, float]]:
+    def rerank(
+        self, query: str, documents: List[str], top_k: Optional[int] = None
+    ) -> List[Tuple[int, float]]:
         """
         重排序文档
 
@@ -34,7 +36,9 @@ class Reranker:
 class BGEReranker(Reranker):
     """BGE Reranker - FlagEmbedding重排序模型"""
 
-    def __init__(self, model_name: str = "BAAI/bge-reranker-v2-m3", device: str = "cpu"):
+    def __init__(
+        self, model_name: str = "BAAI/bge-reranker-v2-m3", device: str = "cpu"
+    ):
         super().__init__(model_name, device)
         self._load_model()
 
@@ -42,40 +46,49 @@ class BGEReranker(Reranker):
         """加载BGE重排序模型"""
         try:
             from FlagEmbedding import FlagReranker
-            
+
             # 确定模型路径
             model_path = self.model_name
-            
+
             # 尝试从本地加载
             import os
             from pathlib import Path
-            
-            cache_dir = settings.upload_dir.replace('/data/docs', '/data/models')
-            local_model_path = Path(cache_dir) / model_name.replace('/', '--')
-            
+
+            cache_dir = settings.upload_dir.replace("/data/docs", "/data/models")
+            local_model_path = Path(cache_dir) / model_name.replace("/", "--")
+
             if local_model_path.exists():
                 model_path = str(local_model_path)
                 logger.info(f"从本地加载BGE重排序模型: {model_path}")
             else:
                 logger.info(f"从HuggingFace下载BGE重排序模型: {model_name}")
-            
+
             # 初始化模型
             self.model = FlagReranker(
                 model_path,
                 use_fp16=False,  # CPU上不使用FP16
-                device=self.device
+                device=self.device,
             )
-            
+
+            self.is_loaded = True
             logger.info(f"BGE重排序模型加载成功: {self.model_name}")
-            
+
         except ImportError:
-            logger.warning("FlagEmbedding未安装，重排序功能不可用。请安装: pip install -U FlagEmbedding")
-            raise
+            logger.warning(
+                "FlagEmbedding未安装，重排序功能不可用。请安装: pip install -U FlagEmbedding"
+            )
+            # 不抛出异常，而是设置未加载状态
+            self.is_loaded = False
+        except Exception as e:
+            logger.error(f"加载BGE重排序模型失败: {str(e)}")
+            self.is_loaded = False
         except Exception as e:
             logger.error(f"加载BGE重排序模型失败: {str(e)}")
             raise
 
-    def rerank(self, query: str, documents: List[str], top_k: Optional[int] = None) -> List[Tuple[int, float]]:
+    def rerank(
+        self, query: str, documents: List[str], top_k: Optional[int] = None
+    ) -> List[Tuple[int, float]]:
         """
         重排序文档
 
@@ -97,20 +110,20 @@ class BGEReranker(Reranker):
         try:
             # 准备输入对
             pairs = [[query, doc] for doc in documents]
-            
+
             # 计算重排序分数
             scores = self.model.compute_score(pairs)
-            
+
             # 组合索引和分数
             indexed_scores = list(enumerate(scores))
-            
+
             # 按分数降序排序
             indexed_scores.sort(key=lambda x: x[1], reverse=True)
-            
+
             # 应用top_k
             if top_k and top_k > 0:
                 indexed_scores = indexed_scores[:top_k]
-            
+
             return indexed_scores
 
         except Exception as e:
@@ -122,7 +135,11 @@ class BGEReranker(Reranker):
 class CrossEncoderReranker(Reranker):
     """CrossEncoder重排序器"""
 
-    def __init__(self, model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2", device: str = "cpu"):
+    def __init__(
+        self,
+        model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2",
+        device: str = "cpu",
+    ):
         super().__init__(model_name, device)
         self._load_model()
 
@@ -130,26 +147,27 @@ class CrossEncoderReranker(Reranker):
         """加载CrossEncoder模型"""
         try:
             from sentence_transformers import CrossEncoder
-            
+
             # 确定模型路径
             model_path = self.model_name
-            
+
             # 尝试从本地加载
             from pathlib import Path
-            cache_dir = settings.upload_dir.replace('/data/docs', '/data/models')
-            local_model_path = Path(cache_dir) / model_name.replace('/', '--')
-            
+
+            cache_dir = settings.upload_dir.replace("/data/docs", "/data/models")
+            local_model_path = Path(cache_dir) / model_name.replace("/", "--")
+
             if local_model_path.exists():
                 model_path = str(local_model_path)
                 logger.info(f"从本地加载CrossEncoder模型: {model_path}")
             else:
                 logger.info(f"从HuggingFace下载CrossEncoder模型: {model_name}")
-            
+
             # 初始化模型
             self.model = CrossEncoder(model_path, device=self.device)
-            
+
             logger.info(f"CrossEncoder模型加载成功: {self.model_name}")
-            
+
         except ImportError:
             logger.warning("sentence-transformers未安装，重排序功能不可用")
             raise
@@ -157,7 +175,9 @@ class CrossEncoderReranker(Reranker):
             logger.error(f"加载CrossEncoder模型失败: {str(e)}")
             raise
 
-    def rerank(self, query: str, documents: List[str], top_k: Optional[int] = None) -> List[Tuple[int, float]]:
+    def rerank(
+        self, query: str, documents: List[str], top_k: Optional[int] = None
+    ) -> List[Tuple[int, float]]:
         """
         重排序文档
 
@@ -179,20 +199,20 @@ class CrossEncoderReranker(Reranker):
         try:
             # 准备输入对
             pairs = [[query, doc] for doc in documents]
-            
+
             # 计算重排序分数
             scores = self.model.predict(pairs)
-            
+
             # 组合索引和分数
             indexed_scores = list(enumerate(scores))
-            
+
             # 按分数降序排序
             indexed_scores.sort(key=lambda x: x[1], reverse=True)
-            
+
             # 应用top_k
             if top_k and top_k > 0:
                 indexed_scores = indexed_scores[:top_k]
-            
+
             return indexed_scores
 
         except Exception as e:
@@ -208,7 +228,9 @@ class NoReranker(Reranker):
         super().__init__(model_name, device)
         logger.info("使用无重排序模式")
 
-    def rerank(self, query: str, documents: List[str], top_k: Optional[int] = None) -> List[Tuple[int, float]]:
+    def rerank(
+        self, query: str, documents: List[str], top_k: Optional[int] = None
+    ) -> List[Tuple[int, float]]:
         """
         返回原始顺序
 
@@ -236,7 +258,14 @@ class RerankerManager:
         self.reranker_top_k = 10
         self.reranker_threshold = 0.0
 
-    def initialize(self, reranker_type: str = "none", model_name: str = "", device: str = "cpu", top_k: int = 10, threshold: float = 0.0):
+    def initialize(
+        self,
+        reranker_type: str = "none",
+        model_name: str = "",
+        device: str = "cpu",
+        top_k: int = 10,
+        threshold: float = 0.0,
+    ):
         """
         初始化重排序器
 
@@ -269,9 +298,13 @@ class RerankerManager:
                 if not model_name:
                     # 根据设备选择合适的模型
                     if "cuda" in device:
-                        model_name = "cross-encoder/ms-marco-MiniLM-L-12-v2"  # 更大的模型
+                        model_name = (
+                            "cross-encoder/ms-marco-MiniLM-L-12-v2"  # 更大的模型
+                        )
                     else:
-                        model_name = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # 更快的模型
+                        model_name = (
+                            "cross-encoder/ms-marco-MiniLM-L-6-v2"  # 更快的模型
+                        )
                 self.reranker = CrossEncoderReranker(model_name, device)
             else:
                 logger.warning(f"未知重排序器类型: {reranker_type}，使用无重排序模式")
@@ -283,7 +316,9 @@ class RerankerManager:
             logger.error(f"重排序器初始化失败: {str(e)}，使用无重排序模式")
             self.reranker = NoReranker()
 
-    def rerank_results(self, query: str, results: List, apply_threshold: bool = True) -> List:
+    def rerank_results(
+        self, query: str, results: List, apply_threshold: bool = True
+    ) -> List:
         """
         重排序检索结果
 
@@ -303,42 +338,51 @@ class RerankerManager:
 
         try:
             import time
+
             start_time = time.time()
-            
+
             # 提取文档内容
             documents = [r.content for r in results]
-            
+
             # 限制文档长度，避免处理过长的文档
             max_doc_length = 1000  # 最大文档长度
             documents = [doc[:max_doc_length] for doc in documents]
-            
+
             # 执行重排序
-            reranked_indices = self.reranker.rerank(query, documents, self.reranker_top_k)
-            
+            reranked_indices = self.reranker.rerank(
+                query, documents, self.reranker_top_k
+            )
+
             # 根据重排序结果重新组织
             reranked_results = []
             for original_idx, score in reranked_indices:
                 # 应用阈值过滤
                 if apply_threshold and score < self.reranker_threshold:
-                    logger.debug(f"重排序分数 {score:.4f} 低于阈值 {self.reranker_threshold}，跳过")
+                    logger.debug(
+                        f"重排序分数 {score:.4f} 低于阈值 {self.reranker_threshold}，跳过"
+                    )
                     continue
-                
+
                 # 复制结果并更新相似度分数
                 result = results[original_idx]
                 # 更新相似度分数为排序分数，提高后续处理的准确性
                 result.similarity = score
                 reranked_results.append(result)
-            
+
             # 如果重排序后结果太少，补充原始结果
             if len(reranked_results) < min(self.reranker_top_k, 5):
                 # 收集未被选中的原始结果
                 selected_indices = {idx for idx, _ in reranked_indices}
-                supplementary_results = [r for i, r in enumerate(results) if i not in selected_indices][:5 - len(reranked_results)]
+                supplementary_results = [
+                    r for i, r in enumerate(results) if i not in selected_indices
+                ][: 5 - len(reranked_results)]
                 reranked_results.extend(supplementary_results)
-            
+
             rerank_time = time.time() - start_time
-            logger.info(f"重排序完成: {len(results)} -> {len(reranked_results)} 个结果，耗时: {rerank_time:.4f}s")
-            
+            logger.info(
+                f"重排序完成: {len(results)} -> {len(reranked_results)} 个结果，耗时: {rerank_time:.4f}s"
+            )
+
             return reranked_results
 
         except Exception as e:
@@ -352,7 +396,7 @@ class RerankerManager:
             "type": self.reranker_type,
             "model": self.reranker_model,
             "top_k": self.reranker_top_k,
-            "threshold": self.reranker_threshold
+            "threshold": self.reranker_threshold,
         }
 
 

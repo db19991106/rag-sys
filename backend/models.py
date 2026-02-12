@@ -55,6 +55,13 @@ class ChunkType(str, Enum):
     FINANCIAL_REPORT = "financial_report"  # 财务报告切分
     PDF = "pdf"  # PDF智能切分
 
+    # 新增文档类型切分
+    PRODUCT = "product"  # 产品文档切分
+    TECHNICAL = "technical"  # 技术规范切分
+    COMPLIANCE = "compliance"  # 合规文件切分
+    HR = "hr"  # HR文档切分
+    PROJECT = "project"  # 项目管理切分
+
     # 自定义
     CUSTOM = "custom"  # 自定义规则切分
 

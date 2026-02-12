@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from datetime import datetime
 from models import ChunkConfig, ChunkResponse, ApiResponse
 from services.chunker import Chunker
 from services.document_manager import document_manager
@@ -27,9 +28,11 @@ async def split_document(doc_id: str, config: ChunkConfig, auto_embed: bool = Fa
         if not content:
             raise HTTPException(status_code=404, detail="文档不存在或无法读取")
 
-        # 切分文档
+        # 切分文档（传入文件名以启用多类型智能切分）
         chunker = Chunker()
-        chunks = chunker.chunk(content, doc_id, config)
+        doc = document_manager.get_document(doc_id)
+        filename = doc.name if doc else ""
+        chunks = chunker.chunk(content, doc_id, config, filename=filename)
 
         if not chunks:
             raise HTTPException(status_code=400, detail="文档切分失败，未生成片段")
@@ -46,7 +49,7 @@ async def split_document(doc_id: str, config: ChunkConfig, auto_embed: bool = Fa
             "config": config.dict(),  # 保存完整的切分配置
             "chunks": [chunk.dict() for chunk in chunks],
             "chunk_count": len(chunks),
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
         }
 
         with open(chunks_file, "w", encoding="utf-8") as f:
@@ -71,11 +74,11 @@ async def split_document(doc_id: str, config: ChunkConfig, auto_embed: bool = Fa
                     )
                     from models import EmbeddingConfig, EmbeddingModelType
                     import torch
-                    
+
                     # 动态检测设备
                     device = "cuda" if torch.cuda.is_available() else "cpu"
                     logger.info(f"自动检测到设备: {device}")
-                    
+
                     embedding_config = EmbeddingConfig(
                         model_type=EmbeddingModelType.BGE,
                         model_name="BAAI/bge-base-zh-v1.5",
@@ -200,11 +203,11 @@ async def embed_chunks(doc_id: str):
             logger.info("嵌入模型未加载，自动加载默认模型: BAAI/bge-base-zh-v1.5")
             from models import EmbeddingConfig, EmbeddingModelType
             import torch
-            
+
             # 动态检测设备
             device = "cuda" if torch.cuda.is_available() else "cpu"
             logger.info(f"自动检测到设备: {device}")
-            
+
             embedding_config = EmbeddingConfig(
                 model_type=EmbeddingModelType.BGE,
                 model_name="BAAI/bge-base-zh-v1.5",
@@ -267,10 +270,12 @@ async def embed_chunks(doc_id: str):
         # 由于配置信息未保存，我们使用默认配置，但应该从某处读取用户之前使用的配置
         chunker = Chunker()
 
-        # 使用默认配置切分
+        # 使用默认配置切分（传入文件名以启用多类型智能切分）
         # TODO: 应该保存切分时的配置，向量化时使用相同的配置
         config = ChunkConfig()
-        chunks = chunker.chunk(content, doc_id, config)
+        doc = document_manager.get_document(doc_id)
+        filename = doc.name if doc else ""
+        chunks = chunker.chunk(content, doc_id, config, filename=filename)
 
         if not chunks:
             raise HTTPException(status_code=400, detail="文档切分失败，未生成片段")
@@ -303,23 +308,25 @@ async def embed_chunks(doc_id: str):
             if not content:
                 raise HTTPException(status_code=404, detail="文档内容无法读取")
 
-            # 切分文档
+            # 切分文档（传入文件名以启用多类型智能切分）
             chunker = Chunker()
             config = ChunkConfig()
-            chunks = chunker.chunk(content, doc_id, config)
+            filename = doc.name if doc else ""
+            chunks = chunker.chunk(content, doc_id, config, filename=filename)
 
             if not chunks:
                 raise HTTPException(status_code=400, detail="文档切分失败，未生成片段")
 
             # 保存切分结果
             from pathlib import Path
+
             chunks_file = Path(settings.vector_db_dir) / f"chunks_{doc_id}.json"
             chunks_data = {
                 "document_id": doc_id,
                 "config": config.dict(),
                 "chunks": [chunk.dict() for chunk in chunks],
                 "chunk_count": len(chunks),
-                "created_at": datetime.now().isoformat()
+                "created_at": datetime.now().isoformat(),
             }
             with open(chunks_file, "w", encoding="utf-8") as f:
                 json.dump(chunks_data, f, ensure_ascii=False, indent=2)

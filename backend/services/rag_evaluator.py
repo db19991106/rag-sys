@@ -22,11 +22,15 @@ class RAGEvaluator:
             "info_completeness": 0.6,
             "fidelity": 0.7,
             "answer_relevance": 0.7,
-            "readability": 0.6
+            "readability": 0.6,
         }
 
-    def evaluate_retrieval(self, query: str, results: List[RetrievalResult], 
-                         ground_truth: Optional[List[str]] = None) -> Dict[str, Any]:
+    def evaluate_retrieval(
+        self,
+        query: str,
+        results: List[RetrievalResult],
+        ground_truth: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
         """
         评估检索阶段
 
@@ -64,7 +68,7 @@ class RAGEvaluator:
                 "std": float(np.std(similarity_scores)),
                 "min": float(min(similarity_scores)),
                 "max": float(max(similarity_scores)),
-                "median": float(np.median(similarity_scores))
+                "median": float(np.median(similarity_scores)),
             }
 
         # 计算相关性阈值过滤后的结果数
@@ -75,8 +79,9 @@ class RAGEvaluator:
 
         return metrics
 
-    def evaluate_enhancement(self, query: str, results: List[RetrievalResult], 
-                           context: str) -> Dict[str, Any]:
+    def evaluate_enhancement(
+        self, query: str, results: List[RetrievalResult], context: str
+    ) -> Dict[str, Any]:
         """
         评估增强阶段
 
@@ -104,13 +109,16 @@ class RAGEvaluator:
 
         # 上下文长度分析
         metrics["context_length"] = len(context)
-        metrics["average_chunk_length"] = np.mean([len(r.content) for r in results]) if results else 0
+        metrics["average_chunk_length"] = (
+            np.mean([len(r.content) for r in results]) if results else 0
+        )
         metrics["chunk_count"] = len(results)
 
         return metrics
 
-    def evaluate_generation(self, query: str, response: RAGResponse, 
-                          ground_truth: Optional[str] = None) -> Dict[str, Any]:
+    def evaluate_generation(
+        self, query: str, response: RAGResponse, ground_truth: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         评估生成阶段
 
@@ -152,8 +160,12 @@ class RAGEvaluator:
 
         return metrics
 
-    def evaluate_full_rag(self, query: str, response: RAGResponse, 
-                        ground_truth: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def evaluate_full_rag(
+        self,
+        query: str,
+        response: RAGResponse,
+        ground_truth: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """
         评估完整的RAG流程
 
@@ -168,25 +180,26 @@ class RAGEvaluator:
         start_time = time.time()
 
         # 构建上下文
-        context = "\n".join([f"【参考文档{i+1}】\n{r.content}\n" for i, r in enumerate(response.context_chunks)])
+        context = "\n".join(
+            [
+                f"【参考文档{i + 1}】\n{r.content}\n"
+                for i, r in enumerate(response.context_chunks)
+            ]
+        )
 
         # 评估各个阶段
         retrieval_metrics = self.evaluate_retrieval(
-            query, 
-            response.context_chunks, 
-            ground_truth.get("relevant_docs") if ground_truth else None
+            query,
+            response.context_chunks,
+            ground_truth.get("relevant_docs") if ground_truth else None,
         )
 
         enhancement_metrics = self.evaluate_enhancement(
-            query, 
-            response.context_chunks, 
-            context
+            query, response.context_chunks, context
         )
 
         generation_metrics = self.evaluate_generation(
-            query, 
-            response, 
-            ground_truth.get("answer") if ground_truth else None
+            query, response, ground_truth.get("answer") if ground_truth else None
         )
 
         # 整合所有指标
@@ -198,11 +211,12 @@ class RAGEvaluator:
             "enhancement": enhancement_metrics,
             "generation": generation_metrics,
             "overall": {
-                "success": len(response.context_chunks) > 0 and len(response.answer) > 0,
+                "success": len(response.context_chunks) > 0
+                and len(response.answer) > 0,
                 "total_context_chunks": len(response.context_chunks),
                 "answer_length": len(response.answer),
-                "total_time_ms": response.total_time_ms
-            }
+                "total_time_ms": response.total_time_ms,
+            },
         }
 
         # 保存评估历史
@@ -210,8 +224,13 @@ class RAGEvaluator:
 
         return metrics
 
-    def run_ab_test(self, query: str, config_a: Dict[str, Any], config_b: Dict[str, Any], 
-                   rag_generator: Any) -> Dict[str, Any]:
+    def run_ab_test(
+        self,
+        query: str,
+        config_a: Dict[str, Any],
+        config_b: Dict[str, Any],
+        rag_generator: Any,
+    ) -> Dict[str, Any]:
         """
         运行A/B测试
 
@@ -233,12 +252,16 @@ class RAGEvaluator:
 
         # 运行A配置
         logger.info(f"运行A/B测试 - 配置A")
-        response_a = rag_generator.generate(query, retrieval_config_a, generation_config_a)
+        response_a = rag_generator.generate(
+            query, retrieval_config_a, generation_config_a
+        )
         metrics_a = self.evaluate_full_rag(query, response_a)
 
         # 运行B配置
         logger.info(f"运行A/B测试 - 配置B")
-        response_b = rag_generator.generate(query, retrieval_config_b, generation_config_b)
+        response_b = rag_generator.generate(
+            query, retrieval_config_b, generation_config_b
+        )
         metrics_b = self.evaluate_full_rag(query, response_b)
 
         # 计算差异
@@ -248,7 +271,9 @@ class RAGEvaluator:
         test_insights = {
             "summary": f"A/B测试完成，胜者: {'A' if comparison['overall_winner'] == 'A' else 'B'}",
             "key_improvements": [],
-            "recommended_config": config_a if comparison['overall_winner'] == 'A' else config_b
+            "recommended_config": config_a
+            if comparison["overall_winner"] == "A"
+            else config_b,
         }
 
         # 分析关键改进点
@@ -271,10 +296,12 @@ class RAGEvaluator:
             "metrics_b": metrics_b,
             "comparison": comparison,
             "winner": "A" if comparison["overall_winner"] == "A" else "B",
-            "insights": test_insights
+            "insights": test_insights,
         }
 
-    def build_optimization_recommendation(self, evaluation_history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def build_optimization_recommendation(
+        self, evaluation_history: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """
         基于评估历史构建RAG系统优化推荐
 
@@ -288,7 +315,7 @@ class RAGEvaluator:
             return {
                 "status": "insufficient_data",
                 "message": "评估历史数据不足，无法生成推荐",
-                "recommendations": []
+                "recommendations": [],
             }
 
         # 分析历史趋势
@@ -302,68 +329,76 @@ class RAGEvaluator:
         if retrieval_trends:
             precision_trend = retrieval_trends.get("precision_at_1", {})
             if precision_trend.get("slope", 0) < -0.01:
-                recommendations.append({
-                    "category": "retrieval",
-                    "priority": "high",
-                    "title": "检索精确率下降",
-                    "description": "最近的评估显示检索精确率呈下降趋势",
-                    "actions": [
-                        "检查向量数据库索引状态",
-                        "考虑更新嵌入模型或调整其参数",
-                        "优化检索参数，如top_k和similarity_threshold"
-                    ]
-                })
+                recommendations.append(
+                    {
+                        "category": "retrieval",
+                        "priority": "high",
+                        "title": "检索精确率下降",
+                        "description": "最近的评估显示检索精确率呈下降趋势",
+                        "actions": [
+                            "检查向量数据库索引状态",
+                            "考虑更新嵌入模型或调整其参数",
+                            "优化检索参数，如top_k和similarity_threshold",
+                        ],
+                    }
+                )
 
         # 基于增强趋势的建议
         enhancement_trends = trends.get("enhancement", {})
         if enhancement_trends:
             context_relevance_trend = enhancement_trends.get("context_relevance", {})
             if context_relevance_trend.get("slope", 0) < -0.01:
-                recommendations.append({
-                    "category": "enhancement",
-                    "priority": "medium",
-                    "title": "上下文相关性下降",
-                    "description": "最近的评估显示上下文相关性呈下降趋势",
-                    "actions": [
-                        "调整上下文构建策略",
-                        "优化文档切分参数",
-                        "考虑使用更细粒度的文档切分方法"
-                    ]
-                })
+                recommendations.append(
+                    {
+                        "category": "enhancement",
+                        "priority": "medium",
+                        "title": "上下文相关性下降",
+                        "description": "最近的评估显示上下文相关性呈下降趋势",
+                        "actions": [
+                            "调整上下文构建策略",
+                            "优化文档切分参数",
+                            "考虑使用更细粒度的文档切分方法",
+                        ],
+                    }
+                )
 
         # 基于生成趋势的建议
         generation_trends = trends.get("generation", {})
         if generation_trends:
             fidelity_trend = generation_trends.get("fidelity", {})
             if fidelity_trend.get("slope", 0) < -0.01:
-                recommendations.append({
-                    "category": "generation",
-                    "priority": "high",
-                    "title": "生成忠实度下降",
-                    "description": "最近的评估显示生成忠实度呈下降趋势",
-                    "actions": [
-                        "优化提示词模板，强调忠实于源材料",
-                        "调整LLM生成参数，如降低temperature",
-                        "考虑使用更适合的LLM模型"
-                    ]
-                })
+                recommendations.append(
+                    {
+                        "category": "generation",
+                        "priority": "high",
+                        "title": "生成忠实度下降",
+                        "description": "最近的评估显示生成忠实度呈下降趋势",
+                        "actions": [
+                            "优化提示词模板，强调忠实于源材料",
+                            "调整LLM生成参数，如降低temperature",
+                            "考虑使用更适合的LLM模型",
+                        ],
+                    }
+                )
 
         # 基于时间性能的建议
         time_trends = trends.get("time", {})
         if time_trends:
             total_time_trend = time_trends.get("total_time_ms", {})
             if total_time_trend.get("slope", 0) > 100:
-                recommendations.append({
-                    "category": "performance",
-                    "priority": "medium",
-                    "title": "响应时间增加",
-                    "description": "最近的评估显示响应时间呈上升趋势",
-                    "actions": [
-                        "优化检索性能，如使用缓存",
-                        "考虑使用更快的嵌入模型",
-                        "调整LLM生成参数以提高速度"
-                    ]
-                })
+                recommendations.append(
+                    {
+                        "category": "performance",
+                        "priority": "medium",
+                        "title": "响应时间增加",
+                        "description": "最近的评估显示响应时间呈上升趋势",
+                        "actions": [
+                            "优化检索性能，如使用缓存",
+                            "考虑使用更快的嵌入模型",
+                            "调整LLM生成参数以提高速度",
+                        ],
+                    }
+                )
 
         return {
             "status": "success",
@@ -373,11 +408,13 @@ class RAGEvaluator:
             "next_steps": [
                 "优先实施高优先级建议",
                 "定期运行评估以监控改进效果",
-                "考虑进行A/B测试验证优化效果"
-            ]
+                "考虑进行A/B测试验证优化效果",
+            ],
         }
 
-    def _analyze_evaluation_trends(self, evaluation_history: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_evaluation_trends(
+        self, evaluation_history: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """
         分析评估历史趋势
 
@@ -387,18 +424,13 @@ class RAGEvaluator:
         Returns:
             趋势分析结果
         """
-        trends = {
-            "retrieval": {},
-            "enhancement": {},
-            "generation": {},
-            "time": {}
-        }
+        trends = {"retrieval": {}, "enhancement": {}, "generation": {}, "time": {}}
 
         # 提取关键指标的时间序列数据
         metrics_series = {}
         for i, eval_data in enumerate(evaluation_history):
             timestamp = i  # 使用索引作为时间点
-            
+
             # 提取检索指标
             retrieval = eval_data.get("retrieval", {})
             for metric in ["precision_at_1", "precision_at_3", "mrr"]:
@@ -428,7 +460,9 @@ class RAGEvaluator:
             if "total_time_ms" in overall:
                 if "total_time_ms" not in metrics_series:
                     metrics_series["total_time_ms"] = []
-                metrics_series["total_time_ms"].append((timestamp, overall["total_time_ms"]))
+                metrics_series["total_time_ms"].append(
+                    (timestamp, overall["total_time_ms"])
+                )
 
         # 计算每个指标的趋势
         for metric, series in metrics_series.items():
@@ -459,7 +493,9 @@ class RAGEvaluator:
                     "r_squared": float(r_squared),
                     "current_value": float(y[-1]),
                     "previous_value": float(y[0]),
-                    "change_percent": float((y[-1] - y[0]) / y[0] * 100) if y[0] != 0 else 0
+                    "change_percent": float((y[-1] - y[0]) / y[0] * 100)
+                    if y[0] != 0
+                    else 0,
                 }
 
         return trends
@@ -480,7 +516,7 @@ class RAGEvaluator:
             "recommendations": [],
             "root_causes": [],
             "action_items": [],
-            "visualization_data": {}
+            "visualization_data": {},
         }
 
         # 分析检索性能
@@ -490,18 +526,28 @@ class RAGEvaluator:
             for k in [1, 3, 5]:
                 precision = retrieval.get(f"precision_at_{k}", 0)
                 if precision >= self.thresholds["precision_at_k"]:
-                    insights["strengths"].append(f"检索精确率@k={k}表现良好: {precision:.2f}")
+                    insights["strengths"].append(
+                        f"检索精确率@k={k}表现良好: {precision:.2f}"
+                    )
                 else:
-                    insights["weaknesses"].append(f"检索精确率@k={k}需要改进: {precision:.2f}")
-                    insights["recommendations"].append(f"考虑调整检索参数以提高精确率@k={k}")
+                    insights["weaknesses"].append(
+                        f"检索精确率@k={k}需要改进: {precision:.2f}"
+                    )
+                    insights["recommendations"].append(
+                        f"考虑调整检索参数以提高精确率@k={k}"
+                    )
 
             # 检查相关性分布
             similarity_dist = retrieval.get("similarity_distribution", {})
             if similarity_dist:
                 mean_similarity = similarity_dist.get("mean", 0)
                 if mean_similarity < 0.7:
-                    insights["weaknesses"].append(f"平均相关性得分较低: {mean_similarity:.2f}")
-                    insights["recommendations"].append("考虑使用更适合的嵌入模型或调整检索参数")
+                    insights["weaknesses"].append(
+                        f"平均相关性得分较低: {mean_similarity:.2f}"
+                    )
+                    insights["recommendations"].append(
+                        "考虑使用更适合的嵌入模型或调整检索参数"
+                    )
 
             # 构建检索性能可视化数据
             precision_data = []
@@ -512,26 +558,32 @@ class RAGEvaluator:
 
             # 构建相关性分布可视化数据
             if similarity_dist:
-                insights["visualization_data"]["similarity_distribution"] = similarity_dist
+                insights["visualization_data"]["similarity_distribution"] = (
+                    similarity_dist
+                )
 
         # 分析增强性能
         enhancement = evaluation_metrics.get("enhancement", {})
         if enhancement:
             context_relevance = enhancement.get("context_relevance", 0)
             if context_relevance < self.thresholds["context_relevance"]:
-                insights["weaknesses"].append(f"上下文相关性较低: {context_relevance:.2f}")
+                insights["weaknesses"].append(
+                    f"上下文相关性较低: {context_relevance:.2f}"
+                )
                 insights["recommendations"].append("优化上下文构建策略")
 
             info_completeness = enhancement.get("info_completeness", 0)
             if info_completeness < self.thresholds["info_completeness"]:
-                insights["weaknesses"].append(f"信息完整性较低: {info_completeness:.2f}")
+                insights["weaknesses"].append(
+                    f"信息完整性较低: {info_completeness:.2f}"
+                )
                 insights["recommendations"].append("增加检索结果数量或优化检索策略")
 
             # 构建增强性能可视化数据
             insights["visualization_data"]["enhancement_metrics"] = {
                 "context_relevance": context_relevance,
                 "info_completeness": info_completeness,
-                "noise_filtering": enhancement.get("noise_filtering", 0)
+                "noise_filtering": enhancement.get("noise_filtering", 0),
             }
 
         # 分析生成性能
@@ -544,7 +596,9 @@ class RAGEvaluator:
 
             answer_relevance = generation.get("answer_relevance", 0)
             if answer_relevance < self.thresholds["answer_relevance"]:
-                insights["weaknesses"].append(f"回答与查询的相关性较低: {answer_relevance:.2f}")
+                insights["weaknesses"].append(
+                    f"回答与查询的相关性较低: {answer_relevance:.2f}"
+                )
                 insights["recommendations"].append("优化检索策略或提示词")
 
             # 构建生成性能可视化数据
@@ -552,14 +606,14 @@ class RAGEvaluator:
                 "fidelity": fidelity,
                 "answer_relevance": answer_relevance,
                 "readability": generation.get("readability", 0),
-                "accuracy": generation.get("accuracy", 0)
+                "accuracy": generation.get("accuracy", 0),
             }
 
             # 构建时间性能可视化数据
             insights["visualization_data"]["time_metrics"] = {
                 "generation_time_ms": generation.get("generation_time_ms", 0),
                 "retrieval_time_ms": generation.get("retrieval_time_ms", 0),
-                "total_time_ms": generation.get("total_time_ms", 0)
+                "total_time_ms": generation.get("total_time_ms", 0),
             }
 
         # 分析时间性能
@@ -573,7 +627,9 @@ class RAGEvaluator:
 
         # 生成具体的行动项
         if insights["weaknesses"]:
-            insights["action_items"] = self._generate_action_items(insights["weaknesses"])
+            insights["action_items"] = self._generate_action_items(
+                insights["weaknesses"]
+            )
 
         return insights
 
@@ -596,24 +652,30 @@ class RAGEvaluator:
             if similarity_dist:
                 mean_similarity = similarity_dist.get("mean", 0)
                 std_similarity = similarity_dist.get("std", 0)
-                
+
                 if mean_similarity < 0.6:
                     if std_similarity > 0.2:
-                        root_causes.append("嵌入模型可能不适合当前数据分布，导致相似度评分波动较大")
+                        root_causes.append(
+                            "嵌入模型可能不适合当前数据分布，导致相似度评分波动较大"
+                        )
                     else:
                         root_causes.append("嵌入模型整体表现不佳，需要更换或微调")
 
             # 检查检索结果数量
-            chunk_count = evaluation_metrics.get("enhancement", {}).get("chunk_count", 0)
+            chunk_count = evaluation_metrics.get("enhancement", {}).get(
+                "chunk_count", 0
+            )
             if chunk_count < 3:
-                root_causes.append("检索结果数量不足，可能是向量数据库索引问题或查询表述问题")
+                root_causes.append(
+                    "检索结果数量不足，可能是向量数据库索引问题或查询表述问题"
+                )
 
         # 分析增强问题根因
         enhancement = evaluation_metrics.get("enhancement", {})
         if enhancement:
             context_relevance = enhancement.get("context_relevance", 0)
             info_completeness = enhancement.get("info_completeness", 0)
-            
+
             if context_relevance < 0.6 and info_completeness < 0.6:
                 root_causes.append("文档切分策略可能不合理，导致片段质量较差")
             elif context_relevance < 0.6:
@@ -626,21 +688,25 @@ class RAGEvaluator:
         if generation:
             fidelity = generation.get("fidelity", 0)
             answer_relevance = generation.get("answer_relevance", 0)
-            
+
             if fidelity < 0.6:
                 root_causes.append("提示词模板可能需要优化，强调忠实于源材料")
-            
+
             if answer_relevance < 0.6:
                 if fidelity >= 0.6:
-                    root_causes.append("回答相关性低但忠实度高，可能是检索结果与查询不匹配")
+                    root_causes.append(
+                        "回答相关性低但忠实度高，可能是检索结果与查询不匹配"
+                    )
                 else:
-                    root_causes.append("回答质量整体较差，可能是LLM模型选择或参数配置问题")
+                    root_causes.append(
+                        "回答质量整体较差，可能是LLM模型选择或参数配置问题"
+                    )
 
         # 分析时间性能根因
         total_time = evaluation_metrics.get("overall", {}).get("total_time_ms", 0)
         retrieval_time = generation.get("retrieval_time_ms", 0)
         generation_time = generation.get("generation_time_ms", 0)
-        
+
         if total_time > 5000:
             if retrieval_time > 3000:
                 root_causes.append("检索时间过长，可能是向量数据库性能问题或网络延迟")
@@ -649,7 +715,9 @@ class RAGEvaluator:
 
         return root_causes
 
-    def _calculate_precision_at_k(self, results: List[RetrievalResult], k: int) -> float:
+    def _calculate_precision_at_k(
+        self, results: List[RetrievalResult], k: int
+    ) -> float:
         """计算precision@k"""
         if not results:
             return 0.0
@@ -659,8 +727,9 @@ class RAGEvaluator:
         relevant_count = len([r for r in top_k_results if r.similarity >= 0.7])
         return relevant_count / min(k, len(results))
 
-    def _calculate_recall_at_k(self, results: List[RetrievalResult], 
-                             ground_truth: List[str], k: int) -> float:
+    def _calculate_recall_at_k(
+        self, results: List[RetrievalResult], ground_truth: List[str], k: int
+    ) -> float:
         """计算recall@k"""
         if not ground_truth:
             return 0.0
@@ -671,18 +740,21 @@ class RAGEvaluator:
         intersection = retrieved_docs.intersection(relevant_docs)
         return len(intersection) / len(relevant_docs)
 
-    def _calculate_mrr(self, results: List[RetrievalResult], 
-                     ground_truth: List[str]) -> float:
+    def _calculate_mrr(
+        self, results: List[RetrievalResult], ground_truth: List[str]
+    ) -> float:
         """计算平均倒数排名"""
         if not ground_truth:
             return 0.0
+
         for i, result in enumerate(results, 1):
             if result.document_id in ground_truth:
                 return 1.0 / i
         return 0.0
 
-    def _calculate_context_relevance(self, query: str, 
-                                   results: List[RetrievalResult]) -> float:
+    def _calculate_context_relevance(
+        self, query: str, results: List[RetrievalResult]
+    ) -> float:
         """计算上下文相关性"""
         if not results:
             return 0.0
@@ -695,7 +767,9 @@ class RAGEvaluator:
             return 0.0
         # 考虑因素：结果数量、内容长度、相似度分布
         count_score = min(len(results) / 5, 1.0)  # 期望至少5个结果
-        length_score = min(np.mean([len(r.content) for r in results]) / 200, 1.0)  # 期望平均长度200字符
+        length_score = min(
+            np.mean([len(r.content) for r in results]) / 200, 1.0
+        )  # 期望平均长度200字符
         similarity_score = np.mean([r.similarity for r in results])
         return (count_score + length_score + similarity_score) / 3
 
@@ -719,8 +793,9 @@ class RAGEvaluator:
             return 0.0
         return len(intersection) / len(ground_truth_tokens)
 
-    def _calculate_fidelity(self, answer: str, 
-                          context_chunks: List[RetrievalResult]) -> float:
+    def _calculate_fidelity(
+        self, answer: str, context_chunks: List[RetrievalResult]
+    ) -> float:
         """计算对源材料的忠实度"""
         if not answer or not context_chunks:
             return 0.0
@@ -750,9 +825,11 @@ class RAGEvaluator:
         if not answer:
             return 0.0
         # 简单实现：考虑句子长度、段落结构等
-        sentences = answer.split('。')
-        avg_sentence_length = np.mean([len(s) for s in sentences if s.strip()]) if sentences else 0
-        paragraphs = answer.split('\n')
+        sentences = answer.split("。")
+        avg_sentence_length = (
+            np.mean([len(s) for s in sentences if s.strip()]) if sentences else 0
+        )
+        paragraphs = answer.split("\n")
         paragraph_count = len([p for p in paragraphs if p.strip()])
         # 理想句子长度：15-20字符
         sentence_length_score = max(0, 1 - abs(avg_sentence_length - 17.5) / 35)
@@ -760,15 +837,16 @@ class RAGEvaluator:
         paragraph_score = min(paragraph_count / 3, 1.0)
         return (sentence_length_score + paragraph_score) / 2
 
-    def _compare_metrics(self, metrics_a: Dict[str, Any], 
-                       metrics_b: Dict[str, Any]) -> Dict[str, Any]:
+    def _compare_metrics(
+        self, metrics_a: Dict[str, Any], metrics_b: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """比较两个配置的指标"""
         comparison = {
             "retrieval": {},
             "enhancement": {},
             "generation": {},
             "overall": {},
-            "overall_winner": "A"
+            "overall_winner": "A",
         }
 
         # 比较检索指标
@@ -783,7 +861,7 @@ class RAGEvaluator:
                 "a": val_a,
                 "b": val_b,
                 "difference": val_b - val_a,
-                "percent_change": (val_b - val_a) / (val_a if val_a != 0 else 1) * 100
+                "percent_change": (val_b - val_a) / (val_a if val_a != 0 else 1) * 100,
             }
 
         # 比较增强指标
@@ -796,7 +874,7 @@ class RAGEvaluator:
                 "a": val_a,
                 "b": val_b,
                 "difference": val_b - val_a,
-                "percent_change": (val_b - val_a) / (val_a if val_a != 0 else 1) * 100
+                "percent_change": (val_b - val_a) / (val_a if val_a != 0 else 1) * 100,
             }
 
         # 比较生成指标
@@ -809,17 +887,21 @@ class RAGEvaluator:
                 "a": val_a,
                 "b": val_b,
                 "difference": val_b - val_a,
-                "percent_change": (val_b - val_a) / (val_a if val_a != 0 else 1) * 100
+                "percent_change": (val_b - val_a) / (val_a if val_a != 0 else 1) * 100,
             }
 
         # 计算总体赢家
         scores = {"A": 0, "B": 0}
         # 对关键指标进行评分
         key_metrics = [
-            "precision_at_1", "precision_at_3", "context_relevance", 
-            "info_completeness", "fidelity", "answer_relevance"
+            "precision_at_1",
+            "precision_at_3",
+            "context_relevance",
+            "info_completeness",
+            "fidelity",
+            "answer_relevance",
         ]
-        
+
         for metric in key_metrics:
             # 检查retrieval指标
             if metric in comparison["retrieval"]:
@@ -860,7 +942,7 @@ class RAGEvaluator:
     def _generate_action_items(self, weaknesses: List[str]) -> List[str]:
         """生成行动项"""
         action_items = []
-        
+
         if any("precision" in w for w in weaknesses):
             action_items.append("调整检索参数，如top_k、similarity_threshold等")
             action_items.append("考虑使用更适合的嵌入模型")

@@ -1,24 +1,233 @@
 {
-  "1a2878777ca687bed1e6eb382941bcb9": {
-    "id": "1a2878777ca687bed1e6eb382941bcb9",
-    "name": "baoxiao.md",
-    "size": 6637,
-    "status": "indexed",
-    "upload_time": "2026-02-07T22:50:11.796603",
-    "chunk_count": 14,
-    "category": "未分类",
-    "tags": [],
-    "file_path": "baoxiao.md"
-  },
-  "a6fa7355a561a888c06a677dccd86f96": {
-    "id": "a6fa7355a561a888c06a677dccd86f96",
-    "name": "baoxiao.md",
-    "size": 6444,
+  "104d25868d4164e8511340a60ced9cf8": {
+    "id": "104d25868d4164e8511340a60ced9cf8",
+    "name": "01_企业协作平台用户手册.md",
+    "size": 1270,
     "status": "pending",
-    "upload_time": "2026-02-08T13:30:17.861373",
+    "upload_time": "2026-02-10T20:17:58.634889",
     "chunk_count": 0,
     "category": "未分类",
     "tags": [],
-    "file_path": "baoxiao.md"
+    "file_path": "01_企业协作平台用户手册.md"
+  },
+  "3903babfaea673230b2865d473184b9c": {
+    "id": "3903babfaea673230b2865d473184b9c",
+    "name": "02_智能客服系统产品规格.md",
+    "size": 1301,
+    "status": "indexed",
+    "upload_time": "2026-02-10T20:17:59.868942",
+    "chunk_count": 2,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "02_智能客服系统产品规格.md"
+  },
+  "eb5cdca3c277d5ee0ae254181bddcf6f": {
+    "id": "eb5cdca3c277d5ee0ae254181bddcf6f",
+    "name": "03_数据分析平台产品介绍.md",
+    "size": 1554,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:00.143925",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "03_数据分析平台产品介绍.md"
+  },
+  "d900db9c176beb5aee7573d64c2ce034": {
+    "id": "d900db9c176beb5aee7573d64c2ce034",
+    "name": "04_企业网盘使用指南.md",
+    "size": 1701,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:01.491284",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "04_企业网盘使用指南.md"
+  },
+  "a31b9ee9f59922482089025d5a89152d": {
+    "id": "a31b9ee9f59922482089025d5a89152d",
+    "name": "05_API网关技术白皮书.md",
+    "size": 1847,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:01.771222",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "05_API网关技术白皮书.md"
+  },
+  "58b396065d4f59ead00e43ce9641cb2e": {
+    "id": "58b396065d4f59ead00e43ce9641cb2e",
+    "name": "06_RESTful_API设计规范.md",
+    "size": 3212,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:02.025953",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "06_RESTful_API设计规范.md"
+  },
+  "50ddb8d5081413e8c17bb8e69b1d2da1": {
+    "id": "50ddb8d5081413e8c17bb8e69b1d2da1",
+    "name": "07_数据库设计规范.md",
+    "size": 3974,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:02.330738",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "07_数据库设计规范.md"
+  },
+  "aa9b08adc0889e21df5aac129078ad3f": {
+    "id": "aa9b08adc0889e21df5aac129078ad3f",
+    "name": "08_前端开发规范.md",
+    "size": 3922,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:02.559172",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "08_前端开发规范.md"
+  },
+  "a4ea699bddd59ad36c14aac8db72650e": {
+    "id": "a4ea699bddd59ad36c14aac8db72650e",
+    "name": "09_微服务架构设计规范.md",
+    "size": 3005,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:02.692859",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "09_微服务架构设计规范.md"
+  },
+  "a320221586b96709ae1b9b1a7559ec26": {
+    "id": "a320221586b96709ae1b9b1a7559ec26",
+    "name": "10_DevOps实践指南.md",
+    "size": 4372,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:02.957996",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "10_DevOps实践指南.md"
+  },
+  "820a3b99bade07c142b29ef34525c57c": {
+    "id": "820a3b99bade07c142b29ef34525c57c",
+    "name": "11_隐私政策.md",
+    "size": 2969,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:03.091524",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "11_隐私政策.md"
+  },
+  "ac8cd6e1bdf52da3917d4b8f94aaf4a6": {
+    "id": "ac8cd6e1bdf52da3917d4b8f94aaf4a6",
+    "name": "12_信息安全管理制度.md",
+    "size": 4547,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:03.403125",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "12_信息安全管理制度.md"
+  },
+  "b7d86e53c7275b49515dc14c287ab08d": {
+    "id": "b7d86e53c7275b49515dc14c287ab08d",
+    "name": "13_软件合规使用政策.md",
+    "size": 3514,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:03.521637",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "13_软件合规使用政策.md"
+  },
+  "0ab3bfe27359fe2ebac19e098aa31a1c": {
+    "id": "0ab3bfe27359fe2ebac19e098aa31a1c",
+    "name": "14_财务报销.md",
+    "size": 6637,
+    "status": "indexed",
+    "upload_time": "2026-02-10T20:18:04.369898",
+    "chunk_count": 14,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "14_财务报销.md"
+  },
+  "49c5e8157d04cb47d6e08a68503fba44": {
+    "id": "49c5e8157d04cb47d6e08a68503fba44",
+    "name": "16_项目预算与成本管理制度.md",
+    "size": 5142,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:05.142194",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "16_项目预算与成本管理制度.md"
+  },
+  "54db6a2a1f503450645d12d6dbe7c62e": {
+    "id": "54db6a2a1f503450645d12d6dbe7c62e",
+    "name": "17_员工手册.md",
+    "size": 6409,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:07.823079",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "17_员工手册.md"
+  },
+  "3ae814bb831242a66a1b2bb52d26b6c8": {
+    "id": "3ae814bb831242a66a1b2bb52d26b6c8",
+    "name": "18_绩效考核管理办法.md",
+    "size": 4817,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:08.196391",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "18_绩效考核管理办法.md"
+  },
+  "b1cc90e5ecfa7a91ae1cd823f2425703": {
+    "id": "b1cc90e5ecfa7a91ae1cd823f2425703",
+    "name": "19_软件开发流程规范.md",
+    "size": 4866,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:08.339299",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "19_软件开发流程规范.md"
+  },
+  "18a036fb5a42efea25185746f56d2159": {
+    "id": "18a036fb5a42efea25185746f56d2159",
+    "name": "20_版本发布管理规范.md",
+    "size": 5870,
+    "status": "pending",
+    "upload_time": "2026-02-10T20:18:08.530638",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "20_版本发布管理规范.md"
+  },
+  "3310d5a804500ee900b8d16dc142026e": {
+    "id": "3310d5a804500ee900b8d16dc142026e",
+    "name": "15_酒店级别标准补充.md",
+    "size": 3264,
+    "status": "indexed",
+    "upload_time": "2026-02-10T23:46:38.386312",
+    "chunk_count": 1,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "15_酒店级别标准补充.md"
+  },
+  "084d1c6ebf152b6fe0d2c2b256ec0993": {
+    "id": "084d1c6ebf152b6fe0d2c2b256ec0993",
+    "name": "16_城市分类地区差异.md",
+    "size": 4706,
+    "status": "pending",
+    "upload_time": "2026-02-10T23:46:39.356423",
+    "chunk_count": 0,
+    "category": "未分类",
+    "tags": [],
+    "file_path": "16_城市分类地区差异.md"
   }
 }

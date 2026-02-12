@@ -1,5 +1,6 @@
 """
-文档切分器 - RAGFlow 风格的智能切分系统（制度文档增强版）
+文档切分器 - RAGFlow 风格的智能切分系统（多类型文档增强版）
+支持：财务制度、产品文档、技术规范、合规文件、HR文档、项目管理文档
 """
 
 from typing import List, Tuple, Optional, Dict, Any
@@ -21,11 +22,46 @@ except ImportError:
     FINANCIAL_CHUNKER_AVAILABLE = False
     logger.warning("Financial chunker v2 not available")
 
+# 导入文档类型检测器
+try:
+    from services.document_type_detector import (
+        DocumentTypeDetector,
+        DocumentCategory,
+        detect_document_type,
+    )
+
+    DOC_TYPE_DETECTOR_AVAILABLE = True
+except ImportError:
+    DOC_TYPE_DETECTOR_AVAILABLE = False
+    logger.warning("Document type detector not available")
+
+# 导入多类型切分器
+try:
+    from services.multi_type_chunkers import (
+        ProductDocumentChunker,
+        TechnicalSpecChunker,
+        ComplianceDocumentChunker,
+        HRDocumentChunker,
+        ProjectManagementChunker,
+    )
+
+    MULTI_TYPE_CHUNKERS_AVAILABLE = True
+except ImportError:
+    MULTI_TYPE_CHUNKERS_AVAILABLE = False
+    logger.warning("Multi-type chunkers not available")
+
 
 class RAGFlowChunker:
     """
     RAGFlow 风格的文档切分器（支持财务制度类文档的智能切分）
     """
+
+    # 切分硬限制配置
+    CHUNK_HARD_LIMITS = {
+        "max_chars": 2000,  # 约1000个汉字
+        "max_tokens_estimate": 512,  # 预留LLM token空间
+        "overlap_max_ratio": 0.3,  # 重叠度不超过30%
+    }
 
     def __init__(self):
         # 章标题：支持 "## 第一章 总则" 或 "##第一章..."
@@ -46,9 +82,112 @@ class RAGFlowChunker:
         # 用于存储元数据的缓存
         self._chunk_metadata_cache: Dict[str, Dict] = {}
 
-    def chunk(self, content: str, doc_id: str, config: ChunkConfig) -> List[ChunkInfo]:
+        # 初始化多类型切分器
+        self._init_multi_type_chunkers()
+
+    def _init_multi_type_chunkers(self):
+        """初始化多类型文档切分器"""
+        self._multi_type_chunkers = {}
+
+        if MULTI_TYPE_CHUNKERS_AVAILABLE:
+            try:
+                self._multi_type_chunkers[DocumentCategory.PRODUCT] = (
+                    ProductDocumentChunker()
+                )
+                self._multi_type_chunkers[DocumentCategory.TECHNICAL] = (
+                    TechnicalSpecChunker()
+                )
+                self._multi_type_chunkers[DocumentCategory.COMPLIANCE] = (
+                    ComplianceDocumentChunker()
+                )
+                self._multi_type_chunkers[DocumentCategory.HR] = HRDocumentChunker()
+                self._multi_type_chunkers[DocumentCategory.PROJECT] = (
+                    ProjectManagementChunker()
+                )
+                logger.info("多类型文档切分器初始化成功")
+            except Exception as e:
+                logger.error(f"初始化多类型切分器失败: {e}")
+
+    def _validate_chunk_length(
+        self, chunks: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """
+        验证并强制截断超长片段
+
+        Args:
+            chunks: 原始切分结果
+
+        Returns:
+            验证后的切分结果
+        """
+        validated_chunks = []
+        for chunk in chunks:
+            content = chunk.get("content", "")
+            if len(content) > self.CHUNK_HARD_LIMITS["max_chars"]:
+                # 强制按字符切分兜底
+                logger.warning(
+                    f"片段长度({len(content)})超过限制({self.CHUNK_HARD_LIMITS['max_chars']})，执行强制切分"
+                )
+                sub_chunks = self._force_char_split(content)
+                for i, sub_content in enumerate(sub_chunks):
+                    sub_chunk = chunk.copy()
+                    sub_chunk["content"] = sub_content
+                    sub_chunk["metadata"] = {
+                        **(chunk.get("metadata", {})),
+                        "forced_split": True,
+                        "sub_chunk_index": i,
+                    }
+                    validated_chunks.append(sub_chunk)
+            else:
+                validated_chunks.append(chunk)
+        return validated_chunks
+
+    def _force_char_split(self, content: str, max_chars: int = None) -> List[str]:
+        """
+        强制按字符切分超长内容
+
+        Args:
+            content: 需要切分的内容
+            max_chars: 最大字符数，默认使用配置值
+
+        Returns:
+            切分后的内容列表
+        """
+        if max_chars is None:
+            max_chars = self.CHUNK_HARD_LIMITS["max_chars"]
+
+        chunks = []
+        start = 0
+        content_len = len(content)
+
+        while start < content_len:
+            end = min(start + max_chars, content_len)
+            # 尝试在句子边界处切分
+            if end < content_len:
+                # 向后查找最近的句子结束符
+                for i in range(end, start, -1):
+                    if content[i - 1] in "。；！？\n":
+                        end = i
+                        break
+
+            chunk = content[start:end].strip()
+            if chunk:
+                chunks.append(chunk)
+            start = end
+
+        return chunks if chunks else [content[:max_chars]]
+
+    def chunk(
+        self, content: str, doc_id: str, config: ChunkConfig, filename: str = ""
+    ) -> List[ChunkInfo]:
         """
         根据配置切分文档
+
+        Args:
+            content: 文档内容
+            doc_id: 文档ID
+            config: 切分配置
+            filename: 文件名（可选，用于文档类型检测）
         """
         if not content or not content.strip():
             logger.warning("文档内容为空，无法切分")
@@ -60,8 +199,16 @@ class RAGFlowChunker:
         try:
             # 检测文档类型
             is_policy_doc = self._detect_policy_document(content)
+            doc_category = None
 
-            # 智能切分：对于INTELLIGENT类型或制度类文档，使用优化的财务/制度类文档切分策略
+            # 使用文档类型检测器
+            if DOC_TYPE_DETECTOR_AVAILABLE:
+                doc_category = detect_document_type(content, filename=filename)
+                logger.info(
+                    f"文档类型检测结果: {doc_category.value if doc_category else 'unknown'}"
+                )
+
+            # 智能切分：对于INTELLIGENT类型或制度类文档，使用优化的切分策略
             if config.type == ChunkType.INTELLIGENT or (
                 is_policy_doc and config.type in [ChunkType.PDF, ChunkType.ENHANCED]
             ):
@@ -69,8 +216,18 @@ class RAGFlowChunker:
                     f"使用智能切分策略 (config.type: {config.type})。文档长度: {len(content)}"
                 )
 
+                # 根据文档类型选择对应的切分器
+                if doc_category and doc_category in self._multi_type_chunkers:
+                    logger.info(f"使用专用切分器: {doc_category.value}")
+                    try:
+                        chunk_dicts = self._multi_type_chunkers[doc_category].chunk(
+                            content, doc_id
+                        )
+                    except Exception as e:
+                        logger.warning(f"专用切分器失败: {e}，回退到通用切分")
+                        chunk_dicts = self._financial_policy_chunking(content)
                 # 优先使用新版财务制度切分器（如果文档包含明显的制度特征）
-                if is_policy_doc and (
+                elif is_policy_doc and (
                     "报销" in content or "差旅" in content or "审批" in content
                 ):
                     logger.info(
@@ -97,6 +254,46 @@ class RAGFlowChunker:
                 chunk_dicts = [
                     {"content": t, "type": "text", "metadata": {}} for t in chunk_texts
                 ]
+            elif config.type in [
+                ChunkType.PRODUCT,
+                ChunkType.TECHNICAL,
+                ChunkType.COMPLIANCE,
+                ChunkType.HR,
+                ChunkType.PROJECT,
+            ]:
+                # 新的文档类型切分：使用智能切分逻辑，但根据类型调整分隔符
+                delimiter_map = {
+                    ChunkType.PRODUCT: ["##", "###", "\n\n", "。"],
+                    ChunkType.TECHNICAL: ["##", "###", "```", "```", "\n\n", "。"],
+                    ChunkType.COMPLIANCE: [
+                        "第.*章",
+                        "第.*条",
+                        "##",
+                        "###",
+                        "\n\n",
+                        "。",
+                    ],
+                    ChunkType.HR: ["##", "###", "\n\n", "。"],
+                    ChunkType.PROJECT: ["##", "###", "阶段", "里程碑", "\n\n", "。"],
+                }
+
+                delimiters = delimiter_map.get(config.type, ["##", "###", "\n\n", "。"])
+                logger.info(f"使用 {config.type} 切分策略，分隔符: {delimiters}")
+
+                chunk_texts = self._naive_merge(
+                    content,
+                    chunk_token_num=config.chunk_token_size,
+                    delimiter=delimiters[0],
+                    overlapped_percent=config.overlapped_percent,
+                )
+                chunk_dicts = [
+                    {
+                        "content": t,
+                        "type": "text",
+                        "metadata": {"chunk_type": config.type},
+                    }
+                    for t in chunk_texts
+                ]
             else:
                 chunk_texts = self._naive_merge(
                     content,
@@ -109,6 +306,9 @@ class RAGFlowChunker:
                 chunk_dicts = [
                     {"content": t, "type": "text", "metadata": {}} for t in chunk_texts
                 ]
+
+            # 验证并强制截断超长片段
+            chunk_dicts = self._validate_chunk_length(chunk_dicts)
 
             # 转换为 ChunkInfo 对象
             chunk_infos = self._create_chunk_infos(chunk_dicts, doc_id)

@@ -291,6 +291,21 @@
         .red-tip {
             color: var(--error);
         }
+        /* 切分方法说明样式 */
+        .method-description {
+            transition: all 0.3s ease;
+        }
+        .method-description:hover {
+            background: #e6f2ff !important;
+        }
+        /* 文档类型选择器样式 */
+        #docTypeSelector {
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         /* 弹窗样式 */
         .modal-mask {
             position: fixed;
@@ -389,12 +404,30 @@
                 <div class="chunk-config">
                     <div class="form-item">
                         <label class="form-label">切分方式</label>
-                        <select class="form-select" id="chunkType">
+                        <select class="form-select form-select-lg" id="chunkType">
+                            <option value="intelligent">智能切分（推荐）</option>
                             <option value="char">按字符</option>
                             <option value="sentence">按句子</option>
                             <option value="paragraph">按段落</option>
                             <option value="custom">自定义规则</option>
                         </select>
+                        <!-- 切分方法说明区域 -->
+                        <div id="chunkMethodDesc" class="method-description" style="margin-top: 10px; padding: 12px; background: #f0f7ff; border-radius: 6px; border-left: 3px solid #165DFF; font-size: 13px; color: #4E5969; line-height: 1.6;">
+                            <strong>智能切分</strong>：自动识别文档类型（财务制度、产品文档、技术规范、合规文件、HR文档、项目管理），使用专用切分策略，保证最佳检索效果。
+                        </div>
+                        <!-- 文档类型选择器（智能切分时显示） -->
+                        <div id="docTypeSelector" style="margin-top: 10px;">
+                            <label class="form-label" style="font-size: 12px; color: #86909C;">文档类型（可选，用于优化切分策略）</label>
+                            <select class="form-select" id="documentType" style="font-size: 13px;">
+                                <option value="auto">自动检测</option>
+                                <option value="financial">财务制度（报销、差旅、费用管理）</option>
+                                <option value="product">产品文档（手册、指南、白皮书）</option>
+                                <option value="technical">技术规范（API、设计规范、架构）</option>
+                                <option value="compliance">合规文件（隐私政策、安全制度）</option>
+                                <option value="hr">HR文档（员工手册、绩效考核）</option>
+                                <option value="project">项目管理（流程规范、发布管理）</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-item">
                         <label class="form-label">切分长度</label>
@@ -513,6 +546,18 @@ RAG的核心流程分为四步：文档加载与预处理、文档切分与向�
         let currentSplitId = ''; // 当前拆分的片段ID
         // 元素获取
         const chunkType = document.getElementById('chunkType');
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置默认切分方式为智能切分
+            chunkType.value = 'intelligent';
+            chunkLen.value = '自动';
+            chunkOverlap.value = '自动';
+            chunkLen.readOnly = true;
+            chunkOverlap.readOnly = true;
+            // 显示智能切分说明
+            updateChunkMethodDesc('intelligent');
+        });
         const chunkLen = document.getElementById('chunkLen');
         const chunkOverlap = document.getElementById('chunkOverlap');
         const customRule = document.getElementById('customRule');
@@ -530,9 +575,56 @@ RAG的核心流程分为四步：文档加载与预处理、文档切分与向�
         const splitPos = document.getElementById('splitPos');
         const splitContent = document.getElementById('splitContent');
 
+        // 切分方式说明配置
+        const chunkMethodDescriptions = {
+            'intelligent': {
+                title: '智能切分',
+                desc: '自动识别文档类型（财务制度、产品文档、技术规范、合规文件、HR文档、项目管理），使用专用切分策略，保证最佳检索效果。',
+                showDocType: true
+            },
+            'char': {
+                title: '按字符切分',
+                desc: '按照固定字符数切分文档，适用于无明显格式的纯文本。优点是实现简单、通用性强；缺点是可能拆分完整语义。',
+                showDocType: false
+            },
+            'sentence': {
+                title: '按句子切分',
+                desc: '按中文分句符（。！？；）切分，适合中文书面文档。优点是语义完整性高；缺点是对分句符敏感，可能产生长度不均的片段。',
+                showDocType: false
+            },
+            'paragraph': {
+                title: '按段落切分',
+                desc: '按换行符切分，适合排版规范的文档。优点是语义独立性最强；缺点是片段长度不均，可能产生过长或过短的片段。',
+                showDocType: false
+            },
+            'custom': {
+                title: '自定义规则切分',
+                desc: '使用自定义分隔符切分，适合专属格式文档。优点是适配个性化业务；缺点是需要人工配置规则，通用性较差。',
+                showDocType: false
+            }
+        };
+
+        // 更新切分方法说明
+        function updateChunkMethodDesc(type) {
+            const descDiv = document.getElementById('chunkMethodDesc');
+            const docTypeSelector = document.getElementById('docTypeSelector');
+            const config = chunkMethodDescriptions[type];
+            
+            if (config) {
+                descDiv.innerHTML = `<strong>${config.title}</strong>：${config.desc}`;
+                // 控制文档类型选择器显示/隐藏
+                docTypeSelector.style.display = config.showDocType ? 'block' : 'none';
+            }
+        }
+
         // 初始化：切分方式切换监听
         chunkType.addEventListener('change', function() {
-            if (this.value === 'custom') {
+            const type = this.value;
+            
+            // 更新说明
+            updateChunkMethodDesc(type);
+            
+            if (type === 'custom') {
                 customRule.disabled = false;
                 customRule.placeholder = '输入分隔符，如：\n、。！？；';
             } else {
@@ -540,13 +632,22 @@ RAG的核心流程分为四步：文档加载与预处理、文档切分与向�
                 customRule.value = '';
                 customRule.placeholder = '如：\n、。！？；';
             }
-            // 按段落隐藏长度/重叠配置（前端视觉屏蔽，实际可加样式）
-            if (this.value === 'paragraph') {
+            
+            // 按段落或智能切分时的特殊处理
+            if (type === 'paragraph' || type === 'intelligent') {
                 chunkLen.readOnly = true;
                 chunkOverlap.readOnly = true;
+                if (type === 'intelligent') {
+                    chunkLen.value = '自动';
+                    chunkOverlap.value = '自动';
+                }
             } else {
                 chunkLen.readOnly = false;
                 chunkOverlap.readOnly = false;
+                if (chunkLen.value === '自动') {
+                    chunkLen.value = 500;
+                    chunkOverlap.value = 50;
+                }
             }
         });
 
@@ -560,19 +661,25 @@ RAG的核心流程分为四步：文档加载与预处理、文档切分与向�
             const type = chunkType.value;
             const len = parseInt(chunkLen.value);
             const overlap = parseInt(chunkOverlap.value);
-            // 参数校验
-            if (type !== 'paragraph' && (isNaN(len) || len < 100 || len > 2000)) {
-                alert('切分长度请输入100-2000之间的数字！');
-                chunkLen.focus();
-                return;
-            }
-            if (type !== 'paragraph' && (isNaN(overlap) || overlap < 0 || overlap >= len)) {
-                alert('重叠长度请输入0到切分长度之间的数字！');
-                chunkOverlap.focus();
-                return;
+            // 参数校验（智能切分不需要校验）
+            if (type !== 'paragraph' && type !== 'intelligent') {
+                if (isNaN(len) || len < 100 || len > 2000) {
+                    alert('切分长度请输入100-2000之间的数字！');
+                    chunkLen.focus();
+                    return;
+                }
+                if (isNaN(overlap) || overlap < 0 || overlap >= len) {
+                    alert('重叠长度请输入0到切分长度之间的数字！');
+                    chunkOverlap.focus();
+                    return;
+                }
             }
             // 执行对应切分方法
             switch (type) {
+                case 'intelligent':
+                    const docType = document.getElementById('documentType').value;
+                    chunkList = chunkByIntelligent(content, docType);
+                    break;
                 case 'char':
                     chunkList = chunkByChar(content, len, overlap);
                     break;
@@ -597,6 +704,59 @@ RAG的核心流程分为四步：文档加载与预处理、文档切分与向�
             // 提示
             alert(`切分完成！共生成 ${chunkList.length} 个片段`);
         });
+
+        // 0. 智能切分方法
+        function chunkByIntelligent(content, docType) {
+            const chunks = [];
+            let id = 1;
+            
+            // 根据文档类型选择不同的切分策略
+            const strategies = {
+                'financial': { pattern: /(第[一二三四五六七八九十百千万]+章|第\d+章)/, name: '财务制度' },
+                'product': { pattern: /##\s+\d+\./, name: '产品文档' },
+                'technical': { pattern: /##\s+\d+\./, name: '技术规范' },
+                'compliance': { pattern: /(第[一二三四五六七八九十百千万]+章|第[一二三四五六七八九十百千万]+条)/, name: '合规文件' },
+                'hr': { pattern: /(第[一二三四五六七八九十百千万]+章|第\d+条)/, name: 'HR文档' },
+                'project': { pattern: /##\s+第[一二三四五六七八九十百千万]+章/, name: '项目管理' },
+                'auto': { pattern: /##\s+/, name: '通用' }
+            };
+            
+            const strategy = strategies[docType] || strategies['auto'];
+            
+            // 尝试按章节切分
+            const sections = content.split(strategy.pattern).filter(s => s.trim() !== '');
+            
+            if (sections.length > 1) {
+                // 按章节切分成功
+                sections.forEach((section, index) => {
+                    if (section.trim()) {
+                        chunks.push({
+                            id: 'c' + id,
+                            num: id,
+                            content: section.trim(),
+                            length: section.length,
+                            type: strategy.name + '_section'
+                        });
+                        id++;
+                    }
+                });
+            } else {
+                // 回退到按段落切分
+                const paragraphs = content.split('\n').filter(p => p.trim() !== '');
+                paragraphs.forEach((p, index) => {
+                    chunks.push({
+                        id: 'c' + id,
+                        num: id,
+                        content: p.trim(),
+                        length: p.length,
+                        type: 'paragraph'
+                    });
+                    id++;
+                });
+            }
+            
+            return chunks;
+        }
 
         // 1. 按字符切分（核心方法）
         function chunkByChar(content, chunkSize, overlapSize) {
@@ -749,13 +909,15 @@ RAG的核心流程分为四步：文档加载与预处理、文档切分与向�
 
         // 重置配置
         resetBtn.addEventListener('click', function() {
-            chunkType.value = 'char';
-            chunkLen.value = 500;
-            chunkOverlap.value = 50;
+            chunkType.value = 'intelligent';
+            chunkLen.value = '自动';
+            chunkOverlap.value = '自动';
             customRule.disabled = true;
             customRule.value = '';
-            chunkLen.readOnly = false;
-            chunkOverlap.readOnly = false;
+            chunkLen.readOnly = true;
+            chunkOverlap.readOnly = true;
+            document.getElementById('documentType').value = 'auto';
+            updateChunkMethodDesc('intelligent');
             docContent.value = docContent.defaultValue;
             chunkList = [];
             renderChunkList();
@@ -775,7 +937,8 @@ RAG的核心流程分为四步：文档加载与预处理、文档切分与向�
                 chunkParams: {
                     length: chunkLen.value,
                     overlap: chunkOverlap.value,
-                    customRule: customRule.value
+                    customRule: customRule.value,
+                    documentType: chunkType.value === 'intelligent' ? document.getElementById('documentType').value : null
                 },
                 chunkTotal: chunkList.length,
                 chunks: chunkList

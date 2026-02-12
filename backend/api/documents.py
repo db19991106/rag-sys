@@ -546,3 +546,73 @@ async def check_system_integrity():
     except Exception as e:
         logger.error(f"检查系统完整性失败: {str(e)}")
         raise HTTPException(status_code=500, detail=f"检查系统完整性失败: {str(e)}")
+
+
+@router.get("/local-docs", response_model=List[dict])
+async def list_local_docs():
+    """
+    获取本地 data/docs 目录中的所有文档列表
+    """
+    try:
+        import os
+        from pathlib import Path
+
+        docs_dir = Path(__file__).parent.parent / "data" / "docs"
+
+        if not docs_dir.exists():
+            return []
+
+        docs = []
+        for file_path in docs_dir.iterdir():
+            if file_path.is_file() and file_path.suffix == ".md":
+                file_stat = file_path.stat()
+                docs.append(
+                    {
+                        "id": file_path.stem,
+                        "name": file_path.name,
+                        "size": f"{file_stat.st_size / 1024:.1f} KB",
+                        "path": str(
+                            file_path.relative_to(Path(__file__).parent.parent)
+                        ),
+                    }
+                )
+
+        # 按文件名排序
+        docs.sort(key=lambda x: x["name"])
+        return docs
+    except Exception as e:
+        logger.error(f"获取本地文档列表失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取本地文档列表失败: {str(e)}")
+
+
+@router.get("/local-docs/{doc_id}/content")
+async def get_local_doc_content(doc_id: str):
+    """
+    获取本地 data/docs 目录中指定文档的内容
+    """
+    try:
+        import os
+        from pathlib import Path
+
+        docs_dir = Path(__file__).parent.parent / "data" / "docs"
+
+        # 查找匹配的文档文件
+        doc_file = None
+        for file_path in docs_dir.iterdir():
+            if file_path.is_file() and file_path.stem == doc_id:
+                doc_file = file_path
+                break
+
+        if not doc_file or not doc_file.exists():
+            raise HTTPException(status_code=404, detail="文档不存在")
+
+        # 读取文件内容
+        with open(doc_file, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        return {"content": content}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"获取本地文档内容失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取本地文档内容失败: {str(e)}")

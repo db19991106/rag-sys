@@ -6,6 +6,8 @@ export interface Document {
   time: string;
   status: 'pending' | 'split' | 'index' | 'error';
   preview?: string;
+  category?: string;
+  tags?: string[];
 }
 
 // 片段类型
@@ -52,7 +54,8 @@ export interface RetrievalConfig {
 // 切分配置类型
 export interface ChunkConfig {
   type: 'naive' | 'char' | 'sentence' | 'paragraph' | 'qa' | 'table' | 'picture' |
-       'resume' | 'manual' | 'paper' | 'book' | 'laws' | 'custom' | 'intelligent' | 'enhanced';
+       'resume' | 'manual' | 'paper' | 'book' | 'laws' | 'custom' | 'intelligent' | 'enhanced' |
+       'product' | 'technical' | 'compliance' | 'hr' | 'project';
   chunkTokenSize: number;
   delimiters: string[];
   childrenDelimiters: string[];

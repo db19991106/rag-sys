@@ -74,6 +74,16 @@ export const documentApi = {
       body: JSON.stringify(docIds),
     });
   },
+
+  // 获取本地 data/docs 目录中的文档列表
+  listLocalDocs: async () => {
+    return request<Array<{ id: string; name: string; size: string; path: string }>>('/documents/local-docs');
+  },
+
+  // 获取本地文档内容
+  getLocalDocContent: async (docId: string) => {
+    return request<{ content: string }>(`/documents/local-docs/${docId}/content`);
+  },
 };
 
 // ========== 文档切分 API ==========
@@ -340,7 +350,7 @@ export interface Chunk {
 }
 
 export interface ChunkConfig {
-  type: 'naive' | 'intelligent' | 'enhanced' | 'char' | 'sentence' | 'paragraph' | 'qa' | 'paper' | 'laws' | 'book' | 'table' | 'custom';
+  type: 'naive' | 'intelligent' | 'enhanced' | 'char' | 'sentence' | 'paragraph' | 'qa' | 'paper' | 'laws' | 'book' | 'table' | 'custom' | 'product' | 'technical' | 'compliance' | 'hr' | 'project';
   chunkTokenSize: number;
   delimiters: string[];
   childrenDelimiters: string[];

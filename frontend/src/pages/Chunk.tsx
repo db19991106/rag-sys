@@ -33,6 +33,13 @@ const Chunk: React.FC = () => {
   const [currentSimilarChunkContent, setCurrentSimilarChunkContent] = useState<string>('');
   const [showDocSelector, setShowDocSelector] = useState(false);
   const [expandedChunks, setExpandedChunks] = useState<Set<string>>(new Set());
+  
+  // 本地文档列表状态
+  const [localDocs, setLocalDocs] = useState<{ id: string; name: string; size: string; path: string; content: string }[]>([]);
+  const [selectedLocalDoc, setSelectedLocalDoc] = useState<string>('');
+  
+  // 添加调试状态
+  const [loadingStatus, setLoadingStatus] = useState<string>('');
 
   useEffect(() => {
     const loadDocuments = async () => {
@@ -60,6 +67,31 @@ const Chunk: React.FC = () => {
       }
     };
     loadDocuments();
+  }, [documents, addDocuments, batchDeleteDocuments]);
+
+  // 加载本地文档列表
+  useEffect(() => {
+    // 直接硬编码一些文档数据用于测试
+    const testDocs = [
+      {
+        id: "01_企业协作平台用户手册",
+        name: "01_企业协作平台用户手册.md",
+        size: "1.2 KB",
+        path: "data/docs/01_企业协作平台用户手册.md",
+        content: "# 企业协作平台用户手册 v2.0\n\n## 1. 产品概述\n\n企业协作平台是一款面向中大型组织的综合办公解决方案，支持即时通讯、文档协作、任务管理等功能。"
+      },
+      {
+        id: "02_智能客服系统产品规格",
+        name: "02_智能客服系统产品规格.md", 
+        size: "1.3 KB",
+        path: "data/docs/02_智能客服系统产品规格.md",
+        content: "# 智能客服系统产品规格说明书\n\n## 产品名称\n智能客服系统 AI-CS v3.5\n\n## 目标用户\n- 电商企业\n- 金融机构"
+      }
+    ];
+    
+    console.log('设置测试文档数据:', testDocs.length, '个文档');
+    setLocalDocs(testDocs);
+    setLoadingStatus(`已加载${testDocs.length}个测试文档`);
   }, []);
 
   useEffect(() => {
@@ -263,6 +295,26 @@ const Chunk: React.FC = () => {
     setExpandedChunks(newExpandedChunks);
   };
 
+  // 选择本地文档
+  const handleSelectLocalDoc = (docId: string) => {
+    const doc = localDocs.find(d => d.id === docId);
+    if (doc) {
+      setSelectedLocalDoc(docId);
+      setDocContent(doc.content);
+      // 创建一个模拟的文档对象
+      setSelectedDocument({
+        id: doc.id,
+        name: doc.name,
+        size: doc.size,
+        time: new Date().toLocaleString('zh-CN'),
+        status: 'index',
+        preview: '',
+        category: '本地文档',
+        tags: []
+      });
+    }
+  };
+
   if (!selectedDocument) {
     return (
       <div className="container">
@@ -272,14 +324,83 @@ const Chunk: React.FC = () => {
             <small>RAG Chunking 配置 &amp; 编辑</small>
           </h1>
         </div>
+        
+        {/* 本地文档列表表格 */}
         <div className="card">
+          <div className="card-header">
+            <h3 className="card-title">
+              <i className="fas fa-folder-open"></i> 本地文档库
+            </h3>
+            <span className="tip-text">共 {localDocs.length} 个文档 {loadingStatus && `(${loadingStatus})`}</span>
+          </div>
+          <div className="card-body">
+            {localDocs.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state-icon">
+                  <i className="fas fa-folder-open"></i>
+                </div>
+                <h4>暂无本地文档</h4>
+                <p>backend/data/docs 目录中没有找到文档</p>
+              </div>
+            ) : (
+              <div className="local-docs-table-container" style={{ overflowX: 'auto' }}>
+                <table className="local-docs-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: 'var(--bg-light)', borderBottom: '2px solid var(--border)' }}>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', color: 'var(--text-secondary)' }}>序号</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', color: 'var(--text-secondary)' }}>文档名称</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', color: 'var(--text-secondary)' }}>大小</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: '600', color: 'var(--text-secondary)' }}>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {localDocs.map((doc, index) => (
+                      <tr 
+                        key={doc.id} 
+                        style={{ 
+                          borderBottom: '1px solid var(--border)',
+                          backgroundColor: selectedLocalDoc === doc.id ? 'var(--active)' : 'transparent',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onClick={() => handleSelectLocalDoc(doc.id)}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--active)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedLocalDoc === doc.id ? 'var(--active)' : 'transparent'}
+                      >
+                        <td style={{ padding: '12px 16px', color: 'var(--text-light)' }}>{index + 1}</td>
+                        <td style={{ padding: '12px 16px', color: 'var(--text-main)', fontWeight: '500' }}>
+                          <i className="fas fa-file-alt" style={{ marginRight: '8px', color: 'var(--primary)' }}></i>
+                          {doc.name}
+                        </td>
+                        <td style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>{doc.size}</td>
+                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                          <button 
+                            className="btn btn-sm btn-primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectLocalDoc(doc.id);
+                            }}
+                          >
+                            <i className="fas fa-check"></i> 选择
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="card" style={{ marginTop: '20px' }}>
           <div className="card-body" style={{ textAlign: 'center', padding: '40px 20px' }}>
             <div style={{ fontSize: '48px', color: 'var(--text-light)', marginBottom: '20px' }}>
-              <i className="fas fa-file-alt"></i>
+              <i className="fas fa-cloud-upload-alt"></i>
             </div>
-            <h3 style={{ marginBottom: '12px', color: 'var(--text-main)' }}>请先选择一个文档</h3>
+            <h3 style={{ marginBottom: '12px', color: 'var(--text-main)' }}>或上传新文档</h3>
             <p style={{ marginBottom: '20px', color: 'var(--text-secondary)' }}>
-              文档切分功能需要先从【知识文档管理】页面选择一个文档
+              也可以从【知识文档管理】页面上传新文档
             </p>
             <button className="btn btn-primary" onClick={() => navigate('/documents')}>
               <i className="fas fa-arrow-left"></i> 前往文档管理
@@ -330,23 +451,15 @@ const Chunk: React.FC = () => {
                 value={config.type}
                 onChange={e => setConfig({ ...config, type: e.target.value as any })}
               >
-                <optgroup label="基础切分">
-                  <option value="naive">📝 朴素切分（推荐）</option>
+                <optgroup label="财务制度">
                   <option value="intelligent">💰 财务报销制度切分</option>
-                  <option value="enhanced">🚀 增强型切分</option>
-                  <option value="char">📝 按字符切分</option>
-                  <option value="sentence">💬 按句子切分</option>
-                  <option value="paragraph">📄 按段落切分</option>
                 </optgroup>
-                <optgroup label="专用文档">
-                  <option value="qa">❓ 问答对切分</option>
-                  <option value="paper">📚 论文切分</option>
-                  <option value="laws">⚖️ 法律文档切分</option>
-                  <option value="book">📖 书籍切分</option>
-                  <option value="table">📊 表格切分</option>
-                </optgroup>
-                <optgroup label="自定义">
-                  <option value="custom">⚙️ 自定义规则</option>
+                <optgroup label="其他文档类型">
+                  <option value="product">📄 产品文档切分</option>
+                  <option value="technical">⚙️ 技术规范切分</option>
+                  <option value="compliance">📋 合规文件切分</option>
+                  <option value="hr">👥 HR文档切分</option>
+                  <option value="project">📊 项目管理切分</option>
                 </optgroup>
               </select>
             </div>
@@ -385,48 +498,6 @@ const Chunk: React.FC = () => {
               <div className="config-hint">%</div>
             </div>
 
-            <div className="config-card config-card-full">
-              <div className="config-card-header">
-                <i className="fas fa-code"></i>
-                <span>主分隔符</span>
-              </div>
-              <input
-                type="text"
-                className="form-input form-input-lg"
-                value={config.delimiters.join(', ')}
-                onChange={e => setConfig({ ...config, delimiters: e.target.value.split(',').map(s => s.trim()) })}
-                placeholder="例如: \n, 。, ；, ！, ？"
-              />
-              <div className="config-hint">多个分隔符用逗号分隔</div>
-            </div>
-
-            <div className="config-card config-card-full">
-              <div className="config-card-header">
-                <i className="fas fa-code-branch"></i>
-                <span>子分隔符</span>
-              </div>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={config.enableChildren}
-                    onChange={e => setConfig({ ...config, enableChildren: e.target.checked })}
-                  />
-                  <span>启用子分隔符</span>
-                </label>
-                {config.enableChildren && (
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={config.childrenDelimiters.join(', ')}
-                    onChange={e => setConfig({ ...config, childrenDelimiters: e.target.value.split(',').map(s => s.trim()) })}
-                    placeholder="例如: \n"
-                    style={{ flex: 1 }}
-                  />
-                )}
-              </div>
-            </div>
-
             <div className="config-card">
               <div className="config-card-header">
                 <i className="fas fa-chart-line"></i>
@@ -444,44 +515,6 @@ const Chunk: React.FC = () => {
               />
               <div className="config-hint">0-1</div>
             </div>
-
-            {config.type === 'table' && (
-              <div className="config-card">
-                <div className="config-card-header">
-                  <i className="fas fa-table"></i>
-                  <span>表格上下文</span>
-                </div>
-                <input
-                  type="number"
-                  className="form-input form-input-lg"
-                  value={config.tableContextSize}
-                  onChange={e => setConfig({ ...config, tableContextSize: parseInt(e.target.value) })}
-                  min={0}
-                  max={256}
-                  placeholder="0-256"
-                />
-                <div className="config-hint">token数</div>
-              </div>
-            )}
-
-            {config.type === 'picture' && (
-              <div className="config-card">
-                <div className="config-card-header">
-                  <i className="fas fa-image"></i>
-                  <span>图片上下文</span>
-                </div>
-                <input
-                  type="number"
-                  className="form-input form-input-lg"
-                  value={config.imageContextSize}
-                  onChange={e => setConfig({ ...config, imageContextSize: parseInt(e.target.value) })}
-                  min={0}
-                  max={256}
-                  placeholder="0-256"
-                />
-                <div className="config-hint">token数</div>
-              </div>
-            )}
           </div>
 
           <div className="action-bar">
@@ -632,7 +665,7 @@ const Chunk: React.FC = () => {
                 </div>
               ) : (
                 <div className="similar-chunks-list">
-                  {similarChunks.map((similarChunk, index) => (
+                  {similarChunks.map((similarChunk) => (
                     <div key={similarChunk.chunk_id} className="similar-chunk-card">
                       <div className="similar-chunk-header">
                         <span className="similar-doc-name">
