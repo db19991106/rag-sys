@@ -19,7 +19,9 @@ class VectorDatabase:
         """添加向量"""
         raise NotImplementedError
 
-    def search(self, query_vector: np.ndarray, top_k: int = 5) -> Tuple[np.ndarray, List[Dict]]:
+    def search(
+        self, query_vector: np.ndarray, top_k: int = 5
+    ) -> Tuple[np.ndarray, List[Dict]]:
         """搜索向量"""
         raise NotImplementedError
 
@@ -43,13 +45,20 @@ class VectorDatabase:
 class FAISSDatabase(VectorDatabase):
     """FAISS 向量数据库"""
 
-    def __init__(self, dimension: int, index_type: str = "HNSW"):
+    def __init__(
+        self, dimension: int, index_type: str = "HNSW", index_path: str = None
+    ):
         super().__init__(dimension)
         self.index_type = index_type
         self.index = None
         self.metadata: Dict[str, Dict] = {}
-        self.db_path = Path(settings.vector_db_dir) / "faiss_index"
-        self.metadata_path = Path(settings.vector_db_dir) / "faiss_metadata.json"
+        # 使用传入的路径或默认路径
+        if index_path:
+            db_dir = Path(index_path)
+        else:
+            db_dir = Path(settings.vector_db_dir)
+        self.db_path = db_dir / "faiss_index"
+        self.metadata_path = db_dir / "faiss_metadata.json"
         self._init_index()
 
     def _init_index(self):
@@ -94,13 +103,13 @@ class FAISSDatabase(VectorDatabase):
             vectors = vectors.reshape(1, -1)
 
         # 训练索引 (如果需要)
-        if hasattr(self.index, 'is_trained') and not self.index.is_trained:
+        if hasattr(self.index, "is_trained") and not self.index.is_trained:
             logger.info(f"训练 IVF 索引，样本数: {len(vectors)}")
             start_train = time.time()
             self.index.train(vectors)
             train_time = time.time() - start_train
             logger.info(f"✓ FAISS 索引训练完成，耗时: {train_time:.2f}s")
-            
+
             # 训练后需要重建索引以启用搜索
             logger.info("重建索引以启用搜索功能...")
             self.index.reset()
@@ -111,30 +120,36 @@ class FAISSDatabase(VectorDatabase):
         batch_size = 1000
         total_added = 0
         start_id = self.total_vectors
-        
+
         for i in range(0, len(vectors), batch_size):
             end = min(i + batch_size, len(vectors))
             batch_vectors = vectors[i:end]
             batch_metadata = metadata[i:end]
-            
+
             # 添加向量
             self.index.add(batch_vectors)
-            
+
             # 保存元数据
             for j, meta in enumerate(batch_metadata):
                 self.metadata[str(start_id + i + j)] = meta
-            
+
             total_added += len(batch_vectors)
-            logger.info(f"添加批次 {i//batch_size + 1}/{(len(vectors)+batch_size-1)//batch_size}，数量: {len(batch_vectors)}")
+            logger.info(
+                f"添加批次 {i // batch_size + 1}/{(len(vectors) + batch_size - 1) // batch_size}，数量: {len(batch_vectors)}"
+            )
 
         self.total_vectors += len(vectors)
         logger.info(f"添加 {len(vectors)} 个向量到 FAISS (总数: {self.total_vectors}) ")
-        
+
         # 定期保存 (每1000个向量或最后一批)
-        if len(vectors) >= 1000 or (len(vectors) > 0 and i + batch_size >= len(vectors)):
+        if len(vectors) >= 1000 or (
+            len(vectors) > 0 and i + batch_size >= len(vectors)
+        ):
             self.save()
 
-    def search(self, query_vector: np.ndarray, top_k: int = 5) -> Tuple[np.ndarray, List[List[Dict]]]:
+    def search(
+        self, query_vector: np.ndarray, top_k: int = 5
+    ) -> Tuple[np.ndarray, List[List[Dict]]]:
         """搜索向量"""
         import faiss
         import time
@@ -147,11 +162,11 @@ class FAISSDatabase(VectorDatabase):
             query_vector = query_vector.reshape(1, -1)
 
         # 优化搜索参数
-        if hasattr(self.index, 'hnsw'):
+        if hasattr(self.index, "hnsw"):
             # HNSW 索引优化
             original_efSearch = self.index.hnsw.efSearch
             self.index.hnsw.efSearch = min(128, top_k * 4)  # 根据 top_k 动态调整
-        elif hasattr(self.index, 'nprobe'):
+        elif hasattr(self.index, "nprobe"):
             # IVF 索引优化
             original_nprobe = self.index.nprobe
             self.index.nprobe = min(64, top_k * 2)  # 根据 top_k 动态调整
@@ -160,12 +175,14 @@ class FAISSDatabase(VectorDatabase):
         start_search = time.time()
         distances, indices = self.index.search(query_vector, top_k)
         search_time = time.time() - start_search
-        logger.debug(f"FAISS 搜索完成，耗时: {search_time:.4f}s, 返回: {len(indices[0])} 个结果")
+        logger.debug(
+            f"FAISS 搜索完成，耗时: {search_time:.4f}s, 返回: {len(indices[0])} 个结果"
+        )
 
         # 恢复原始参数
-        if hasattr(self.index, 'hnsw'):
+        if hasattr(self.index, "hnsw"):
             self.index.hnsw.efSearch = original_efSearch
-        elif hasattr(self.index, 'nprobe'):
+        elif hasattr(self.index, "nprobe"):
             self.index.nprobe = original_nprobe
 
         # 获取元数据 - 返回嵌套列表结构（每行一个查询的元数据）
@@ -180,6 +197,7 @@ class FAISSDatabase(VectorDatabase):
                         # 如果 meta 是字符串，尝试解析为 JSON
                         try:
                             import json
+
                             meta = json.loads(meta)
                         except:
                             meta = {}
@@ -204,7 +222,7 @@ class FAISSDatabase(VectorDatabase):
             db_type="faiss",
             total_vectors=self.total_vectors,
             dimension=self.dimension,
-            status="ready"
+            status="ready",
         )
 
     def save(self):
@@ -217,7 +235,7 @@ class FAISSDatabase(VectorDatabase):
         faiss.write_index(self.index, str(self.db_path))
 
         # 保存元数据
-        with open(self.metadata_path, 'w', encoding='utf-8') as f:
+        with open(self.metadata_path, "w", encoding="utf-8") as f:
             json.dump(self.metadata, f, ensure_ascii=False, indent=2)
 
         logger.info(f"FAISS 索引已保存: {self.db_path}")
@@ -240,8 +258,10 @@ class FAISSDatabase(VectorDatabase):
             logger.info(f"FAISS 索引文件已加载: {self.db_path}")
 
             # 检查维度是否匹配
-            if hasattr(self.index, 'd') and self.index.d != self.dimension:
-                logger.error(f"FAISS 索引维度不匹配: 索引维度={self.index.d}, 配置维度={self.dimension}")
+            if hasattr(self.index, "d") and self.index.d != self.dimension:
+                logger.error(
+                    f"FAISS 索引维度不匹配: 索引维度={self.index.d}, 配置维度={self.dimension}"
+                )
                 logger.info("重新初始化 FAISS 索引以匹配正确维度")
                 self._init_index()
                 self.metadata = {}
@@ -250,7 +270,7 @@ class FAISSDatabase(VectorDatabase):
 
             # 加载元数据
             if self.metadata_path.exists():
-                with open(self.metadata_path, 'r', encoding='utf-8') as f:
+                with open(self.metadata_path, "r", encoding="utf-8") as f:
                     self.metadata = json.load(f)
                 logger.info(f"已加载 {len(self.metadata)} 条元数据")
             else:
@@ -258,13 +278,15 @@ class FAISSDatabase(VectorDatabase):
                 self.metadata = {}
 
             # 验证向量数量
-            logger.info(f"FAISS 索引已加载: {self.total_vectors} 个向量，{len(self.metadata)} 条元数据")
-            
+            logger.info(
+                f"FAISS 索引已加载: {self.total_vectors} 个向量，{len(self.metadata)} 条元数据"
+            )
+
             # 如果索引为0，重新初始化
             if self.total_vectors == 0:
                 logger.warning("加载的索引为空，重新初始化")
                 self._init_index()
-                
+
         except Exception as e:
             logger.error(f"加载 FAISS 索引失败: {str(e)}")
             logger.info("重新初始化 FAISS 索引")
@@ -276,7 +298,13 @@ class FAISSDatabase(VectorDatabase):
 class MilvusDatabase(VectorDatabase):
     """Milvus 向量数据库"""
 
-    def __init__(self, dimension: int, host: str = "localhost", port: int = 19530, collection_name: str = "rag_vectors"):
+    def __init__(
+        self,
+        dimension: int,
+        host: str = "localhost",
+        port: int = 19530,
+        collection_name: str = "rag_vectors",
+    ):
         super().__init__(dimension)
         self.host = host
         self.port = port
@@ -289,9 +317,8 @@ class MilvusDatabase(VectorDatabase):
         """连接 Milvus"""
         try:
             from pymilvus import MilvusClient
-            self.client = MilvusClient(
-                uri=f"http://{self.host}:{self.port}"
-            )
+
+            self.client = MilvusClient(uri=f"http://{self.host}:{self.port}")
             logger.info(f"连接 Milvus: {self.host}:{self.port}")
         except Exception as e:
             logger.error(f"连接 Milvus 失败: {str(e)}")
@@ -303,7 +330,7 @@ class MilvusDatabase(VectorDatabase):
             self.client.create_collection(
                 collection_name=self.collection_name,
                 dimension=self.dimension,
-                metric_type="COSINE"
+                metric_type="COSINE",
             )
             logger.info(f"创建 Milvus 集合: {self.collection_name}")
         self.collection = self.client.get_collection(self.collection_name)
@@ -320,7 +347,9 @@ class MilvusDatabase(VectorDatabase):
             vectors = vectors.reshape(1, -1)
 
         # 准备数据
-        ids = [str(i) for i in range(self.total_vectors, self.total_vectors + len(vectors))]
+        ids = [
+            str(i) for i in range(self.total_vectors, self.total_vectors + len(vectors))
+        ]
 
         # 插入向量
         data = [ids, vectors.tolist(), metadata]
@@ -332,7 +361,9 @@ class MilvusDatabase(VectorDatabase):
         self.total_vectors += len(vectors)
         logger.info(f"添加 {len(vectors)} 个向量到 Milvus (总数: {self.total_vectors})")
 
-    def search(self, query_vector: np.ndarray, top_k: int = 5) -> Tuple[np.ndarray, List[Dict]]:
+    def search(
+        self, query_vector: np.ndarray, top_k: int = 5
+    ) -> Tuple[np.ndarray, List[Dict]]:
         """搜索向量"""
         if not isinstance(query_vector, np.ndarray):
             query_vector = np.array(query_vector, dtype=np.float32)
@@ -346,7 +377,7 @@ class MilvusDatabase(VectorDatabase):
             collection_name=self.collection_name,
             data=query_vector.tolist(),
             limit=top_k,
-            output_fields=["*"]
+            output_fields=["*"],
         )
 
         # 提取距离和元数据
@@ -354,8 +385,8 @@ class MilvusDatabase(VectorDatabase):
         metadata_list = []
 
         for result in results:
-            distances.append([item['distance'] for item in result])
-            metadata_list.append([item['entity'] for item in result])
+            distances.append([item["distance"] for item in result])
+            metadata_list.append([item["entity"] for item in result])
 
         return np.array(distances), metadata_list
 
@@ -368,7 +399,9 @@ class MilvusDatabase(VectorDatabase):
         """获取状态"""
         try:
             self._ensure_collection()
-            num_entities = self.client.get_collection_stats(self.collection_name)['row_count']
+            num_entities = self.client.get_collection_stats(self.collection_name)[
+                "row_count"
+            ]
         except:
             num_entities = 0
 
@@ -376,7 +409,7 @@ class MilvusDatabase(VectorDatabase):
             db_type="milvus",
             total_vectors=num_entities,
             dimension=self.dimension,
-            status="ready"
+            status="ready",
         )
 
     def save(self):
@@ -403,13 +436,15 @@ class VectorDatabaseManager:
 
         try:
             if config.db_type == VectorDBType.FAISS:
-                self.db = FAISSDatabase(config.dimension, config.index_type)
+                self.db = FAISSDatabase(
+                    config.dimension, config.index_type, config.index_path
+                )
             elif config.db_type == VectorDBType.MILVUS:
                 self.db = MilvusDatabase(
                     config.dimension,
                     config.host or settings.milvus_host,
                     config.port or settings.milvus_port,
-                    config.collection_name or settings.milvus_collection_name
+                    config.collection_name or settings.milvus_collection_name,
                 )
             else:
                 raise ValueError(f"不支持的向量数据库类型: {config.db_type}")
@@ -439,31 +474,29 @@ class VectorDatabaseManager:
         """添加向量"""
         if self.db is None:
             raise ValueError("向量数据库未初始化")
-        
+
         try:
             # 验证输入
             if vectors is None or len(vectors) == 0:
                 logger.warning("尝试添加空向量，跳过操作")
                 return
-            
+
             if metadata is None or len(metadata) != len(vectors):
                 logger.warning("向量和元数据长度不匹配，跳过操作")
                 return
-            
+
             # 添加向量到主索引
             self.db.add_vectors(vectors, metadata)
-            
+
             # 更新最后更新时间
             self.last_update_time = time.time()
-            
+
             # 可以选择更新二级索引
             # self._update_secondary_indices(vectors, metadata)
         except Exception as e:
             logger.error(f"添加向量失败: {str(e)}")
             # 不抛出异常，避免系统崩溃
             return
-
-
 
     def _apply_filter(self, metadata: Dict, filters: Dict) -> bool:
         """应用过滤器"""
@@ -482,15 +515,17 @@ class VectorDatabaseManager:
         """获取最后更新时间"""
         return self.last_update_time
 
-    def search(self, query_vector: np.ndarray, top_k: int = 5, filters: Dict = None) -> Tuple[np.ndarray, List[List[Dict]]]:
+    def search(
+        self, query_vector: np.ndarray, top_k: int = 5, filters: Dict = None
+    ) -> Tuple[np.ndarray, List[List[Dict]]]:
         """搜索向量"""
         if self.db is None:
             raise ValueError("向量数据库未初始化")
-        
+
         try:
             # 基本搜索
             distances, metadata_list = self.db.search(query_vector, top_k)
-            
+
             # 如果提供了过滤器，可以在搜索结果上应用
             if filters:
                 filtered_distances = []
@@ -509,7 +544,7 @@ class VectorDatabaseManager:
                         filtered_distances.append([])
                         filtered_metadata.append([])
                 return np.array(filtered_distances), filtered_metadata
-            
+
             return distances, metadata_list
         except Exception as e:
             logger.error(f"搜索向量失败: {str(e)}")
@@ -520,10 +555,7 @@ class VectorDatabaseManager:
         """获取状态"""
         if self.db is None:
             return VectorStatus(
-                db_type="none",
-                total_vectors=0,
-                dimension=0,
-                status="not_initialized"
+                db_type="none", total_vectors=0, dimension=0, status="not_initialized"
             )
         return self.db.get_status()
 
@@ -547,15 +579,15 @@ class VectorDatabaseManager:
         try:
             if self.db is None:
                 return []
-            
+
             # 对于FAISS数据库，直接返回metadata
-            if hasattr(self.db, 'metadata') and isinstance(self.db.metadata, dict):
+            if hasattr(self.db, "metadata") and isinstance(self.db.metadata, dict):
                 all_metadata = []
                 for key, meta in self.db.metadata.items():
-                    # 确保meta是字典类型
-                    if isinstance(meta, dict):
+                    # 确保meta是字典类型且包含content字段（过滤系统元信息）
+                    if isinstance(meta, dict) and "content" in meta:
                         # 添加chunk_id
-                        meta['chunk_id'] = key
+                        meta["chunk_id"] = key
                         all_metadata.append(meta)
                 logger.info(f"获取到 {len(all_metadata)} 个文档片段元数据")
                 return all_metadata

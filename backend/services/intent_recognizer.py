@@ -269,7 +269,7 @@ class IntentRecognizer:
 - other: 其他
 
 请以JSON格式返回结果：
-{"intent": "意图类别", "confidence": 置信度(0-1), "reason": "判断理由"}
+{{"intent": "意图类别", "confidence": 0.8, "reason": "判断理由"}}
 
 注意：只返回JSON，不要其他内容。"""
 
@@ -326,11 +326,7 @@ class IntentRecognizer:
             Dict: 包含intent、confidence和details的字典
         """
         intent, confidence, details = self.recognize(query)
-        return {
-            "intent": intent.value,
-            "confidence": confidence,
-            "details": details
-        }
+        return {"intent": intent.value, "confidence": confidence, "details": details}
 
 
 # 全局意图识别器实例

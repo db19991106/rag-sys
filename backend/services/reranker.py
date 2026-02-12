@@ -51,17 +51,21 @@ class BGEReranker(Reranker):
             model_path = self.model_name
 
             # 尝试从本地加载
-            import os
             from pathlib import Path
 
-            cache_dir = settings.upload_dir.replace("/data/docs", "/data/models")
-            local_model_path = Path(cache_dir) / model_name.replace("/", "--")
-
-            if local_model_path.exists():
-                model_path = str(local_model_path)
+            # 如果传入的是绝对路径且存在，直接使用
+            if Path(model_path).is_absolute() and Path(model_path).exists():
                 logger.info(f"从本地加载BGE重排序模型: {model_path}")
             else:
-                logger.info(f"从HuggingFace下载BGE重排序模型: {model_name}")
+                # 尝试从缓存目录加载
+                cache_dir = settings.upload_dir.replace("/data/docs", "/data/models")
+                local_model_path = Path(cache_dir) / model_name.replace("/", "--")
+
+                if local_model_path.exists():
+                    model_path = str(local_model_path)
+                    logger.info(f"从本地缓存加载BGE重排序模型: {model_path}")
+                else:
+                    logger.info(f"从HuggingFace下载BGE重排序模型: {model_name}")
 
             # 初始化模型
             self.model = FlagReranker(

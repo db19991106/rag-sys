@@ -222,9 +222,24 @@ async def embed_chunks(doc_id: str):
                 )
             logger.info("默认嵌入模型加载成功")
 
-        # 检查向量数据库是否已初始化
+        # 检查向量数据库是否已初始化，如果未初始化则自动初始化
         if not vector_db_manager.db:
-            raise HTTPException(status_code=400, detail="向量数据库未初始化")
+            logger.warning("向量数据库未初始化，尝试自动初始化...")
+            from models import VectorDBConfig, VectorDBType
+
+            # 获取当前嵌入模型的维度
+            current_dimension = embedding_service.get_dimension()
+            logger.info(f"使用当前嵌入模型维度: {current_dimension}")
+
+            vector_db_config = VectorDBConfig(
+                db_type=VectorDBType.FAISS,
+                dimension=current_dimension,
+                index_type="HNSW"
+            )
+            success = vector_db_manager.initialize(vector_db_config)
+            if not success:
+                raise HTTPException(status_code=400, detail="向量数据库自动初始化失败")
+            logger.info("向量数据库自动初始化成功")
 
         # 检查向量维度是否匹配
         current_dimension = embedding_service.get_dimension()

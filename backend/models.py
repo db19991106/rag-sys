@@ -162,6 +162,7 @@ class VectorDBConfig(BaseModel):
     host: Optional[str] = None
     port: Optional[int] = None
     collection_name: Optional[str] = None
+    index_path: Optional[str] = None
 
 
 class VectorStatus(BaseModel):

@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """
-RAG系统增强测评脚本 - 修复版
-支持多数据集和详细报告，修复了所有已知问题
+RAG系统增强测评脚本 - AutoDL适配版
+支持本地模型路径和GPU加速
 """
+
+import os
+# 禁用 stdout 重定向，避免与脚本自身的 logging 冲突
+os.environ['RAG_DISABLE_STDOUT_REDIRECT'] = 'true'
 
 import sys
 import json
@@ -16,11 +20,211 @@ import statistics
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 
-# 配置日志
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+import torch
+import numpy as np
+
+# 配置日志 - 使用eval_config中的日志配置
+import sys
+import os
+from pathlib import Path
+
+# 获取eval_config中的日志配置
+from eval_config import LOG_CONFIG
+
+# 确保日志目录存在
+log_file = LOG_CONFIG.get("log_file")
+if log_file:
+    log_file = Path(log_file)
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+
+logging.basicConfig(
+    level=getattr(logging, LOG_CONFIG.get("log_level", "INFO")),
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler(str(log_file), encoding="utf-8")
+        if log_file
+        else logging.NullHandler(),
+    ],
+    force=True,  # 强制重新配置
+)
 logger = logging.getLogger(__name__)
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+# 导入eval_config配置
+from eval_config import (
+    VECTOR_DB_DIR,
+    MODELS_DIR,
+    TEST_DATASET_PATH,
+)
+
+# 导入RAG生成器
+from services.rag_generator import rag_generator
+from models import RetrievalConfig, GenerationConfig
+
+# ==================== 文本相似度评估指标 ====================
+
+def calculate_bleu(reference: str, candidate: str, max_n: int = 4) -> Dict[str, float]:
+    """
+    计算BLEU分数（基于n-gram精确率的几何平均）
+    
+    Args:
+        reference: 参考文本（Ground Truth）
+        candidate: 候选文本（LLM生成）
+        max_n: 最大n-gram阶数
+    
+    Returns:
+        BLEU-1到BLEU-4的分数
+    """
+    import re
+    from collections import Counter
+    
+    def get_ngrams(tokens, n):
+        return [tuple(tokens[i:i+n]) for i in range(len(tokens)-n+1)]
+    
+    def tokenize(text):
+        # 简单的中文分词（按字符分词）
+        text = re.sub(r'[^\w\s]', ' ', text)
+        return list(text.replace(' ', ''))
+    
+    ref_tokens = tokenize(reference)
+    cand_tokens = tokenize(candidate)
+    
+    if len(cand_tokens) == 0:
+        return {f'bleu_{n}': 0.0 for n in range(1, max_n+1)}
+    
+    results = {}
+    for n in range(1, max_n+1):
+        ref_ngrams = Counter(get_ngrams(ref_tokens, n))
+        cand_ngrams = Counter(get_ngrams(cand_tokens, n))
+        
+        matches = sum((cand_ngrams & ref_ngrams).values())
+        total = sum(cand_ngrams.values())
+        
+        if total == 0:
+            results[f'bleu_{n}'] = 0.0
+        else:
+            # 简化版BLEU（无短句惩罚）
+            results[f'bleu_{n}'] = matches / total
+    
+    return results
+
+def calculate_rouge(reference: str, candidate: str) -> Dict[str, float]:
+    """
+    计算ROUGE分数（基于召回率的n-gram重叠）
+    
+    Args:
+        reference: 参考文本（Ground Truth）
+        candidate: 候选文本（LLM生成）
+    
+    Returns:
+        ROUGE-1, ROUGE-2, ROUGE-L分数
+    """
+    import re
+    
+    def tokenize(text):
+        text = re.sub(r'[^\w\s]', ' ', text)
+        return list(text.replace(' ', ''))
+    
+    def lcs_length(X, Y):
+        """计算最长公共子序列长度"""
+        m, n = len(X), len(Y)
+        if m == 0 or n == 0:
+            return 0
+        
+        # 使用滚动数组优化空间
+        prev = [0] * (n + 1)
+        curr = [0] * (n + 1)
+        
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if X[i-1] == Y[j-1]:
+                    curr[j] = prev[j-1] + 1
+                else:
+                    curr[j] = max(prev[j], curr[j-1])
+            prev, curr = curr, prev
+        
+        return prev[n]
+    
+    ref_tokens = tokenize(reference)
+    cand_tokens = tokenize(candidate)
+    
+    results = {}
+    
+    # ROUGE-N (N-gram recall)
+    for n in [1, 2]:
+        ref_ngrams = set()
+        cand_ngrams = set()
+        
+        for i in range(len(ref_tokens) - n + 1):
+            ref_ngrams.add(tuple(ref_tokens[i:i+n]))
+        for i in range(len(cand_tokens) - n + 1):
+            cand_ngrams.add(tuple(cand_tokens[i:i+n]))
+        
+        if len(ref_ngrams) == 0:
+            results[f'rouge_{n}'] = 0.0
+        else:
+            overlap = len(ref_ngrams & cand_ngrams)
+            results[f'rouge_{n}'] = overlap / len(ref_ngrams)
+    
+    # ROUGE-L (最长公共子序列)
+    lcs = lcs_length(ref_tokens, cand_tokens)
+    if len(ref_tokens) == 0:
+        results['rouge_l'] = 0.0
+    else:
+        results['rouge_l'] = lcs / len(ref_tokens)
+    
+    return results
+
+def calculate_answer_metrics(reference: str, candidate: str) -> Dict[str, float]:
+    """
+    计算答案质量综合指标
+    
+    Args:
+        reference: 参考文本（Ground Truth）
+        candidate: 候选文本（LLM生成）
+    
+    Returns:
+        包含BLEU、ROUGE、语义相似度等的综合指标
+    """
+    metrics = {}
+    
+    # 1. BLEU分数
+    bleu_scores = calculate_bleu(reference, candidate)
+    metrics.update(bleu_scores)
+    # 计算平均BLEU
+    metrics['bleu_avg'] = sum(bleu_scores.values()) / len(bleu_scores)
+    
+    # 2. ROUGE分数
+    rouge_scores = calculate_rouge(reference, candidate)
+    metrics.update(rouge_scores)
+    # 计算平均ROUGE
+    metrics['rouge_avg'] = sum(rouge_scores.values()) / len(rouge_scores)
+    
+    # 3. 字符级精确率和召回率
+    ref_set = set(reference)
+    cand_set = set(candidate)
+    
+    if len(cand_set) > 0:
+        metrics['char_precision'] = len(ref_set & cand_set) / len(cand_set)
+    else:
+        metrics['char_precision'] = 0.0
+    
+    if len(ref_set) > 0:
+        metrics['char_recall'] = len(ref_set & cand_set) / len(ref_set)
+    else:
+        metrics['char_recall'] = 0.0
+    
+    if metrics['char_precision'] + metrics['char_recall'] > 0:
+        metrics['char_f1'] = 2 * metrics['char_precision'] * metrics['char_recall'] / (metrics['char_precision'] + metrics['char_recall'])
+    else:
+        metrics['char_f1'] = 0.0
+    
+    # 4. 答案长度比
+    metrics['length_ratio'] = len(candidate) / len(reference) if len(reference) > 0 else 0.0
+    
+    return metrics
 
 from services.embedding import embedding_service
 from services.vector_db import vector_db_manager
@@ -33,68 +237,77 @@ from models import (
     VectorDBConfig,
     EmbeddingModelType,
     VectorDBType,
+    ChunkInfo,
 )
-from config import settings
+# from config import settings  # 注释掉，避免日志冲突
 
 
 @dataclass
 class FakeResult:
     """模拟检索结果对象"""
+
     content: str
     similarity: float
     document_id: str
     chunk_id: str
     rank: int = 0
-    rerank_score: Optional[float] = None  # 单独存储重排序分数，不污染原始相似度
+    rerank_score: Optional[float] = None
 
 
 class RAGEvaluator:
     """RAG系统测评器"""
 
-    def __init__(self, output_dir: str = "test_reports"):
+    def __init__(
+        self,
+        output_dir: str = "test_reports",
+        model_base_path: Optional[str] = None,
+        vector_db_path: Optional[str] = None,
+        keep_llm_loaded: bool = True,  # 是否保持LLM模型常驻显存
+    ):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
         self.evaluation_time = datetime.now()
+        # 使用传入的路径或eval_config中的默认路径
+        self.model_base_path = Path(model_base_path) if model_base_path else MODELS_DIR
+        self.vector_db_path = Path(vector_db_path) if vector_db_path else VECTOR_DB_DIR
+        # LLM常驻显存配置
+        self.keep_llm_loaded = keep_llm_loaded
+        self._llm_client = None  # 缓存LLM客户端
+        self._llm_config = None  # 缓存LLM配置
 
     def calculate_ndcg_at_k(
         self, results: List[FakeResult], ground_truth: List[str], k: int = 5
     ) -> float:
-        """计算NDCG@K - 归一化折损累积增益（修复版）"""
+        """计算NDCG@K - 归一化折损累积增益"""
         if not ground_truth or not results:
             return 0.0
 
-        # 计算DCG
         dcg = 0.0
         for i, result in enumerate(results[:k]):
-            # 计算相关性：使用语义相似度或二元判断
             relevance = 0.0
             for gt in ground_truth:
-                # 如果内容包含ground_truth或高度相似，认为相关
-                if gt.lower() in result.content.lower():
+                # 使用统一的匹配检查
+                if self._check_text_match(result.content, gt, use_semantic=False):
                     relevance = 1.0
                     break
-                else:
-                    # 使用语义相似度作为连续相关性值
-                    sim = self.calculate_semantic_similarity(gt, result.content)
-                    relevance = max(relevance, sim)
-            
-            # 标准DCG公式：relevance / log2(i+2)，i从0开始
-            if relevance > 0:
-                dcg += (2 ** relevance - 1) / math.log2(i + 2)
 
-        # 计算IDCG (理想DCG) - 按相关性降序排列
-        ideal_relevances = sorted([
-            max(
-                1.0 if gt.lower() in results[0].content.lower() 
-                else self.calculate_semantic_similarity(gt, results[0].content)
-                for gt in ground_truth
-            )
-            for _ in range(min(len(ground_truth), k))
-        ], reverse=True)
-        
+                # 语义相似度（用于计算相关性分数）
+                try:
+                    sim = self.calculate_semantic_similarity(gt, result.content[:500])
+                    relevance = max(relevance, sim)
+                except (RuntimeError, ValueError, TypeError):
+                    pass
+
+            # 限制relevance在[0,1]范围内，防止NDCG>1
+            relevance = min(relevance, 1.0)
+            if relevance > 0:
+                dcg += (2**relevance - 1) / math.log2(i + 2)
+
+        # 计算理想DCG（前k个结果都完全相关）
+        ideal_relevances = [1.0] * k
+
         idcg = sum(
-            (2 ** rel - 1) / math.log2(i + 2) 
-            for i, rel in enumerate(ideal_relevances)
+            (2**rel - 1) / math.log2(i + 2) for i, rel in enumerate(ideal_relevances)
         )
 
         return dcg / idcg if idcg > 0 else 0.0
@@ -102,17 +315,16 @@ class RAGEvaluator:
     def calculate_recall_at_k(
         self, results: List[FakeResult], ground_truth: List[str], k: int = 5
     ) -> float:
-        """计算Recall@K - 召回率@K（修复版）"""
+        """计算Recall@K - 召回率@K"""
         if not ground_truth:
             return 0.0
 
-        # 统计有多少ground_truth在检索结果中被覆盖
         covered_ground_truths = set()
         for gt in ground_truth:
             for result in results[:k]:
-                # 双向包含判断：gt包含result内容 或 result包含gt内容
-                if (gt.lower() in result.content.lower() or 
-                    result.content.lower() in gt.lower()):
+                if self._check_text_match(
+                    result.content, gt, use_semantic=True, semantic_threshold=0.6
+                ):
                     covered_ground_truths.add(gt)
                     break
 
@@ -124,26 +336,30 @@ class RAGEvaluator:
         """计算Precision@K"""
         if not results or not ground_truth or k <= 0:
             return 0.0
-        
+
         relevant_count = 0
         for result in results[:k]:
             for gt in ground_truth:
-                if gt.lower() in result.content.lower():
+                if self._check_text_match(
+                    result.content, gt, use_semantic=True, semantic_threshold=0.6
+                ):
                     relevant_count += 1
                     break
-        
+
         return relevant_count / k
 
     def calculate_mrr(
         self, results: List[FakeResult], ground_truth: List[str]
     ) -> float:
-        """计算MRR - Mean Reciprocal Rank（新增）"""
+        """计算MRR - Mean Reciprocal Rank"""
         if not ground_truth or not results:
             return 0.0
-        
-        for i, result in enumerate(results[:5], 1):  # 排名从1开始
+
+        for i, result in enumerate(results[:5], 1):
             for gt in ground_truth:
-                if gt.lower() in result.content.lower():
+                if self._check_text_match(
+                    result.content, gt, use_semantic=True, semantic_threshold=0.6
+                ):
                     return 1.0 / i
         return 0.0
 
@@ -153,22 +369,71 @@ class RAGEvaluator:
             return 0.0
         return 2 * (precision * recall) / (precision + recall)
 
+    def _check_text_match(
+        self,
+        text: str,
+        ground_truth: str,
+        use_semantic: bool = False,
+        semantic_threshold: float = 0.6,
+    ) -> bool:
+        """统一的文本匹配检查逻辑
+
+        Args:
+            text: 待检查的文本
+            ground_truth: 基准文本
+            use_semantic: 是否使用语义相似度匹配
+            semantic_threshold: 语义相似度阈值
+
+        Returns:
+            是否匹配
+        """
+        text_lower = text.lower()
+        gt_lower = ground_truth.lower()
+
+        # 1. 完全包含匹配
+        if gt_lower in text_lower or text_lower in gt_lower:
+            return True
+
+        # 2. 部分匹配（对于较长的ground_truth）
+        if len(gt_lower) > 4:
+            gt_parts = gt_lower.split()
+            if len(gt_parts) > 1:
+                match_count = sum(
+                    1 for part in gt_parts if len(part) > 2 and part in text_lower
+                )
+                if match_count >= len(gt_parts) * 0.5:
+                    return True
+
+        # 3. 语义相似度匹配
+        if use_semantic:
+            try:
+                sim = self.calculate_semantic_similarity(ground_truth, text[:500])
+                if sim > semantic_threshold:
+                    return True
+            except (RuntimeError, ValueError, TypeError) as e:
+                logger.debug(f"语义匹配检查失败: {e}")
+
+        return False
+
     def calculate_semantic_similarity(self, text1: str, text2: str) -> float:
         """计算语义相似度 - 使用embedding模型"""
+        # 检查模型是否已加载
+        if not embedding_service.is_loaded():
+            logger.warning("嵌入模型未加载，无法计算语义相似度")
+            return 0.0
+
         try:
             embeddings = embedding_service.encode([text1, text2])
-            # 计算余弦相似度
-            import numpy as np
 
             norm1 = np.linalg.norm(embeddings[0])
             norm2 = np.linalg.norm(embeddings[1])
-            
+
             if norm1 == 0 or norm2 == 0:
                 return 0.0
-                
+
             sim = np.dot(embeddings[0], embeddings[1]) / (norm1 * norm2)
             return float(sim)
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.warning(f"语义相似度计算失败: {e}")
             return 0.0
 
@@ -178,22 +443,19 @@ class RAGEvaluator:
         """计算主题覆盖率"""
         if not expected_topics:
             return {
-                "coverage_rate": 0.0, 
-                "covered_topics": [], 
+                "coverage_rate": 0.0,
+                "covered_topics": [],
                 "missed_topics": [],
                 "total_topics": 0,
                 "covered_count": 0,
             }
 
-        # 合并所有检索结果文本
         retrieved_text = " ".join([r.content for r in results]).lower()
 
-        # 检查每个期望主题是否被覆盖
         covered_topics = []
         missed_topics = []
 
         for topic in expected_topics:
-            # 简化的主题匹配
             if topic.lower() in retrieved_text:
                 covered_topics.append(topic)
             else:
@@ -214,14 +476,14 @@ class RAGEvaluator:
     def apply_reranking(
         self, results: List[FakeResult], query: str, expected_keywords: List[str]
     ) -> List[FakeResult]:
-        """应用基于关键词匹配和语义相似度的重排序算法（修复版）"""
+        """应用基于关键词匹配和语义相似度的重排序算法"""
 
-        def calculate_rerank_score(result: FakeResult, query: str, keywords: List[str]) -> float:
+        def calculate_rerank_score(
+            result: FakeResult, query: str, keywords: List[str]
+        ) -> float:
             """计算重排序分数"""
-            # 基础分数：原始向量相似度（权重40%）
             score = result.similarity * 0.4
 
-            # 关键词匹配加分（权重30%）
             content_lower = result.content.lower()
             if keywords:
                 keyword_match_count = sum(
@@ -230,7 +492,6 @@ class RAGEvaluator:
                 keyword_score = keyword_match_count / len(keywords)
                 score += keyword_score * 0.3
 
-            # 酒店级别特殊加分（权重15%）
             if "酒店" in query or "住宿" in query:
                 hotel_keywords = ["三星级", "四星级", "五星级", "快捷酒店", "经济型"]
                 hotel_match_count = sum(
@@ -239,7 +500,6 @@ class RAGEvaluator:
                 if hotel_match_count > 0:
                     score += min(hotel_match_count * 0.05, 0.15)
 
-            # 职级信息特殊加分（权重10%）
             level_keywords = {
                 "8-9级": ["8-9级", "普通员工", "工程师", "专员"],
                 "10-11级": ["10-11级", "经理", "主管"],
@@ -254,10 +514,18 @@ class RAGEvaluator:
                         score += min(level_match_count * 0.03, 0.1)
                         break
 
-            # 地区信息特殊加分（权重5%）
             city_keywords = {
                 "一线城市": ["上海", "北京", "广州", "深圳", "一线城市", "北上广深"],
-                "新一线": ["成都", "杭州", "武汉", "西安", "南京", "重庆", "新一线", "新一线城市"],
+                "新一线": [
+                    "成都",
+                    "杭州",
+                    "武汉",
+                    "西安",
+                    "南京",
+                    "重庆",
+                    "新一线",
+                    "新一线城市",
+                ],
             }
             for city_type, cities in city_keywords.items():
                 if any(c in query for c in cities):
@@ -267,25 +535,21 @@ class RAGEvaluator:
 
             return score
 
-        # 计算重排序分数
         scored_results = []
         for result in results:
             rerank_score = calculate_rerank_score(result, query, expected_keywords)
-            # 创建新对象，保留原始相似度，存储新的重排序分数
             new_result = FakeResult(
                 content=result.content,
                 similarity=result.similarity,
                 document_id=result.document_id,
                 chunk_id=result.chunk_id,
                 rank=result.rank,
-                rerank_score=rerank_score
+                rerank_score=rerank_score,
             )
             scored_results.append((new_result, rerank_score))
 
-        # 按重排序分数降序排列
         scored_results.sort(key=lambda x: x[1], reverse=True)
 
-        # 返回重排序后的结果，更新排名
         final_results = []
         for i, (result, _) in enumerate(scored_results):
             result.rank = i + 1
@@ -296,43 +560,79 @@ class RAGEvaluator:
     def init_services(
         self, enable_rerank: bool = True, reranker_type: str = "bge"
     ) -> bool:
-        """初始化所有服务（包含重排序）"""
+        """初始化所有服务（AutoDL本地路径版）"""
         print("🔧 初始化服务...")
 
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+
         try:
-            # 加载768维嵌入模型（与向量库匹配）
-            print("   加载嵌入模型(bge-base-zh-v1.5, 768维)...")
+            # 加载本地 Embedding 模型
+            embedding_model_path = self.model_base_path / "bge-base-zh-v1.5"
+            print(f"   加载本地嵌入模型: {embedding_model_path}")
+            print(f"   使用设备: {device}")
+
+            if not embedding_model_path.exists():
+                print(f"   ❌ 模型路径不存在: {embedding_model_path}")
+                print(
+                    f"   请从 ModelScope 下载: modelscope download --model BAAI/bge-base-zh-v1.5 --local_dir {embedding_model_path}"
+                )
+                return False
+
             embedding_service.load_model(
                 EmbeddingConfig(
                     model_type=EmbeddingModelType.BGE,
-                    model_name="BAAI/bge-base-zh-v1.5",
-                    device="cpu",
+                    model_name=str(embedding_model_path),
+                    device=device,
                 )
             )
             print(f"   ✅ 模型维度: {embedding_service.get_dimension()}")
 
-            # 初始化向量数据库
-            print("   初始化向量数据库...")
+            # 加载本地向量数据库
+            print(f"   加载向量数据库: {self.vector_db_path}")
+            if not self.vector_db_path.exists():
+                print(f"   ❌ 向量库路径不存在: {self.vector_db_path}")
+                return False
+
             vector_db_manager.initialize(
                 VectorDBConfig(
                     db_type=VectorDBType.FAISS,
                     dimension=embedding_service.get_dimension(),
                     index_type="HNSW",
+                    index_path=str(self.vector_db_path),
                 )
             )
             status = vector_db_manager.get_status()
+            if status.total_vectors == 0:
+                print(f"   ❌ 向量库为空，请先向量化文档")
+                return False
             print(f"   ✅ 向量库: {status.total_vectors} 个向量")
 
             # 初始化重排序器（如果启用）
             if enable_rerank and reranker_type != "none":
+                reranker_model_path = self.model_base_path / "bge-reranker-base"
                 print(f"   初始化重排序器: {reranker_type}")
-                reranker_manager.initialize(
-                    reranker_type=reranker_type, device="cpu", top_k=10, threshold=0.0
-                )
-                reranker_status = reranker_manager.get_status()
-                print(
-                    f"   ✅ 重排序器: {reranker_status['type']} ({reranker_status['model']})"
-                )
+
+                if reranker_model_path.exists():
+                    print(f"   使用本地模型: {reranker_model_path}")
+                    reranker_manager.initialize(
+                        reranker_type=reranker_type,
+                        model_name=str(reranker_model_path),
+                        device=device,
+                        top_k=10,
+                        threshold=0.0,
+                    )
+                else:
+                    print(f"   ⚠️  本地重排序模型不存在: {reranker_model_path}")
+                    print(
+                        f"   请从 ModelScope 下载: modelscope download --model BAAI/bge-reranker-base --local_dir {reranker_model_path}"
+                    )
+                    print(f"   暂时使用基础重排序（无模型）...")
+                    reranker_manager.initialize(
+                        reranker_type="none",  # 使用规则重排序
+                        device=device,
+                        top_k=10,
+                        threshold=0.0,
+                    )
             else:
                 print("   ⚠️  重排序器: 已禁用")
 
@@ -346,7 +646,6 @@ class RAGEvaluator:
     def load_test_data(self, test_file: str) -> Dict[str, Any]:
         """加载测试数据"""
         if not Path(test_file).exists():
-            # 尝试在test_data目录查找
             test_file = Path(__file__).parent.parent.parent / "test_data" / test_file
 
         if not Path(test_file).exists():
@@ -359,42 +658,43 @@ class RAGEvaluator:
         return test_data
 
     def enhance_query(self, query: str, expected_topics: List[str] = None) -> str:
-        """查询增强：添加相关词汇提升召回率（修复版）"""
+        """查询增强：添加相关词汇提升召回率"""
         enhanced_query = query
         additions = set()
 
-        # 住宿相关增强
         if "住宿" in query or "酒店" in query:
             additions.update(["酒店星级", "三星级", "四星级", "五星级", "快捷酒店"])
 
-        # 职级相关增强（修复变量作用域问题）
         level_mappings = {
-            "8-9级": ["8-9级", "普通员工", "软件研发工程师", "机械研发工程师", "工艺工程师", "实施工程师"],
+            "8-9级": [
+                "8-9级",
+                "普通员工",
+                "软件研发工程师",
+                "机械研发工程师",
+                "工艺工程师",
+                "实施工程师",
+            ],
             "10-11级": ["10-11级", "经理", "中层管理", "主管"],
             "12级": ["12级", "总监", "专家级", "高级管理"],
         }
-        
+
         for level_key, level_terms in level_mappings.items():
             if level_key in query or any(term in query for term in level_terms[:2]):
                 additions.update(level_terms)
                 break
 
-        # 地区相关增强（修复变量作用域问题）
         city_mappings = {
             "一线城市": ["上海", "北京", "广州", "深圳"],
             "新一线": ["成都", "杭州", "武汉", "西安", "南京", "重庆", "苏州", "天津"],
         }
-        
-        matched_city_type = None
+
         for city_type, cities in city_mappings.items():
             if any(city in query for city in cities):
-                matched_city_type = city_type
                 additions.add(city_type)
                 if city_type == "一线城市":
                     additions.add("北上广深")
                 break
-        
-        # 主题相关增强
+
         if expected_topics:
             topic_mappings = {
                 "住宿标准": ["出差住宿", "报销标准", "住宿费用", "酒店标准"],
@@ -405,7 +705,6 @@ class RAGEvaluator:
                 if topic in topic_mappings:
                     additions.update(topic_mappings[topic])
 
-        # 去重添加（避免重复）
         for add in additions:
             if add not in enhanced_query:
                 enhanced_query += " " + add
@@ -415,20 +714,38 @@ class RAGEvaluator:
     def run_retrieval_test(
         self,
         query: str,
-        expected_keywords: list,
-        case_info: dict,
+        expected_keywords: List[str],
+        case_info: Dict[str, Any],
         enable_rerank: bool = True,
         reranker_type: str = "bge",
+        verbose: bool = True,
     ) -> Dict[str, Any]:
-        """运行单个检索测试（修复版，删除重复return）"""
+        """运行单个检索测试"""
+        case_id = case_info.get('id', 'unknown')
+        
+        # 记录测试开始
+        logger.info(f"=" * 80)
+        logger.info(f"【测试用例】{case_id}")
+        logger.info(f"=" * 80)
 
-        # 查询增强
+        # 步骤1: 查询增强
         enhanced_query = self.enhance_query(query, case_info.get("expected_topics", []))
+        if verbose:
+            print(f"\n📝 原始查询: {query}")
+            if enhanced_query != query:
+                print(f"🔧 增强查询: {enhanced_query}")
+        # 写入日志
+        logger.info(f"原始查询: {query}")
+        if enhanced_query != query:
+            logger.info(f"增强查询: {enhanced_query}")
 
-        # 向量化查询（使用本地BGE模型）
+        # 步骤2: 向量编码
         query_vector = embedding_service.encode([enhanced_query])
+        if verbose:
+            print(f"🔢 查询向量维度: {query_vector.shape}")
+        logger.info(f"查询向量维度: {query_vector.shape}")
 
-        # 增加检索数量以提升召回率
+        # 步骤3: 向量检索
         start = time.time()
         try:
             scores, metadatas = vector_db_manager.search(query_vector, top_k=15)
@@ -437,40 +754,78 @@ class RAGEvaluator:
             raise
         elapsed = (time.time() - start) * 1000
 
-        # 构建结果对象
+        if verbose:
+            print(f"\n🔍 向量检索 (耗时: {elapsed:.1f}ms)")
+            print(f"   检索到 {len(metadatas[0])} 个结果")
+        logger.info(f"向量检索耗时: {elapsed:.1f}ms, 检索到 {len(metadatas[0])} 个结果")
+
+        # 步骤4: 构建结果列表
         results = []
         for i, (score, meta) in enumerate(zip(scores[0], metadatas[0])):
+            document_id = meta.get("document_id", "")
+            chunk_id = (
+                meta.get("chunk_id") or f"{document_id}_chunk_{i}"
+                if document_id
+                else f"chunk_{i}"
+            )
             results.append(
                 FakeResult(
                     content=meta.get("content", ""),
                     similarity=float(score),
-                    document_id=meta.get("document_id", ""),
-                    chunk_id=meta.get("chunk_id", f"chunk_{i}"),
+                    document_id=document_id,
+                    chunk_id=chunk_id,
                     rank=i + 1,
                 )
             )
 
-        # 应用真正的重排序逻辑
+        if verbose:
+            print(f"\n📄 原始检索结果 (Top 5):")
+            for i, r in enumerate(results[:5], 1):
+                content_preview = r.content[:100] + "..." if len(r.content) > 100 else r.content
+                print(f"   [{i}] 相似度: {r.similarity:.3f} | {content_preview}")
+        # 写入日志
+        logger.info("原始检索结果 (Top 5):")
+        for i, r in enumerate(results[:5], 1):
+            content_log = r.content[:200] + "..." if len(r.content) > 200 else r.content
+            logger.info(f"  [{i}] 相似度: {r.similarity:.3f} | 文档: {r.document_id} | {content_log}")
+
+        # 步骤5: 重排序
         if enable_rerank:
             try:
                 reranked_results = self.apply_reranking(
                     results[:10], query, expected_keywords
                 )
+                if verbose:
+                    print(f"\n🔄 重排序完成 ({reranker_type})")
+                    print(f"   重排序前 Top3: {[r.similarity for r in results[:3]]}")
+                    print(f"   重排序后 Top3: {[r.rerank_score for r in reranked_results[:3]]}")
+                # 写入日志
+                logger.info(f"重排序完成 ({reranker_type})")
+                logger.info(f"  重排序前 Top3: {[r.similarity for r in results[:3]]}")
+                logger.info(f"  重排序后 Top3: {[r.rerank_score for r in reranked_results[:3]]}")
                 results = reranked_results
-            except Exception as e:
+            except (RuntimeError, ValueError, TypeError) as e:
                 logger.warning(f"重排序失败，使用原始排序: {e}")
-                # 如果重排序失败，保持原始顺序
+                if verbose:
+                    print(f"   ⚠️ 重排序失败: {e}")
 
-        # 标准化 ground_truth 格式
+        # 步骤6: 准备 Ground Truth
         ground_truth_raw = case_info.get("ground_truth", [])
         if isinstance(ground_truth_raw, str):
             ground_truth = [ground_truth_raw]
-        elif isinstance(ground_truth_raw, list):
+        elif isinstance(ground_truth_raw, list) and ground_truth_raw:
             ground_truth = ground_truth_raw
         else:
-            ground_truth = []
+            ground_truth = expected_keywords if expected_keywords else []
+            if not ground_truth and verbose:
+                print(f"   ⚠️ 用例 {case_info.get('id', 'unknown')} 缺少ground_truth和keywords")
 
-        # ========== 关键词命中统计 ==========
+        if verbose and ground_truth:
+            print(f"\n🎯 Ground Truth / 期望关键词: {ground_truth[:5]}")
+        if ground_truth:
+            logger.info(f"Ground Truth / 期望关键词: {ground_truth}")
+
+        # 步骤7: 关键词匹配分析
         retrieved_text = " ".join([r.content for r in results[:5]])
         hits = sum(1 for kw in expected_keywords if kw in retrieved_text)
         hit_rate = hits / len(expected_keywords) if expected_keywords else 0
@@ -478,40 +833,130 @@ class RAGEvaluator:
         matched_keywords = [kw for kw in expected_keywords if kw in retrieved_text]
         missed_keywords = [kw for kw in expected_keywords if kw not in retrieved_text]
 
-        # ========== 计算所有评估指标（修复版）==========
+        if verbose and expected_keywords:
+            print(f"\n🔑 关键词分析:")
+            print(f"   总关键词: {len(expected_keywords)} ({expected_keywords})")
+            print(f"   命中: {hits} ({matched_keywords})")
+            print(f"   未命中: {len(missed_keywords)} ({missed_keywords})")
+            print(f"   命中率: {hit_rate:.1%}")
+        # 写入日志
+        if expected_keywords:
+            logger.info(f"关键词分析:")
+            logger.info(f"  总关键词: {len(expected_keywords)} - {expected_keywords}")
+            logger.info(f"  命中: {hits} - {matched_keywords}")
+            logger.info(f"  未命中: {len(missed_keywords)} - {missed_keywords}")
+            logger.info(f"  命中率: {hit_rate:.1%}")
+
+        # 步骤8: 计算各项指标
         precision_at_1 = self.calculate_precision_at_k(results, ground_truth, 1)
         precision_at_3 = self.calculate_precision_at_k(results, ground_truth, 3)
         precision_at_5 = self.calculate_precision_at_k(results, ground_truth, 5)
-        
+
         recall_at_5 = self.calculate_recall_at_k(results, ground_truth, k=5)
         f1_at_5 = self.calculate_f1_at_k(precision_at_5, recall_at_5)
         ndcg_at_5 = self.calculate_ndcg_at_k(results, ground_truth, k=5)
         mrr = self.calculate_mrr(results, ground_truth)
 
-        # ========== 语义相似度 ==========
         semantic_similarity = 0.0
         if ground_truth and results:
-            # 计算查询与top1结果的语义相似度
             semantic_similarity = self.calculate_semantic_similarity(
                 query, results[0].content
             )
 
-        # ========== 主题覆盖率 ==========
         expected_topics = case_info.get("expected_topics", [])
         topic_coverage = self.calculate_topic_coverage(results, expected_topics)
 
-        # 构建模型信息
+        if verbose:
+            print(f"\n📊 评估指标:")
+            print(f"   P@1: {precision_at_1:.3f} | P@3: {precision_at_3:.3f} | P@5: {precision_at_5:.3f}")
+            print(f"   Recall@5: {recall_at_5:.3f} | F1@5: {f1_at_5:.3f}")
+            print(f"   NDCG@5: {ndcg_at_5:.3f} | MRR: {mrr:.3f}")
+            print(f"   语义相似度: {semantic_similarity:.3f}")
+            if topic_coverage.get('coverage_rate', 0) > 0:
+                print(f"   主题覆盖率: {topic_coverage['coverage_rate']:.1%}")
+        # 写入日志
+        logger.info(f"评估指标:")
+        logger.info(f"  P@1: {precision_at_1:.3f} | P@3: {precision_at_3:.3f} | P@5: {precision_at_5:.3f}")
+        logger.info(f"  Recall@5: {recall_at_5:.3f} | F1@5: {f1_at_5:.3f}")
+        logger.info(f"  NDCG@5: {ndcg_at_5:.3f} | MRR: {mrr:.3f}")
+        logger.info(f"  语义相似度: {semantic_similarity:.3f}")
+        if topic_coverage.get('coverage_rate', 0) > 0:
+            logger.info(f"  主题覆盖率: {topic_coverage['coverage_rate']:.1%}")
+
+        # 步骤9: 模型信息
         model_info = {
             "embedding_model": "BAAI/bge-base-zh-v1.5 (本地)",
             "vector_db": "FAISS (本地)",
-            "llm_provider": "local (Qwen2.5-7B-Instruct)",
+            "llm_provider": "local (GPU)" if torch.cuda.is_available() else "local (CPU)",
             "reranker_enabled": enable_rerank,
             "reranker_type": reranker_type if enable_rerank else None,
             "reranker_top_k": 5 if enable_rerank else None,
             "query_enhanced": enhanced_query != query,
         }
 
-        # 唯一的return语句（修复重复return问题）
+        retrieved_text = " ".join([r.content for r in results[:5]])
+        hits = sum(1 for kw in expected_keywords if kw in retrieved_text)
+        hit_rate = hits / len(expected_keywords) if expected_keywords else 0
+
+        matched_keywords = [kw for kw in expected_keywords if kw in retrieved_text]
+        missed_keywords = [kw for kw in expected_keywords if kw not in retrieved_text]
+
+        precision_at_1 = self.calculate_precision_at_k(results, ground_truth, 1)
+        precision_at_3 = self.calculate_precision_at_k(results, ground_truth, 3)
+        precision_at_5 = self.calculate_precision_at_k(results, ground_truth, 5)
+
+        recall_at_5 = self.calculate_recall_at_k(results, ground_truth, k=5)
+        f1_at_5 = self.calculate_f1_at_k(precision_at_5, recall_at_5)
+        ndcg_at_5 = self.calculate_ndcg_at_k(results, ground_truth, k=5)
+        mrr = self.calculate_mrr(results, ground_truth)
+
+        semantic_similarity = 0.0
+        if ground_truth and results:
+            semantic_similarity = self.calculate_semantic_similarity(
+                query, results[0].content
+            )
+
+        expected_topics = case_info.get("expected_topics", [])
+        topic_coverage = self.calculate_topic_coverage(results, expected_topics)
+
+        model_info = {
+            "embedding_model": "BAAI/bge-base-zh-v1.5 (本地)",
+            "vector_db": "FAISS (本地)",
+            "llm_provider": "local (GPU)"
+            if torch.cuda.is_available()
+            else "local (CPU)",
+            "reranker_enabled": enable_rerank,
+            "reranker_type": reranker_type if enable_rerank else None,
+            "reranker_top_k": 5 if enable_rerank else None,
+            "query_enhanced": enhanced_query != query,
+        }
+
+        # 步骤10: LLM生成答案和答案质量评估
+        llm_result = None
+        answer_metrics = None
+        ground_truth_text = ground_truth[0] if isinstance(ground_truth, list) and ground_truth else ""
+        
+        if ground_truth_text and len(results) > 0:
+            # 准备上下文
+            context = "\n\n".join([f"[{i+1}] {r.content}" for i, r in enumerate(results[:5])])
+            
+            # 生成LLM答案
+            llm_result = self.generate_llm_answer(query, context, verbose)
+            
+            # 评估答案质量
+            if llm_result.get("success") and llm_result.get("answer"):
+                answer_metrics = self.evaluate_answer_quality(
+                    ground_truth_text, 
+                    llm_result["answer"], 
+                    llm_result,  # 传入完整的性能指标
+                    verbose
+                )
+                # 更新model_info
+                model_info['llm_generation_time_ms'] = llm_result.get('generation_time_ms', 0)
+                model_info['llm_tokens_per_second'] = llm_result.get('tokens_per_second', 0)
+                model_info['llm_input_tokens'] = llm_result.get('input_tokens', 0)
+                model_info['llm_output_tokens'] = llm_result.get('output_tokens', 0)
+
         return {
             "case_info": case_info,
             "query": query,
@@ -523,7 +968,9 @@ class RAGEvaluator:
                     "rank": r.rank,
                     "similarity": r.similarity,
                     "rerank_score": r.rerank_score,
-                    "content": r.content[:80] + "..." if len(r.content) > 80 else r.content,
+                    "content": r.content[:80] + "..."
+                    if len(r.content) > 80
+                    else r.content,
                     "chunk_id": r.chunk_id,
                     "document_id": r.document_id,
                 }
@@ -545,12 +992,214 @@ class RAGEvaluator:
                 "f1_at_5": f1_at_5,
                 "ndcg_at_5": ndcg_at_5,
                 "mrr": mrr,
-                "context_precision": precision_at_5,  # 别名
-                "context_recall": recall_at_5,  # 别名
+                "context_precision": precision_at_5,
+                "context_recall": recall_at_5,
                 "semantic_similarity": semantic_similarity,
             },
+            "llm_answer": llm_result.get("answer") if llm_result else None,
+            "llm_generation": llm_result,
+            "answer_metrics": answer_metrics,
             "model_info": model_info,
         }
+
+    def generate_llm_answer(self, query: str, context: str, verbose: bool = True) -> Dict[str, Any]:
+        """
+        使用LLM生成答案
+        
+        Args:
+            query: 用户查询
+            context: 检索上下文
+            verbose: 是否显示详细输出
+            
+        Returns:
+            包含答案和元数据的字典
+        """
+        try:
+            # 构建RAG提示
+            prompt = f"""基于以下参考资料，回答问题：
+
+参考资料：
+{context}
+
+问题：{query}
+
+请根据参考资料回答，如果参考资料中没有相关信息，请说明无法回答。"""
+            
+            if verbose:
+                print(f"\n🤖 LLM生成答案...")
+                print(f"   使用上下文长度: {len(context)} 字符")
+            logger.info(f"LLM生成答案 - 上下文长度: {len(context)} 字符")
+            
+            # 配置生成参数
+            generation_config = GenerationConfig(
+                llm_provider="local",
+                llm_model="Qwen2.5-7B-Instruct",
+                temperature=0.7,
+                max_tokens=512
+            )
+            
+            # 获取LLM客户端（使用缓存或新建）
+            llm_start = time.time()
+            if self.keep_llm_loaded and self._llm_client is not None:
+                # 使用已缓存的客户端
+                llm_client = self._llm_client
+                if verbose:
+                    print(f"   使用常驻显存的LLM模型")
+                logger.info("使用常驻显存的LLM模型")
+            else:
+                # 新建客户端
+                llm_client = rag_generator._get_llm_client(generation_config)
+                if self.keep_llm_loaded:
+                    self._llm_client = llm_client
+                    self._llm_config = generation_config
+                    if verbose:
+                        print(f"   LLM模型已加载到显存（将保持常驻）")
+                    logger.info("LLM模型已加载到显存（将保持常驻）")
+            
+            generation_result = llm_client.generate(prompt)
+            llm_elapsed = (time.time() - llm_start) * 1000
+            
+            # 提取生成的文本和性能指标
+            answer = generation_result.get("text", "")
+            input_tokens = generation_result.get("input_tokens", 0)
+            output_tokens = generation_result.get("output_tokens", 0)
+            total_tokens = generation_result.get("total_tokens", 0)
+            time_to_first_token_ms = generation_result.get("time_to_first_token_ms", 0)
+            total_time_ms = generation_result.get("total_time_ms", 0)
+            generation_time_ms = generation_result.get("generation_time_ms", 0)
+            tokens_per_second = generation_result.get("tokens_per_second", 0)
+            
+            # 根据配置决定是否卸载模型
+            if not self.keep_llm_loaded:
+                # 生成完成后卸载模型，释放显存
+                if hasattr(llm_client, "unload"):
+                    llm_client.unload()
+            else:
+                logger.info("LLM模型保持常驻显存（未卸载）")
+            
+            if verbose:
+                print(f"\n📊 LLM性能指标:")
+                print(f"   输入Token: {input_tokens} | 输出Token: {output_tokens} | 总计: {total_tokens}")
+                print(f"   首Token时延: {time_to_first_token_ms:.1f}ms")
+                print(f"   总生成时间: {total_time_ms:.1f}ms")
+                print(f"   ⚡ 生成速度: {tokens_per_second:.2f} tokens/s")
+                print(f"   答案长度: {len(answer)} 字符")
+                print(f"\n💬 LLM回答:\n{answer[:200]}..." if len(answer) > 200 else f"\n💬 LLM回答:\n{answer}")
+            logger.info(f"LLM性能 - 输入Token: {input_tokens}, 输出Token: {output_tokens}, "
+                       f"首Token时延: {time_to_first_token_ms:.1f}ms, "
+                       f"生成速度: {tokens_per_second:.2f} tokens/s")
+            logger.info(f"LLM回答: {answer[:500]}..." if len(answer) > 500 else f"LLM回答: {answer}")
+            
+            return {
+                "answer": answer,
+                "generation_time_ms": llm_elapsed,
+                "answer_length": len(answer),
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "total_tokens": total_tokens,
+                "time_to_first_token_ms": time_to_first_token_ms,
+                "total_time_ms": total_time_ms,
+                "generation_time_ms": generation_time_ms,
+                "tokens_per_second": tokens_per_second,
+                "success": True
+            }
+            
+        except Exception as e:
+            logger.error(f"LLM生成失败: {e}")
+            if verbose:
+                print(f"   ⚠️ LLM生成失败: {e}")
+            return {
+                "answer": "",
+                "generation_time_ms": 0,
+                "answer_length": 0,
+                "success": False,
+                "error": str(e)
+            }
+    
+    def unload_llm_model(self):
+        """手动卸载LLM模型，释放显存"""
+        if self._llm_client is not None:
+            if hasattr(self._llm_client, "unload"):
+                self._llm_client.unload()
+                logger.info("LLM模型已手动卸载")
+            self._llm_client = None
+            self._llm_config = None
+
+    def evaluate_answer_quality(self, ground_truth: str, llm_answer: str, 
+                                   llm_performance: Dict[str, Any] = None,
+                                   verbose: bool = True) -> Dict[str, float]:
+        """
+        评估LLM答案质量
+        
+        Args:
+            ground_truth: 标准答案
+            llm_answer: LLM生成的答案
+            llm_performance: LLM生成性能指标
+            verbose: 是否显示详细输出
+            
+        Returns:
+            包含各项评估指标的字典
+        """
+        try:
+            # 计算各项指标
+            metrics = calculate_answer_metrics(ground_truth, llm_answer)
+            
+            # 计算语义相似度
+            semantic_sim = self.calculate_semantic_similarity(ground_truth, llm_answer)
+            metrics['semantic_similarity'] = semantic_sim
+            
+            # 添加性能指标到metrics中
+            if llm_performance:
+                metrics['input_tokens'] = llm_performance.get('input_tokens', 0)
+                metrics['output_tokens'] = llm_performance.get('output_tokens', 0)
+                metrics['total_tokens'] = llm_performance.get('total_tokens', 0)
+                metrics['time_to_first_token_ms'] = llm_performance.get('time_to_first_token_ms', 0)
+                metrics['total_time_ms'] = llm_performance.get('total_time_ms', 0)
+                metrics['generation_time_ms'] = llm_performance.get('generation_time_ms', 0)
+                metrics['tokens_per_second'] = llm_performance.get('tokens_per_second', 0)
+            
+            if verbose:
+                print(f"\n📊 答案质量评估:")
+                print(f"   BLEU-1: {metrics['bleu_1']:.3f} | BLEU-2: {metrics['bleu_2']:.3f} | BLEU-avg: {metrics['bleu_avg']:.3f}")
+                print(f"   ROUGE-1: {metrics['rouge_1']:.3f} | ROUGE-2: {metrics['rouge_2']:.3f} | ROUGE-L: {metrics['rouge_l']:.3f}")
+                print(f"   ROUGE-avg: {metrics['rouge_avg']:.3f}")
+                print(f"   字符精确率: {metrics['char_precision']:.3f} | 召回率: {metrics['char_recall']:.3f} | F1: {metrics['char_f1']:.3f}")
+                print(f"   语义相似度: {semantic_sim:.3f}")
+                print(f"   长度比: {metrics['length_ratio']:.2f}")
+                
+                # 显示性能指标
+                if llm_performance:
+                    print(f"\n⚡ LLM性能指标:")
+                    print(f"   输入Token: {llm_performance.get('input_tokens', 0)} | 输出Token: {llm_performance.get('output_tokens', 0)}")
+                    print(f"   首Token时延: {llm_performance.get('time_to_first_token_ms', 0):.1f}ms")
+                    print(f"   总生成时间: {llm_performance.get('total_time_ms', 0):.1f}ms")
+                    print(f"   有效生成速度: {llm_performance.get('tokens_per_second', 0):.2f} tokens/s")
+            
+            logger.info(f"答案质量评估:")
+            logger.info(f"  BLEU: {metrics['bleu_avg']:.3f} (BLEU-1: {metrics['bleu_1']:.3f}, BLEU-2: {metrics['bleu_2']:.3f})")
+            logger.info(f"  ROUGE: {metrics['rouge_avg']:.3f} (ROUGE-1: {metrics['rouge_1']:.3f}, ROUGE-2: {metrics['rouge_2']:.3f}, ROUGE-L: {metrics['rouge_l']:.3f})")
+            logger.info(f"  字符级: 精确率={metrics['char_precision']:.3f}, 召回率={metrics['char_recall']:.3f}, F1={metrics['char_f1']:.3f}")
+            logger.info(f"  语义相似度: {semantic_sim:.3f}")
+            logger.info(f"  长度比: {metrics['length_ratio']:.2f}")
+            if llm_performance:
+                logger.info(f"  LLM性能: 输入Token={llm_performance.get('input_tokens', 0)}, "
+                           f"输出Token={llm_performance.get('output_tokens', 0)}, "
+                           f"首Token时延={llm_performance.get('time_to_first_token_ms', 0):.1f}ms, "
+                           f"生成速度={llm_performance.get('tokens_per_second', 0):.2f} tokens/s")
+            
+            return metrics
+            
+        except Exception as e:
+            logger.error(f"答案评估失败: {e}")
+            return {
+                'bleu_1': 0.0, 'bleu_2': 0.0, 'bleu_avg': 0.0,
+                'rouge_1': 0.0, 'rouge_2': 0.0, 'rouge_l': 0.0, 'rouge_avg': 0.0,
+                'char_precision': 0.0, 'char_recall': 0.0, 'char_f1': 0.0,
+                'semantic_similarity': 0.0, 'length_ratio': 0.0,
+                'input_tokens': 0, 'output_tokens': 0, 'total_tokens': 0,
+                'time_to_first_token_ms': 0, 'total_time_ms': 0, 
+                'generation_time_ms': 0, 'tokens_per_second': 0
+            }
 
     def evaluate_retrieval_cases(
         self,
@@ -558,8 +1207,17 @@ class RAGEvaluator:
         limit: Optional[int] = None,
         enable_rerank: bool = True,
         reranker_type: str = "bge",
+        verbose: bool = True,
     ) -> List[Dict]:
-        """评估检索测试用例（支持重排序对比）"""
+        """评估检索测试用例
+        
+        Args:
+            test_cases: 测试用例列表
+            limit: 限制测试数量
+            enable_rerank: 是否启用重排序
+            reranker_type: 重排序器类型
+            verbose: 是否显示详细过程
+        """
         if limit:
             test_cases = test_cases[:limit]
 
@@ -575,10 +1233,10 @@ class RAGEvaluator:
             query = case["query"]
             keywords = case.get("expected_keywords", [])
 
-            print(f"[{i:2d}/{len(test_cases)}] {query[:45]}...", end=" ")
+            print(f"\n[{i:2d}/{len(test_cases)}] {query[:45]}...", end=" ")
             print(f"[{case.get('difficulty', 'unknown')}]")
+            print("=" * 80)
 
-            # 运行测试
             case_info = {
                 "id": case["id"],
                 "category": case.get("category", "unknown"),
@@ -589,11 +1247,10 @@ class RAGEvaluator:
 
             try:
                 result = self.run_retrieval_test(
-                    query, keywords, case_info, enable_rerank, reranker_type
+                    query, keywords, case_info, enable_rerank, reranker_type, verbose
                 )
                 results.append(result)
 
-                # 打印结果摘要
                 metrics = result["metrics"]
                 keyword_analysis = result["keyword_analysis"]
                 model_info = result["model_info"]
@@ -613,46 +1270,33 @@ class RAGEvaluator:
                 )
 
                 print(
-                    f"     {rerank_indicator}{status} {result['response_time_ms']:.1f}ms | "
+                    f"\n📊 结果摘要: {rerank_indicator}{status} {result['response_time_ms']:.1f}ms | "
                     f"P@1:{metrics['precision_at_1']:.2f} | "
                     f"NDCG:{metrics['ndcg_at_5']:.2f} | "
                     f"关键词:{keyword_analysis['hit_rate']:.0%}"
                 )
 
-                if result["results"]:
-                    top1 = result["results"][0]
-                    print(
-                        f"     Top1: {top1['similarity']:.3f} | {top1['content'][:40]}"
-                    )
-
-                if model_info.get("reranker_enabled"):
-                    print(
-                        f"     🔄 重排序: {model_info.get('reranker_type', 'unknown')}"
-                    )
-
                 if len(keyword_analysis["missed"]) > 0:
-                    print(
-                        f"     未命中关键词: {', '.join(keyword_analysis['missed'][:3])}"
-                    )
+                    print(f"     未命中关键词: {', '.join(keyword_analysis['missed'][:3])}")
 
             except Exception as e:
-                print(f"     ❌ 测试失败: {str(e)[:50]}")
+                print(f"\n     ❌ 测试失败: {str(e)[:50]}")
                 logger.error(f"测试失败 {case['id']}: {e}", exc_info=True)
                 results.append(
                     {"case_info": case_info, "query": query, "error": str(e)}
                 )
+            
+            print("-" * 80)
 
         return results
 
     def analyze_results(self, results: List[Dict]) -> Dict[str, Any]:
-        """分析测试结果（增强版，包含新指标）"""
-        # 过滤有效结果
+        """分析测试结果"""
         valid_results = [r for r in results if "metrics" in r]
 
         if not valid_results:
             return {"error": "无有效测试结果"}
 
-        # 基础统计
         times = [r["response_time_ms"] for r in valid_results]
         p1s = [r["metrics"]["precision_at_1"] for r in valid_results]
         p3s = [r["metrics"]["precision_at_3"] for r in valid_results]
@@ -660,7 +1304,6 @@ class RAGEvaluator:
         mrrs = [r["metrics"]["mrr"] for r in valid_results]
         hit_rates = [r["keyword_analysis"]["hit_rate"] for r in valid_results]
 
-        # 新增指标统计
         recalls = [r["metrics"]["recall_at_5"] for r in valid_results]
         f1s = [r["metrics"]["f1_at_5"] for r in valid_results]
         ndcgs = [r["metrics"]["ndcg_at_5"] for r in valid_results]
@@ -674,8 +1317,34 @@ class RAGEvaluator:
             for r in valid_results
             if r["topic_coverage"]["coverage_rate"] > 0
         ]
+        
+        # 收集 LLM 性能指标
+        llm_input_tokens = [
+            r["answer_metrics"]["input_tokens"]
+            for r in valid_results
+            if r.get("answer_metrics") and r["answer_metrics"].get("input_tokens", 0) > 0
+        ]
+        llm_output_tokens = [
+            r["answer_metrics"]["output_tokens"]
+            for r in valid_results
+            if r.get("answer_metrics") and r["answer_metrics"].get("output_tokens", 0) > 0
+        ]
+        llm_time_to_first_token = [
+            r["answer_metrics"]["time_to_first_token_ms"]
+            for r in valid_results
+            if r.get("answer_metrics") and r["answer_metrics"].get("time_to_first_token_ms", 0) > 0
+        ]
+        llm_generation_time = [
+            r["answer_metrics"]["generation_time_ms"]
+            for r in valid_results
+            if r.get("answer_metrics") and r["answer_metrics"].get("generation_time_ms", 0) > 0
+        ]
+        llm_tokens_per_second = [
+            r["answer_metrics"]["tokens_per_second"]
+            for r in valid_results
+            if r.get("answer_metrics") and r["answer_metrics"].get("tokens_per_second", 0) > 0
+        ]
 
-        # 按难度分组统计
         by_difficulty = {}
         by_category = {}
 
@@ -692,6 +1361,11 @@ class RAGEvaluator:
                     "recall": [],
                     "f1": [],
                     "ndcg": [],
+                    "llm_input_tokens": [],
+                    "llm_output_tokens": [],
+                    "llm_ttft": [],
+                    "llm_generation_time": [],
+                    "llm_tokens_per_second": [],
                 }
             by_difficulty[diff]["p1"].append(r["metrics"]["precision_at_1"])
             by_difficulty[diff]["hit"].append(r["keyword_analysis"]["hit_rate"])
@@ -700,6 +1374,20 @@ class RAGEvaluator:
             by_difficulty[diff]["recall"].append(r["metrics"]["recall_at_5"])
             by_difficulty[diff]["f1"].append(r["metrics"]["f1_at_5"])
             by_difficulty[diff]["ndcg"].append(r["metrics"]["ndcg_at_5"])
+            
+            # 收集LLM性能数据
+            if r.get("answer_metrics"):
+                am = r["answer_metrics"]
+                if am.get("input_tokens", 0) > 0:
+                    by_difficulty[diff]["llm_input_tokens"].append(am["input_tokens"])
+                if am.get("output_tokens", 0) > 0:
+                    by_difficulty[diff]["llm_output_tokens"].append(am["output_tokens"])
+                if am.get("time_to_first_token_ms", 0) > 0:
+                    by_difficulty[diff]["llm_ttft"].append(am["time_to_first_token_ms"])
+                if am.get("generation_time_ms", 0) > 0:
+                    by_difficulty[diff]["llm_generation_time"].append(am["generation_time_ms"])
+                if am.get("tokens_per_second", 0) > 0:
+                    by_difficulty[diff]["llm_tokens_per_second"].append(am["tokens_per_second"])
 
             if cat not in by_category:
                 by_category[cat] = {
@@ -709,6 +1397,11 @@ class RAGEvaluator:
                     "recall": [],
                     "f1": [],
                     "ndcg": [],
+                    "llm_input_tokens": [],
+                    "llm_output_tokens": [],
+                    "llm_ttft": [],
+                    "llm_generation_time": [],
+                    "llm_tokens_per_second": [],
                 }
             by_category[cat]["p1"].append(r["metrics"]["precision_at_1"])
             by_category[cat]["hit"].append(r["keyword_analysis"]["hit_rate"])
@@ -716,8 +1409,21 @@ class RAGEvaluator:
             by_category[cat]["recall"].append(r["metrics"]["recall_at_5"])
             by_category[cat]["f1"].append(r["metrics"]["f1_at_5"])
             by_category[cat]["ndcg"].append(r["metrics"]["ndcg_at_5"])
+            
+            # 收集LLM性能数据
+            if r.get("answer_metrics"):
+                am = r["answer_metrics"]
+                if am.get("input_tokens", 0) > 0:
+                    by_category[cat]["llm_input_tokens"].append(am["input_tokens"])
+                if am.get("output_tokens", 0) > 0:
+                    by_category[cat]["llm_output_tokens"].append(am["output_tokens"])
+                if am.get("time_to_first_token_ms", 0) > 0:
+                    by_category[cat]["llm_ttft"].append(am["time_to_first_token_ms"])
+                if am.get("generation_time_ms", 0) > 0:
+                    by_category[cat]["llm_generation_time"].append(am["generation_time_ms"])
+                if am.get("tokens_per_second", 0) > 0:
+                    by_category[cat]["llm_tokens_per_second"].append(am["tokens_per_second"])
 
-        # 问题用例分析
         poor_cases = [
             r
             for r in valid_results
@@ -759,6 +1465,22 @@ class RAGEvaluator:
                 "avg_topic_coverage": round(statistics.mean(topic_coverage_rates), 3)
                 if topic_coverage_rates
                 else 0,
+                # LLM 性能指标
+                "avg_llm_input_tokens": round(statistics.mean(llm_input_tokens), 1)
+                if llm_input_tokens
+                else 0,
+                "avg_llm_output_tokens": round(statistics.mean(llm_output_tokens), 1)
+                if llm_output_tokens
+                else 0,
+                "avg_time_to_first_token_ms": round(statistics.mean(llm_time_to_first_token), 1)
+                if llm_time_to_first_token
+                else 0,
+                "avg_generation_time_ms": round(statistics.mean(llm_generation_time), 1)
+                if llm_generation_time
+                else 0,
+                "avg_tokens_per_second": round(statistics.mean(llm_tokens_per_second), 2)
+                if llm_tokens_per_second
+                else 0,
             },
             "by_difficulty": {
                 diff: {
@@ -784,6 +1506,19 @@ class RAGEvaluator:
                     "avg_ndcg_at_5": round(
                         statistics.mean(stats["ndcg"]) if stats["ndcg"] else 0, 3
                     ),
+                    # LLM 性能指标
+                    "avg_llm_input_tokens": round(
+                        statistics.mean(stats["llm_input_tokens"]) if stats["llm_input_tokens"] else 0, 1
+                    ),
+                    "avg_llm_output_tokens": round(
+                        statistics.mean(stats["llm_output_tokens"]) if stats["llm_output_tokens"] else 0, 1
+                    ),
+                    "avg_llm_tokens_per_second": round(
+                        statistics.mean(stats["llm_tokens_per_second"]) if stats["llm_tokens_per_second"] else 0, 2
+                    ),
+                    "avg_llm_ttft_ms": round(
+                        statistics.mean(stats["llm_ttft"]) if stats["llm_ttft"] else 0, 1
+                    ),
                 }
                 for diff, stats in by_difficulty.items()
             },
@@ -807,6 +1542,19 @@ class RAGEvaluator:
                     ),
                     "avg_ndcg_at_5": round(
                         statistics.mean(stats["ndcg"]) if stats["ndcg"] else 0, 3
+                    ),
+                    # LLM 性能指标
+                    "avg_llm_input_tokens": round(
+                        statistics.mean(stats["llm_input_tokens"]) if stats["llm_input_tokens"] else 0, 1
+                    ),
+                    "avg_llm_output_tokens": round(
+                        statistics.mean(stats["llm_output_tokens"]) if stats["llm_output_tokens"] else 0, 1
+                    ),
+                    "avg_llm_tokens_per_second": round(
+                        statistics.mean(stats["llm_tokens_per_second"]) if stats["llm_tokens_per_second"] else 0, 2
+                    ),
+                    "avg_llm_ttft_ms": round(
+                        statistics.mean(stats["llm_ttft"]) if stats["llm_ttft"] else 0, 1
                     ),
                 }
                 for cat, stats in by_category.items()
@@ -841,13 +1589,12 @@ class RAGEvaluator:
         }
 
     def calculate_score(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
-        """计算综合评分（增强版，包含新指标）"""
+        """计算综合评分"""
         stats = analysis.get("statistics", {})
 
         score = 0
         grade_descriptions = []
 
-        # P@1 精确率 (20分)
         avg_p1 = stats.get("avg_precision_at_1", 0)
         if avg_p1 >= 0.7:
             score += 20
@@ -859,7 +1606,6 @@ class RAGEvaluator:
             score += 8
             grade_descriptions.append("🟠 P@1 精确率一般 (+8)")
 
-        # NDCG@5 排序质量 (20分)
         avg_ndcg = stats.get("avg_ndcg_at_5", 0)
         if avg_ndcg >= 0.7:
             score += 20
@@ -871,7 +1617,6 @@ class RAGEvaluator:
             score += 8
             grade_descriptions.append("🟠 NDCG@5 排序质量一般 (+8)")
 
-        # F1@5 平衡指标 (20分)
         avg_f1 = stats.get("avg_f1_at_5", 0)
         if avg_f1 >= 0.7:
             score += 20
@@ -883,7 +1628,6 @@ class RAGEvaluator:
             score += 8
             grade_descriptions.append("🟠 F1@5 平衡指标一般 (+8)")
 
-        # 关键词命中率 (15分)
         avg_hit = stats.get("avg_keyword_hit_rate", 0)
         if avg_hit >= 0.8:
             score += 15
@@ -895,7 +1639,6 @@ class RAGEvaluator:
             score += 5
             grade_descriptions.append("🟠 关键词命中率一般 (+5)")
 
-        # 主题覆盖率 (10分)
         avg_topic = stats.get("avg_topic_coverage", 0)
         if avg_topic >= 0.8:
             score += 10
@@ -907,7 +1650,6 @@ class RAGEvaluator:
             score += 3
             grade_descriptions.append("🟠 主题覆盖率一般 (+3)")
 
-        # 语义相似度 (5分)
         avg_semantic = stats.get("avg_semantic_similarity", 0)
         if avg_semantic >= 0.8:
             score += 5
@@ -916,13 +1658,11 @@ class RAGEvaluator:
             score += 3
             grade_descriptions.append("🟡 语义相似度良好 (+3)")
 
-        # MRR (5分)
         avg_mrr = stats.get("avg_mrr", 0)
         if avg_mrr >= 0.5:
             score += 5
             grade_descriptions.append("🟢 MRR 优秀 (+5)")
 
-        # 响应速度 (5分)
         avg_time = stats.get("avg_response_time_ms", 0)
         if avg_time <= 100:
             score += 5
@@ -931,7 +1671,6 @@ class RAGEvaluator:
             score += 3
             grade_descriptions.append("🟡 响应速度良好 (+3)")
 
-        # 综合评级
         if score >= 85:
             grade = "🟢 优秀"
         elif score >= 70:
@@ -959,22 +1698,21 @@ class RAGEvaluator:
         baseline_analysis: Optional[Dict[str, Any]] = None,
         baseline_score: Optional[Dict[str, Any]] = None,
     ) -> str:
-        """保存测试报告（支持基线对比）"""
+        """保存测试报告"""
         timestamp = self.evaluation_time.strftime("%Y%m%d_%H%M%S")
 
-        # 检查是否启用了重排序
         reranker_enabled = False
         if results and results[0]["model_info"].get("reranker_enabled"):
             reranker_enabled = True
 
-        # 保存详细JSON报告
         report_data = {
             "evaluation_info": {
                 "timestamp": self.evaluation_time.isoformat(),
                 "test_file": str(test_file),
                 "evaluator": "enhanced_eval.py",
-                "version": "2.1",
+                "version": "2.1-autodl",
                 "reranker_enabled": reranker_enabled,
+                "device": "cuda" if torch.cuda.is_available() else "cpu",
             },
             "dataset_info": test_data_info,
             "score_info": score,
@@ -982,7 +1720,6 @@ class RAGEvaluator:
             "detailed_results": results,
         }
 
-        # 添加基线对比数据
         if baseline_results:
             report_data["baseline_results"] = baseline_results
             report_data["baseline_analysis"] = baseline_analysis
@@ -992,7 +1729,6 @@ class RAGEvaluator:
         with open(json_file, "w", encoding="utf-8") as f:
             json.dump(report_data, f, ensure_ascii=False, indent=2)
 
-        # 保存Markdown报告
         md_file = self.output_dir / f"rag_evaluation_summary_{timestamp}.md"
         md_content = self.generate_markdown_report(
             results,
@@ -1020,10 +1756,9 @@ class RAGEvaluator:
         baseline_analysis: Optional[Dict[str, Any]] = None,
         baseline_score: Optional[Dict[str, Any]] = None,
     ) -> str:
-        """生成Markdown格式报告（支持基线对比）"""
+        """生成Markdown格式报告"""
         stats = analysis["statistics"]
 
-        # 检查是否启用了重排序
         reranker_enabled = False
         reranker_info = ""
         if results and results[0]["model_info"].get("reranker_enabled"):
@@ -1032,11 +1767,14 @@ class RAGEvaluator:
                 f" ({results[0]['model_info'].get('reranker_type', 'unknown')} 重排序)"
             )
 
+        device_info = "GPU" if torch.cuda.is_available() else "CPU"
+
         md = f"""# RAG系统测评报告{reranker_info}
 
 ## 📊 测评概览
 
 - **测评时间**: {self.evaluation_time.strftime("%Y-%m-%d %H:%M:%S")}
+- **运行设备**: {device_info}
 - **数据集版本**: {test_data_info.get("version", "unknown")}
 - **测试用例总数**: {analysis["total_tests"]}
 - **有效测试**: {analysis["valid_tests"]}
@@ -1052,7 +1790,6 @@ class RAGEvaluator:
         for desc in score["grade_descriptions"]:
             md += f"- {desc}\n"
 
-        # 添加基线对比（如果有）
         if baseline_analysis and baseline_score:
             baseline_stats = baseline_analysis["statistics"]
             md += f"""
@@ -1095,6 +1832,32 @@ class RAGEvaluator:
 - **主题覆盖率**: expected_topics的覆盖情况分析
 - **语义相似度**: 使用embedding模型计算答案相似度
 
+## ⚡ LLM 生成性能
+
+| 指标 | 数值 | 评价 |
+|------|------|------|
+| 平均输入 Token | {stats.get('avg_llm_input_tokens', 0):.1f} | prompt 长度 |
+| 平均输出 Token | {stats.get('avg_llm_output_tokens', 0):.1f} | 生成长度 |
+| 首 Token 时延 | {stats.get('avg_time_to_first_token_ms', 0):.1f}ms | {"优秀" if stats.get('avg_time_to_first_token_ms', 0) < 1000 else "良好" if stats.get('avg_time_to_first_token_ms', 0) < 2000 else "一般"} |
+| 平均生成时间 | {stats.get('avg_generation_time_ms', 0):.1f}ms | 纯生成阶段耗时 |
+| **生成速度** | **{stats.get('avg_tokens_per_second', 0):.2f} tokens/s** | {"优秀" if stats.get('avg_tokens_per_second', 0) > 25 else "良好" if stats.get('avg_tokens_per_second', 0) > 15 else "一般"} |
+
+### 📝 性能指标说明
+
+- **输入 Token**: 送入模型的 prompt token 数量
+- **输出 Token**: 模型生成的答案 token 数量
+- **首 Token 时延 (TTFT)**: 从请求发送到首个 token 生成的时间（反映模型加载和预热速度）
+- **生成时间**: 从首个 token 到生成结束的纯生成阶段时间
+- **生成速度**: output_tokens / generation_time，模型解码效率的核心指标
+
+### 🎯 性能评价标准
+
+| 指标 | 优秀 | 良好 | 一般 |
+|------|------|------|------|
+| 生成速度 | > 25 tokens/s | 15-25 tokens/s | < 15 tokens/s |
+| 首 Token 时延 | < 1000ms | 1000-2000ms | > 2000ms |
+| 输出 Token 数 | 100-300 | 50-100 或 300-500 | < 50 或 > 500 |
+
 ## 📊 按难度分析
 
 """
@@ -1107,7 +1870,13 @@ class RAGEvaluator:
             md += f"- **F1@5**: {diff_stats['avg_f1_at_5']:.3f}\n"
             md += f"- **Recall@5**: {diff_stats['avg_recall_at_5']:.3f}\n"
             md += f"- 关键词命中率: {diff_stats['avg_keyword_hit_rate']:.1%}\n"
-            md += f"- 平均响应时间: {diff_stats['avg_response_time_ms']:.1f}ms\n\n"
+            md += f"- 平均响应时间: {diff_stats['avg_response_time_ms']:.1f}ms\n"
+            # 添加LLM性能指标（如果有数据）
+            if diff_stats.get('avg_llm_tokens_per_second', 0) > 0:
+                md += f"- **生成速度**: {diff_stats['avg_llm_tokens_per_second']:.2f} tokens/s\n"
+                md += f"- 首Token时延: {diff_stats.get('avg_llm_ttft_ms', 0):.1f}ms\n"
+                md += f"- 平均输出Token: {diff_stats.get('avg_llm_output_tokens', 0):.1f}\n"
+            md += "\n"
 
         if analysis["problem_cases"]:
             md += "## ⚠️ 问题用例分析\n\n"
@@ -1130,7 +1899,6 @@ class RAGEvaluator:
 
 """
 
-        # 基于新指标的优化建议
         if stats["avg_precision_at_1"] < 0.6:
             md += "- 🔴 检索精确率偏低，建议优化嵌入模型或重排序策略\n"
         if stats.get("avg_ndcg_at_5", 0) < 0.5:
@@ -1161,35 +1929,36 @@ class RAGEvaluator:
         reranker_type: str = "bge",
         compare_with_baseline: bool = True,
     ) -> str:
-        """运行完整测评（支持重排序对比）"""
+        """运行完整测评"""
         print("\n" + "=" * 80)
-        print("🚀 RAG系统增强测评")
+        print("🚀 RAG系统增强测评 (AutoDL版)")
+        print(f"💻 设备: {'GPU' if torch.cuda.is_available() else 'CPU'}")
+        if torch.cuda.is_available():
+            print(f"🎮 GPU: {torch.cuda.get_device_name(0)}")
         if enable_rerank:
-            print(f"🔄 启用重排序: {reranker_type.upper()}")
+            print(f"🔄 重排序: {reranker_type.upper()}")
         else:
             print("📊 基础检索模式")
         print("=" * 80)
         print(f"测评时间: {self.evaluation_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
-        # 初始化服务
         if not self.init_services(
             enable_rerank=enable_rerank, reranker_type=reranker_type
         ):
             raise RuntimeError("服务初始化失败")
 
-        # 加载测试数据
         test_data = self.load_test_data(test_file)
 
-        # 数据集信息
         metadata = test_data.get("metadata", {})
-        retrieval_cases = test_data.get("retrieval_test_cases", []) + test_data.get("retrieval_test_cases_part2", [])
+        retrieval_cases = test_data.get("retrieval_test_cases", []) + test_data.get(
+            "retrieval_test_cases_part2", []
+        )
 
         print(f"\n📊 数据集信息:")
         print(f"   版本: {metadata.get('version', 'unknown')}")
         print(f"   描述: {metadata.get('description', 'N/A')}")
         print(f"   检索测试: {len(retrieval_cases)} 条")
 
-        # 运行主要测试（启用重排序）
         print(f"\n🎯 主要测试: {'启用' if enable_rerank else '禁用'}重排序")
         results = self.evaluate_retrieval_cases(
             retrieval_cases,
@@ -1198,7 +1967,6 @@ class RAGEvaluator:
             reranker_type=reranker_type,
         )
 
-        # 可选：对比测试（禁用重排序）
         baseline_results = None
         if compare_with_baseline and enable_rerank:
             print(f"\n📊 对比测试: 禁用重排序")
@@ -1206,24 +1974,20 @@ class RAGEvaluator:
                 retrieval_cases, limit, enable_rerank=False
             )
 
-        # 分析主要结果
         print("\n📊 分析测试结果...")
         analysis = self.analyze_results(results)
 
-        # 分析基线结果（如果有）
         baseline_analysis = None
         if baseline_results:
             print("📊 分析基线测试结果...")
             baseline_analysis = self.analyze_results(baseline_results)
 
-        # 计算评分
         print("🏆 计算综合评分...")
         score = self.calculate_score(analysis)
         baseline_score = None
         if baseline_analysis:
             baseline_score = self.calculate_score(baseline_analysis)
 
-        # 保存报告
         print("💾 保存测试报告...")
         report_file = self.save_report(
             results,
@@ -1236,8 +2000,12 @@ class RAGEvaluator:
             baseline_score=baseline_score,
         )
 
-        # 打印摘要
         self.print_summary(analysis, score, baseline_analysis, baseline_score)
+        
+        # 测试完成后，如果LLM模型常驻显存，则卸载释放资源
+        if self.keep_llm_loaded and self._llm_client is not None:
+            print("\n🧹 清理资源：卸载LLM模型...")
+            self.unload_llm_model()
 
         return report_file
 
@@ -1248,7 +2016,7 @@ class RAGEvaluator:
         baseline_analysis: Optional[Dict[str, Any]] = None,
         baseline_score: Optional[Dict[str, Any]] = None,
     ):
-        """打印测评摘要（支持基线对比）"""
+        """打印测评摘要"""
         print("\n" + "=" * 80)
         print("📊 测评摘要")
         if baseline_analysis:
@@ -1256,7 +2024,10 @@ class RAGEvaluator:
         print("=" * 80)
 
         stats = analysis["statistics"]
-        print(f"\n🔍 整体性能:")
+        device = "GPU" if torch.cuda.is_available() else "CPU"
+
+        print(f"\n💻 运行设备: {device}")
+        print(f"🔍 整体性能:")
         print(
             f"   测试数量: {analysis['total_tests']} (有效:{analysis['valid_tests']}, 失败:{analysis['failed_tests']})"
         )
@@ -1271,8 +2042,25 @@ class RAGEvaluator:
         print(f"   关键词命中率: {stats['avg_keyword_hit_rate']:.1%}")
         print(f"   🆕 主题覆盖率: {stats.get('avg_topic_coverage', 0):.1%}")
         print(f"   🆕 语义相似度: {stats.get('avg_semantic_similarity', 0):.3f}")
+        
+        # LLM 性能指标
+        if stats.get('avg_llm_tokens_per_second', 0) > 0:
+            print(f"\n   ⚡ LLM生成性能:")
+            print(f"      平均输入Token: {stats.get('avg_llm_input_tokens', 0):.1f}")
+            print(f"      平均输出Token: {stats.get('avg_llm_output_tokens', 0):.1f}")
+            print(f"      首Token时延: {stats.get('avg_time_to_first_token_ms', 0):.1f}ms")
+            print(f"      平均生成时间: {stats.get('avg_generation_time_ms', 0):.1f}ms")
+            print(f"      ⚡ 生成速度: {stats.get('avg_llm_tokens_per_second', 0):.2f} tokens/s")
+        
+        # 打印 LLM 性能指标
+        if stats.get('avg_tokens_per_second', 0) > 0:
+            print(f"\n⚡ LLM生成性能:")
+            print(f"   平均输入Token: {stats.get('avg_llm_input_tokens', 0):.1f}")
+            print(f"   平均输出Token: {stats.get('avg_llm_output_tokens', 0):.1f}")
+            print(f"   首Token时延: {stats.get('avg_time_to_first_token_ms', 0):.1f}ms")
+            print(f"   平均生成时间: {stats.get('avg_generation_time_ms', 0):.1f}ms")
+            print(f"   ⚡ 生成速度: {stats.get('avg_tokens_per_second', 0):.2f} tokens/s")
 
-        # 基线对比
         if baseline_analysis:
             baseline_stats = baseline_analysis["statistics"]
             print(f"\n🔄 重排序效果对比:")
@@ -1317,12 +2105,12 @@ class RAGEvaluator:
 
 def main():
     """主函数"""
-    parser = argparse.ArgumentParser(description="RAG系统增强测评脚本")
+    parser = argparse.ArgumentParser(description="RAG系统增强测评脚本 (AutoDL版)")
     parser.add_argument(
         "--test-file",
         type=str,
-        default="test_dataset_extended.json",
-        help="测试数据文件",
+        default=str(TEST_DATASET_PATH),
+        help=f"测试数据文件 (默认: {TEST_DATASET_PATH})",
     )
     parser.add_argument("--limit", type=int, help="限制测试数量")
     parser.add_argument(
@@ -1346,14 +2134,22 @@ def main():
         "--compare", action="store_true", default=True, help="与基线对比（默认启用）"
     )
     parser.add_argument("--no-compare", action="store_true", help="禁用基线对比")
+    parser.add_argument(
+        "--vector-db-dir",
+        type=str,
+        default=str(VECTOR_DB_DIR),
+        help=f"向量数据库目录 (默认: {VECTOR_DB_DIR})",
+    )
 
     args = parser.parse_args()
 
-    # 处理重排序选项
     enable_rerank = args.enable_rerank and not args.disable_rerank
     compare_with_baseline = args.compare and not args.no_compare
 
-    evaluator = RAGEvaluator(output_dir=args.output_dir)
+    evaluator = RAGEvaluator(
+        output_dir=args.output_dir,
+        vector_db_path=args.vector_db_dir,
+    )
 
     try:
         report_file = evaluator.run_evaluation(
@@ -1372,212 +2168,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-                VectorDBConfig(
-                    db_type=VectorDBType.FAISS,
-                    dimension=embedding_service.get_dimension(),
-                    index_type="HNSW",
-                )
-            )
-            status = vector_db_manager.get_status()
-            print(f"   ✅ 向量库: {status.total_vectors} 个向量")
-
-            return True
-
-        except Exception as e:
-            print(f"   ❌ 初始化失败: {e}")
-            return False
-
-    def load_test_data(self, test_file: str) -> Dict[str, Any]:
-        """加载测试数据"""
-        if not Path(test_file).exists():
-            # 尝试在test_data目录查找
-            test_file = Path(__file__).parent.parent.parent / "test_data" / test_file
-
-        if not Path(test_file).exists():
-            raise FileNotFoundError(f"测试文件不存在: {test_file}")
-
-        with open(test_file, "r", encoding="utf-8") as f:
-            test_data = json.load(f)
-
-        print(f"✅ 加载测试数据: {test_file}")
-        return test_data
-
-    def calculate_ndcg_at_k(
-        self, results: List[Any], ground_truth: List[str], k: int = 5
-    ) -> float:
-        """计算NDCG@K (归一化折损累积增益)"""
-        if not ground_truth:
-            return 0.0
-
-        # 计算DCG
-        dcg = 0.0
-        for i, result in enumerate(results[:k]):
-            # 检查这个结果是否在ground_truth中
-            relevance = 0
-            for gt in ground_truth:
-                if gt in result.content or result.content in gt:
-                    relevance = 1
-                    break
-            # 折损因子: log2(i+2)，因为i从0开始
-            dcg += relevance / math.log2(i + 2)
-
-        # 计算理想DCG (IDCG)
-        idcg = 0.0
-        for i in range(min(len(ground_truth), k)):
-            idcg += 1.0 / math.log2(i + 2)
-
-        if idcg == 0:
-            return 0.0
-
-        return dcg / idcg
-
-    def calculate_recall_at_k(
-        self, results: List[Any], ground_truth: List[str], k: int = 5
-    ) -> float:
-        """计算Recall@K"""
-        if not ground_truth:
-            return 0.0
-
-        # 统计在top-k结果中找到的ground_truth数量
-        found = 0
-        for gt in ground_truth:
-            for result in results[:k]:
-                if gt in result.content or result.content in gt:
-                    found += 1
-                    break
-
-        return found / len(ground_truth)
-
-    def calculate_f1_at_k(
-        self, precision: float, recall: float
-    ) -> float:
-        """计算F1@K (精确率和召回率的调和平均)"""
-        if precision + recall == 0:
-            return 0.0
-        return 2 * (precision * recall) / (precision + recall)
-
-    def calculate_semantic_similarity(
-        self, text1: str, text2: str
-    ) -> float:
-        """计算两段文本的语义相似度 (使用embedding)"""
-        try:
-            # 编码两段文本
-            embedding1 = embedding_service.encode([text1])
-            embedding2 = embedding_service.encode([text2])
-
-            # 计算余弦相似度
-            similarity = np.dot(embedding1[0], embedding2[0]) / (
-                np.linalg.norm(embedding1[0]) * np.linalg.norm(embedding2[0])
-            )
-
-            return float(similarity)
-        except Exception as e:
-            print(f"   ⚠️ 语义相似度计算失败: {e}")
-            return 0.0
-
-    def calculate_topic_coverage(
-        self, results: List[Any], expected_topics: List[str]
-    ) -> Dict[str, Any]:
-        """计算主题覆盖率"""
-        if not expected_topics:
-            return {"coverage_rate": 0.0, "covered_topics": [], "missed_topics": []}
-
-        # 合并所有检索结果文本
-        retrieved_text = " ".join([r.content for r in results]).lower()
-
-        # 检查每个期望主题是否被覆盖
-        covered_topics = []
-        missed_topics = []
-
-        for topic in expected_topics:
-            # 简化的主题匹配（实际应用中可能需要更复杂的语义匹配）
-            if topic.lower() in retrieved_text:
-                covered_topics.append(topic)
-            else:
-                missed_topics.append(topic)
-
-        coverage_rate = len(covered_topics) / len(expected_topics) if expected_topics else 0.0
-
-        return {
-            "coverage_rate": coverage_rate,
-            "covered_topics": covered_topics,
-            "missed_topics": missed_topics,
-            "total_topics": len(expected_topics),
-            "covered_count": len(covered_topics),
-        }
-
-    def run_retrieval_test(
-        self, query: str, expected_keywords: list, case_info: dict
-    ) -> Dict[str, Any]:
-        """运行单个检索测试（增强版，包含完整指标）"""
-        # 保存查询到evaluator用于MRR估算
-        rag_evaluator._last_query = query
-
-        # 向量化查询（使用本地BGE模型）
-        query_vector = embedding_service.encode([query])
-
-        # 检索
-        start = time.time()
-        scores, metadatas = vector_db_manager.search(query_vector, top_k=10)  # 检索更多结果用于计算NDCG
-        elapsed = (time.time() - start) * 1000
-
-        # 构建结果对象
-        class FakeResult:
-            def __init__(self, content, similarity, document_id, chunk_id):
-                self.content = content
-                self.similarity = similarity
-                self.document_id = document_id
-                self.chunk_id = chunk_id
-
-        results = []
-        for i, (score, meta) in enumerate(zip(scores[0], metadatas[0])):
-            results.append(
-                FakeResult(
-                    content=meta.get("content", ""),
-                    similarity=float(score),
-                    document_id=meta.get("document_id", ""),
-                    chunk_id=meta.get("chunk_id", f"chunk_{i}"),
-                )
-            )
-
-        # ========== 关键词命中统计 ==========
-        retrieved_text = " ".join([r.content for r in results])
-        hits = sum(1 for kw in expected_keywords if kw in retrieved_text)
-        hit_rate = hits / len(expected_keywords) if expected_keywords else 0
-
-        matched_keywords = [kw for kw in expected_keywords if kw in retrieved_text]
-        missed_keywords = [kw for kw in expected_keywords if kw not in retrieved_text]
-
-        # ========== 基础评估指标 ==========
-        ground_truth = case_info.get("ground_truth", [])
-        eval_result = rag_evaluator.evaluate_retrieval(query, results[:5], ground_truth)
-
-        # ========== 新增：NDCG@K ==========
-        ndcg_at_5 = self.calculate_ndcg_at_k(results, [ground_truth] if isinstance(ground_truth, str) else ground_truth, k=5)
-
-        # ========== 新增：Recall@K ==========
-        recall_at_5 = self.calculate_recall_at_k(results, [ground_truth] if isinstance(ground_truth, str) else ground_truth, k=5)
-
-        # ========== 新增：F1@K ==========
-        precision_at_5 = eval_result.get("precision_at_5", 0)
-        f1_at_5 = self.calculate_f1_at_k(precision_at_5, recall_at_5)
-
-        # ========== 新增：语义相似度（如果有ground_truth）==========
-        semantic_similarity = 0.0
-        if ground_truth and isinstance(ground_truth, str) and results:
-            # 计算查询与top1结果的语义相似度
-            semantic_similarity = self.calculate_semantic_similarity(query, results[0].content)
-
-        # ========== 新增：主题覆盖率 ==========
-        expected_topics = case_info.get("expected_topics", [])
-        topic_coverage = self.calculate_topic_coverage(results, expected_topics)
-
-        return {
-            "case_info": case_info,
-            "query": query,
-            "response_time_ms": elapsed,
-            "results_count": len(results),
-            "results": [
-                {
-eval_result.get("precision_at_3",

@@ -24,8 +24,12 @@ class StreamToLogger:
         刷新缓冲区
         """
         if self.linebuf:
-            self.logger.log(self.log_level, self.linebuf.rstrip())
-            self.linebuf = ''
+            try:
+                self.logger.log(self.log_level, self.linebuf.rstrip())
+                self.linebuf = ''
+            except Exception:
+                # 避免递归错误
+                pass
 
     def close(self):
         """
@@ -115,12 +119,16 @@ class StreamToLogger:
         """
         写入数据
         """
+        # 如果流已关闭，直接忽略
+        if not s:
+            return
         try:
             for line in s.rstrip().splitlines():
-                self.logger.log(self.log_level, line.rstrip())
-        except Exception as e:
-            # 写入失败时的错误处理
-            print(f"Error writing to log stream: {str(e)}")
+                if line:
+                    self.logger.log(self.log_level, line.rstrip())
+        except Exception:
+            # 忽略所有错误，避免递归
+            pass
 
     def writelines(self, lines):
         """
@@ -132,16 +140,11 @@ class StreamToLogger:
 
 def setup_logger(name: str = "rag_backend") -> logging.Logger:
     """配置日志记录器"""
-    # 打印调试信息
-    print(f"DEBUG: log_file = {settings.log_file}")
-    print(f"DEBUG: log_level = {settings.log_level}")
-    
     logger = logging.getLogger(name)
     logger.setLevel(getattr(logging, settings.log_level))
 
     # 清空现有的处理器，确保使用新的配置
     if logger.handlers:
-        print(f"DEBUG: Clearing existing handlers: {len(logger.handlers)}")
         logger.handlers.clear()
 
     # 添加敏感信息过滤器
@@ -149,13 +152,12 @@ def setup_logger(name: str = "rag_backend") -> logging.Logger:
     sensitive_filter = SensitiveDataFilter()
     logger.addFilter(sensitive_filter)
 
-    # 控制台处理器
-    console_handler = logging.StreamHandler(sys.stdout)
+    # 控制台处理器 - 使用原始的sys.stdout避免递归
+    console_handler = logging.StreamHandler(sys.__stdout__)
     console_handler.setLevel(getattr(logging, settings.log_level))
 
     # 文件处理器 - 使用智能轮转处理器
     log_file_path = "/root/autodl-tmp/rag/logs/app.log"
-    print(f"DEBUG: Using hardcoded log file path: {log_file_path}")
     try:
         # 使用智能轮转文件处理器，支持文件大小和时间间隔两种轮转策略
         file_handler = SmartRotatingFileHandler(
@@ -168,13 +170,10 @@ def setup_logger(name: str = "rag_backend") -> logging.Logger:
             delay=False
         )
         file_handler.setLevel(logging.DEBUG)
-        print(f"DEBUG: Smart rotating file handler created successfully")
-    except Exception as e:
-        print(f"DEBUG: Error creating smart rotating file handler: {str(e)}")
+    except Exception:
         # 创建一个简单的文件处理器作为备用
         file_handler = logging.FileHandler(log_file_path, encoding='utf-8', delay=False)
         file_handler.setLevel(logging.DEBUG)
-        print(f"DEBUG: Fallback to simple file handler")
 
     # 日志格式 - 包含毫秒级时间戳
     formatter = logging.Formatter(
@@ -199,11 +198,8 @@ def setup_logger(name: str = "rag_backend") -> logging.Logger:
     console_handler.setFormatter(custom_formatter)
     file_handler.setFormatter(custom_formatter)
 
-    print(f"DEBUG: Adding console handler")
     logger.addHandler(console_handler)
-    print(f"DEBUG: Adding file handler")
     logger.addHandler(file_handler)
-    print(f"DEBUG: Total handlers: {len(logger.handlers)}")
 
     # 配置第三方库的日志级别
     logging.getLogger("transformers").setLevel(logging.WARNING)
@@ -239,7 +235,7 @@ def restore_stdout_stderr(original_stdout, original_stderr):
 
 def validate_logger_config(logger):
     """
-    验证日志配置有效性并输出诊断信息
+    验证日志配置有效性
 
     Args:
         logger: 日志记录器实例
@@ -247,75 +243,33 @@ def validate_logger_config(logger):
     Returns:
         bool: 配置是否有效
     """
-    print("\n=== 日志系统自检 ===")
     is_valid = True
-
-    # 检查处理器配置
-    print(f"处理器数量: {len(logger.handlers)}")
-    for i, handler in enumerate(logger.handlers):
-        print(f"处理器 {i}: {type(handler).__name__}")
-        if hasattr(handler, 'baseFilename'):
-            log_file = getattr(handler, 'baseFilename')
-            print(f"  日志文件: {log_file}")
-            
-            # 检查文件路径是否存在
-            log_dir = os.path.dirname(log_file)
-            if log_dir:
-                if os.path.exists(log_dir):
-                    print(f"  目录存在: {log_dir}")
-                else:
-                    print(f"  警告: 目录不存在，将自动创建: {log_dir}")
-            
-            # 检查文件权限
-            try:
-                if os.path.exists(log_file):
-                    if os.access(log_file, os.W_OK):
-                        print(f"  文件可写: {log_file}")
-                    else:
-                        print(f"  错误: 文件不可写: {log_file}")
-                        is_valid = False
-                else:
-                    # 检查目录权限
-                    if os.access(log_dir, os.W_OK):
-                        print(f"  目录可写: {log_dir}")
-                    else:
-                        print(f"  错误: 目录不可写: {log_dir}")
-                        is_valid = False
-            except Exception as e:
-                print(f"  权限检查失败: {str(e)}")
-                is_valid = False
-
-    # 检查日志级别
-    print(f"日志级别: {logging.getLevelName(logger.level)}")
-
+    
+    # 检查是否有处理器
+    if not logger.handlers:
+        is_valid = False
+    
     # 测试日志输出
-    print("测试日志输出...")
-    test_message = "日志系统自检测试消息"
     try:
-        logger.info(test_message)
-        print("  测试日志输出成功")
-    except Exception as e:
-        print(f"  错误: 测试日志输出失败: {str(e)}")
+        logger.debug("日志系统自检")
+    except Exception:
         is_valid = False
-
-    # 检查标准输出重定向
-    print("检查标准输出重定向...")
-    try:
-        print("  标准输出重定向测试")
-        print("  标准错误重定向测试", file=sys.stderr)
-        print("  标准输出重定向成功")
-    except Exception as e:
-        print(f"  错误: 标准输出重定向失败: {str(e)}")
-        is_valid = False
-
-    print(f"\n=== 自检结果: {'有效' if is_valid else '无效'} ===\n")
+    
     return is_valid
 
 
 logger = setup_logger()
 
 # 重定向标准输出和标准错误到日志记录器
-original_stdout, original_stderr = redirect_stdout_stderr(logger)
-
-# 验证日志配置
-validate_logger_config(logger)
+# 检查环境变量，允许在脚本执行时禁用重定向以避免递归
+import os
+if os.environ.get('RAG_DISABLE_STDOUT_REDIRECT', '').lower() != 'true':
+    original_stdout, original_stderr = redirect_stdout_stderr(logger)
+    # 验证日志配置
+    validate_logger_config(logger)
+else:
+    # 不重定向，保持原始stdout/stderr
+    original_stdout = sys.stdout
+    original_stderr = sys.stderr
+    # 不重定向时不输出日志，避免与脚本自身的日志配置冲突
+    pass

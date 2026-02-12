@@ -1,5 +1,12 @@
 from typing import List, Optional, Dict, Any
 import time
+
+# 先导入 accelerate，确保 transformers 能检测到它
+try:
+    import accelerate
+except ImportError:
+    pass
+
 import torch
 from models import RAGRequest, RAGResponse, RetrievalResult, GenerationConfig
 from services.retriever import retriever
@@ -175,10 +182,12 @@ class LocalLLMClient(LLMClient):
                 )
 
             # 根据前端指定的模型名称动态调整模型路径
+            # 使用相对于backend目录的路径
+            backend_dir = Path(__file__).parent.parent
             if config.llm_model == "Qwen2.5-7B-Instruct":
-                model_path = "./data/models/Qwen2.5-7B-Instruct"
+                model_path = str(backend_dir / "data" / "models" / "Qwen2.5-7B-Instruct")
             elif config.llm_model == "Qwen2.5-0.5B-Instruct":
-                model_path = "./data/models/Qwen2.5-0.5B-Instruct"
+                model_path = str(backend_dir / "data" / "models" / "Qwen2.5-0.5B-Instruct")
 
             # 2. 检查模型文件是否存在
             if not self._check_model_exists(model_path):
@@ -231,7 +240,7 @@ class LocalLLMClient(LLMClient):
                 }
 
                 if self.device == "cuda":
-                    model_kwargs["torch_dtype"] = torch.float16
+                    model_kwargs["dtype"] = torch.float16
                     if load_in_8bit:
                         model_kwargs["load_in_8bit"] = True
                         logger.info("启用8bit量化以节省显存")
@@ -250,11 +259,21 @@ class LocalLLMClient(LLMClient):
                             )
                             model_kwargs["load_in_8bit"] = True
                     else:
-                        # 如果显存足够，尝试使用device_map="auto"以自动分配
-                        model_kwargs["device_map"] = "auto"
+                        # 检查是否安装了 accelerate，如果安装了才使用 device_map
+                        try:
+                            import accelerate
+
+                            # 如果显存足够，尝试使用device_map="auto"以自动分配
+                            model_kwargs["device_map"] = "auto"
+                            logger.info("使用 device_map='auto' 自动分配模型")
+                        except ImportError:
+                            logger.warning(
+                                "accelerate 未安装，无法使用 device_map='auto'，模型将加载到默认GPU"
+                            )
+                            # 不显式指定 device，让模型自动加载到 GPU
                 else:
                     # CPU设备使用float32
-                    model_kwargs["torch_dtype"] = torch.float32
+                    model_kwargs["dtype"] = torch.float32
                     logger.warning("使用CPU设备，生成速度较慢")
 
                 # 加载模型
@@ -274,9 +293,26 @@ class LocalLLMClient(LLMClient):
             logger.error("如果使用CUDA设备，请确保已安装CUDA和cudatoolkit")
             raise
 
-    def generate(self, prompt: str) -> str:
-        """生成回答"""
+    def generate(self, prompt: str) -> Dict[str, Any]:
+        """
+        生成回答并返回性能指标
+        
+        Returns:
+            {
+                "text": str,              # 生成的文本
+                "input_tokens": int,      # 输入token数
+                "output_tokens": int,     # 输出token数
+                "total_tokens": int,      # 总token数
+                "time_to_first_token_ms": float,  # 首token时延(ms)
+                "total_time_ms": float,   # 总生成时间(ms)
+                "tokens_per_second": float,  # 生成速度(token/s)
+            }
+        """
+        import time
+        
         try:
+            start_time = time.time()
+            
             # 构建 messages 格式
             messages = [
                 {
@@ -295,31 +331,93 @@ class LocalLLMClient(LLMClient):
             inputs = self.tokenizer(
                 text, return_tensors="pt", truncation=True, max_length=2048
             ).to(self.model.device)
+            
+            input_token_count = inputs["input_ids"].shape[1]
 
-            # 生成
-            with torch.no_grad():
-                outputs = self.model.generate(
-                    **inputs,
-                    max_new_tokens=self.config.max_tokens,
-                    temperature=self.config.temperature,
-                    top_p=self.config.top_p,
-                    do_sample=True,
-                    pad_token_id=self.tokenizer.eos_token_id,
-                )
-
-            # 解码
-            response = self.tokenizer.decode(
-                outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True
+            # 使用 streamer 来捕获首token时间
+            from transformers import TextIteratorStreamer
+            from threading import Thread
+            
+            streamer = TextIteratorStreamer(
+                self.tokenizer, 
+                skip_prompt=True, 
+                skip_special_tokens=True
             )
+            
+            # 准备生成参数
+            generation_kwargs = dict(
+                **inputs,
+                max_new_tokens=self.config.max_tokens,
+                temperature=self.config.temperature,
+                top_p=self.config.top_p,
+                do_sample=True,
+                pad_token_id=self.tokenizer.eos_token_id,
+                streamer=streamer,
+            )
+            
+            first_token_received = False
+            first_token_time = None
+            generation_start = time.time()
 
-            return response.strip()
+            # 在单独线程中运行生成
+            def generate_in_thread():
+                with torch.no_grad():
+                    self.model.generate(**generation_kwargs)
+            
+            thread = Thread(target=generate_in_thread)
+            thread.start()
+            
+            # 收集生成的文本并测量首token时间
+            generated_text = []
+            for new_text in streamer:
+                if not first_token_received:
+                    first_token_time = time.time()
+                    first_token_received = True
+                generated_text.append(new_text)
+            
+            thread.join()
+            
+            end_time = time.time()
+            
+            # 合并生成的文本
+            response = "".join(generated_text).strip()
+            
+            # 计算输出token数
+            output_token_count = len(self.tokenizer.encode(response, add_special_tokens=False))
+            
+            # 计算时间指标
+            total_time_ms = (end_time - start_time) * 1000
+            time_to_first_token_ms = (first_token_time - generation_start) * 1000 if first_token_time else 0
+            generation_time_ms = (end_time - generation_start) * 1000
+            
+            # 计算生成速度（基于实际生成token数的时间）
+            tokens_per_second = (output_token_count / generation_time_ms * 1000) if generation_time_ms > 0 else 0
+            
+            return {
+                "text": response,
+                "input_tokens": input_token_count,
+                "output_tokens": output_token_count,
+                "total_tokens": input_token_count + output_token_count,
+                "time_to_first_token_ms": time_to_first_token_ms,
+                "total_time_ms": total_time_ms,
+                "generation_time_ms": generation_time_ms,
+                "tokens_per_second": tokens_per_second,
+            }
 
         except Exception as e:
             logger.error(f"本地 LLM 生成失败: {str(e)}")
             import traceback
-
             logger.error(traceback.format_exc())
-            return f"生成失败: {str(e)}"
+            return {
+                "text": f"生成失败: {str(e)}",
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "total_tokens": 0,
+                "time_to_first_token_ms": 0,
+                "total_time_ms": 0,
+                "generation_time_ms": 0,
+                "tokens_per_second": 0,
+            }
 
     def _check_model_exists(self, model_path: str) -> bool:
         """检查模型文件是否存在"""
