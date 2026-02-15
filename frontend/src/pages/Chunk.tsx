@@ -460,6 +460,7 @@ const Chunk: React.FC = () => {
                   <option value="compliance">📋 合规文件切分</option>
                   <option value="hr">👥 HR文档切分</option>
                   <option value="project">📊 项目管理切分</option>
+                  <option value="hybrid">🔀 混合切分-标题切分</option>
                 </optgroup>
               </select>
             </div>

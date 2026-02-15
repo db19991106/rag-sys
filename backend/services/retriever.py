@@ -89,6 +89,38 @@ class Retriever:
             logger.info("步骤1: 执行向量检索（主检索）...")
             vector_results = []
 
+            # 确保嵌入模型已加载
+            if not embedding_service.is_loaded():
+                logger.info("嵌入模型未加载，尝试自动加载...")
+                from models import EmbeddingConfig, EmbeddingModelType
+                import torch
+                
+                # 动态检测设备
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+                logger.info(f"自动检测到设备: {device}")
+
+                # 使用配置的模型
+                from config import settings
+                
+                # 转换模型类型
+                model_type = EmbeddingModelType.BGE
+                if settings.embedding_model_type == "sentence-transformers":
+                    model_type = EmbeddingModelType.SENTENCE_TRANSFORMERS
+
+                embedding_config = EmbeddingConfig(
+                    model_type=model_type,
+                    model_name=settings.embedding_model_name,
+                    batch_size=32,
+                    device=device,
+                )
+                
+                # 加载模型
+                embedding_response = embedding_service.load_model(embedding_config)
+                if embedding_response.status != "success":
+                    logger.error(f"自动加载嵌入模型失败: {embedding_response.message}")
+                    raise ValueError(f"嵌入模型加载失败: {embedding_response.message}")
+                logger.info("嵌入模型加载成功")
+
             # 批量编码查询向量
             query_vectors = embedding_service.encode(expanded_queries)
 

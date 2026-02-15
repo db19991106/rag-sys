@@ -747,8 +747,9 @@ class RAGGenerator:
             )
             generation_start = time.time()
             llm_client = self._get_llm_client(generation_config)
-            answer = llm_client.generate(prompt)
-            generation_time = (time.time() - generation_start) * 1000
+            response = llm_client.generate(prompt)
+            answer = response["text"]
+            generation_time = response.get("generation_time_ms", (time.time() - generation_start) * 1000)
 
             # 生成完成后卸载模型，释放显存
             if hasattr(llm_client, "unload"):

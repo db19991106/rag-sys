@@ -1,13 +1,23 @@
 from typing import Optional, Dict, Any, Tuple
 from pathlib import Path
 import pypdf
-from docx import Document as DocxDocument
 import markdown
 import csv
 import json
 import html2text
 import xml.etree.ElementTree as ET
-from pptx import Presentation
+
+
+def _get_docx_document():
+    """延迟导入 DocxDocument，避免在服务启动时触发 pandas 依赖问题"""
+    from docx import Document as DocxDocument
+    return DocxDocument
+
+
+def _get_pptx_presentation():
+    """延迟导入 Presentation，避免在服务启动时触发 pandas 依赖问题"""
+    from pptx import Presentation
+    return Presentation
 from openpyxl import load_workbook
 from utils.logger import logger
 from utils.file_utils import get_file_extension
@@ -44,6 +54,8 @@ class DocumentParser:
                 return DocumentParser._parse_pdf(file_path)
             elif ext == '.docx':
                 return DocumentParser._parse_docx(file_path)
+            elif ext == '.doc':
+                return DocumentParser._parse_doc(file_path)
             elif ext == '.md':
                 return DocumentParser._parse_markdown(file_path)
             elif ext == '.csv':
@@ -117,12 +129,34 @@ class DocumentParser:
     @staticmethod
     def _parse_docx(file_path: str) -> str:
         """解析 DOCX 文件"""
+        DocxDocument = _get_docx_document()
         doc = DocxDocument(file_path)
         content = []
         for paragraph in doc.paragraphs:
             if paragraph.text:
                 content.append(paragraph.text)
         return '\n'.join(content)
+
+    @staticmethod
+    def _parse_doc(file_path: str) -> str:
+        """解析 DOC 文件（尝试 textract，如果失败则尝试用 docx 方式）"""
+        try:
+            import textract
+            text = textract.process(file_path, encoding='utf-8')
+            return text.decode('utf-8') if isinstance(text, bytes) else text
+        except Exception as e:
+            pass
+        
+        try:
+            import zipfile
+            with zipfile.ZipFile(file_path, 'r'):
+                pass
+            return DocumentParser._parse_docx(file_path)
+        except Exception:
+            pass
+        
+        logger.warning(f"无法解析 .doc 文件 {file_path}")
+        return ""
 
     @staticmethod
     def _parse_markdown(file_path: str) -> str:
@@ -189,6 +223,7 @@ class DocumentParser:
     @staticmethod
     def _parse_pptx(file_path: str) -> str:
         """解析 PPTX 文件"""
+        Presentation = _get_pptx_presentation()
         prs = Presentation(file_path)
         content = []
         

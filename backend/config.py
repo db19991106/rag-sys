@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     vector_db_type: str = "faiss"  # faiss, milvus, qdrant
     vector_db_dir: str = "./vector_db"
     faiss_index_type: str = "HNSW"
-    faiss_dimension: int = 768
+    faiss_dimension: int = 1024  # BGE-M3 输出维度 (原来是2560用于Qwen3-Embedding-4B)
 
     # Milvus 配置
     milvus_host: str = "localhost"
@@ -35,7 +35,8 @@ class Settings(BaseSettings):
 
     # 嵌入模型配置
     embedding_model_type: str = "sentence-transformers"
-    embedding_model_name: str = "BAAI/bge-base-zh-v1.5"
+    # embedding_model_name: str = "BAAI/bge-base-zh-v1.5"
+    embedding_model_name: str = "/root/autodl-tmp/rag/backend/data/models/bge-m3"
     embedding_batch_size: int = 32
     # 动态检测设备
     embedding_device: str = "cuda" if torch.cuda.is_available() else "cpu"

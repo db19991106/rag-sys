@@ -61,6 +61,7 @@ class ChunkType(str, Enum):
     COMPLIANCE = "compliance"  # 合规文件切分
     HR = "hr"  # HR文档切分
     PROJECT = "project"  # 项目管理切分
+    HYBRID = "hybrid"  # 混合切分-标题切分
 
     # 自定义
     CUSTOM = "custom"  # 自定义规则切分

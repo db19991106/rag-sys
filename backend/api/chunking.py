@@ -70,7 +70,7 @@ async def split_document(doc_id: str, config: ChunkConfig, auto_embed: bool = Fa
                 # 检查并加载嵌入模型
                 if not embedding_service.is_loaded():
                     logger.info(
-                        "嵌入模型未加载，自动加载默认模型: BAAI/bge-base-zh-v1.5"
+                        f"嵌入模型未加载，自动加载配置模型: {settings.embedding_model_name}"
                     )
                     from models import EmbeddingConfig, EmbeddingModelType
                     import torch
@@ -79,9 +79,14 @@ async def split_document(doc_id: str, config: ChunkConfig, auto_embed: bool = Fa
                     device = "cuda" if torch.cuda.is_available() else "cpu"
                     logger.info(f"自动检测到设备: {device}")
 
+                    # 转换模型类型
+                    model_type = EmbeddingModelType.BGE
+                    if settings.embedding_model_type == "sentence-transformers":
+                        model_type = EmbeddingModelType.SENTENCE_TRANSFORMERS
+
                     embedding_config = EmbeddingConfig(
-                        model_type=EmbeddingModelType.BGE,
-                        model_name="BAAI/bge-base-zh-v1.5",
+                        model_type=model_type,
+                        model_name=settings.embedding_model_name,
                         batch_size=32,
                         device=device,
                     )
@@ -99,7 +104,7 @@ async def split_document(doc_id: str, config: ChunkConfig, auto_embed: bool = Fa
                     from models import VectorDBConfig, VectorDBType
 
                     vector_db_config = VectorDBConfig(
-                        db_type=VectorDBType.FAISS, dimension=768, index_type="HNSW"
+                        db_type=VectorDBType.FAISS, dimension=settings.faiss_dimension, index_type="HNSW"
                     )
                     success = vector_db_manager.initialize(vector_db_config)
                     if success:
@@ -200,7 +205,7 @@ async def embed_chunks(doc_id: str):
     try:
         # 检查模型是否已加载，如果未加载则自动加载默认模型
         if not embedding_service.is_loaded():
-            logger.info("嵌入模型未加载，自动加载默认模型: BAAI/bge-base-zh-v1.5")
+            logger.info(f"嵌入模型未加载，自动加载配置模型: {settings.embedding_model_name}")
             from models import EmbeddingConfig, EmbeddingModelType
             import torch
 
@@ -208,9 +213,14 @@ async def embed_chunks(doc_id: str):
             device = "cuda" if torch.cuda.is_available() else "cpu"
             logger.info(f"自动检测到设备: {device}")
 
+            # 转换模型类型
+            model_type = EmbeddingModelType.BGE
+            if settings.embedding_model_type == "sentence-transformers":
+                model_type = EmbeddingModelType.SENTENCE_TRANSFORMERS
+
             embedding_config = EmbeddingConfig(
-                model_type=EmbeddingModelType.BGE,
-                model_name="BAAI/bge-base-zh-v1.5",
+                model_type=model_type,
+                model_name=settings.embedding_model_name,
                 batch_size=32,
                 device=device,
             )

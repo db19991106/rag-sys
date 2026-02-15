@@ -479,117 +479,252 @@ class ComplianceDocumentChunker(BaseDocumentChunker):
     - 保留条款完整性（第X条、第X章）
     - 维护条款之间的逻辑关系
     - 支持条款引用追踪
+    
+    切分策略：
+    1. 结构化切分（优先）：
+       - 第一层：按「第 X 章」切分章节
+       - 第二层：在章节内按「第 X 条」切分条款
+       - 每个条款作为一个基础单元（包含条款标题 + 正文 + 关联表格）
+    2. 语义切分（补充）：
+       - 超长条款（>2000字）按句子拆分后再语义合并
+       - 短条款（<100字）按语义相似度合并
     """
+
+    CHAPTER_PATTERN = re.compile(r"(?:^|\n)(?:#{1,2}\s*)?第[零一二三四五六七八九十百千万\d]+章\s*.+", re.MULTILINE)
+    ARTICLE_PATTERN = re.compile(r"(?:^|\n)(?:#{1,6}\s*)?第[零一二三四五六七八九十百千万\d]+条", re.MULTILINE)
+    SENTENCE_ENDINGS = re.compile(r"[。；！？\n]")
+    TABLE_PATTERN = re.compile(r"(\|(?:[^\n]+\|)(?:\n\|[-:\|\s]+\|)(?:\n\|[^\n]+\|)+)")
+    TABLE_PLACEHOLDER = re.compile(r"__TABLE_\d+__")
 
     def chunk(self, content: str, doc_id: str) -> List[Dict[str, Any]]:
         """切分合规文件"""
         logger.info(f"使用合规文件切分器处理文档: {doc_id}")
 
+        protected_tables = []
+        content = self._protect_tables(content, protected_tables)
+        
         chunks = []
-        chunk_index = 0
-
-        # 1. 提取文档标题
+        
         title_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
         doc_title = title_match.group(1) if title_match else "未知文档"
 
-        # 2. 按章切分（第一章、第二章等）
-        chapter_pattern = r"(?:^|\n)(#{1,2}\s*第[一二三四五六七八九十百千万]+章[^\n]*)"
-        chapters = re.split(chapter_pattern, content)
-
-        current_chapter_title = ""
-
-        for i, part in enumerate(chapters):
-            if not part.strip():
-                continue
-
-            # 检查是否是章节标题
-            if re.match(r"^#{1,2}\s*第[一二三四五六七八九十百千万]+章", part.strip()):
-                current_chapter_title = part.strip()
-                continue
-
-            # 在章内部按条切分
-            article_pattern = r"(?:^|\n)(#{3,4}\s*第[一二三四五六七八九十百千万]+条[^\n]*|(?:^|\n)\d+\.\s+[^\n]+)"
-            articles = re.split(article_pattern, part)
-
-            current_article_title = ""
-            current_content = []
-            current_size = 0
-
-            for j, article_part in enumerate(articles):
-                if not article_part.strip():
-                    continue
-
-                # 检查是否是条款标题
-                if re.match(
-                    r"^#{3,4}\s*第[一二三四五六七八九十百千万]+条|^\d+\.\s+",
-                    article_part.strip(),
-                ):
-                    # 保存之前的条款
-                    if current_content:
-                        chunk_content = "\n".join(current_content)
-                        chunks.append(
-                            self._create_chunk(
-                                chunk_content,
-                                "compliance_article",
-                                {
-                                    "doc_title": doc_title,
-                                    "chapter_title": current_chapter_title,
-                                    "article_title": current_article_title,
-                                },
-                                chunk_index,
-                            )
-                        )
-                        chunk_index += 1
-
-                    current_article_title = article_part.strip()
-                    current_content = [article_part]
-                    current_size = len(article_part)
-                else:
-                    # 累积内容
-                    current_content.append(article_part)
-                    current_size += len(article_part)
-
-                    # 如果超出限制，强制切分
-                    if current_size > self.max_chars:
-                        chunk_content = "\n".join(current_content)
-                        chunks.append(
-                            self._create_chunk(
-                                chunk_content,
-                                "compliance_article",
-                                {
-                                    "doc_title": doc_title,
-                                    "chapter_title": current_chapter_title,
-                                    "article_title": current_article_title,
-                                },
-                                chunk_index,
-                            )
-                        )
-                        chunk_index += 1
-                        current_content = []
-                        current_size = 0
-
-            # 保存最后的条款
-            if current_content:
-                chunk_content = "\n".join(current_content)
-                chunks.append(
-                    self._create_chunk(
-                        chunk_content,
-                        "compliance_article",
-                        {
-                            "doc_title": doc_title,
-                            "chapter_title": current_chapter_title,
-                            "article_title": current_article_title,
-                        },
-                        chunk_index,
+        chapters = self._split_by_chapters(content)
+        
+        for chapter in chapters:
+            chapter_title = chapter.get("title", "")
+            chapter_content = chapter.get("content", "")
+            
+            articles = self._split_articles_in_chapter(chapter_content, chapter_title)
+            
+            for article in articles:
+                article_title = article.get("title", "")
+                article_content = self._restore_tables(article.get("content", ""), protected_tables)
+                article_numbers = article.get("article_numbers", [])
+                
+                if len(article_content) > 2000:
+                    sub_chunks = self._semantic_split_article(
+                        article_content, doc_title, chapter_title, article_numbers
                     )
-                )
-                chunk_index += 1
+                    chunks.extend(sub_chunks)
+                else:
+                    chunks.append(
+                        self._create_chunk(
+                            article_content,
+                            "compliance_article",
+                            {
+                                "doc_title": doc_title,
+                                "chapter_title": chapter_title,
+                                "article_title": article_title,
+                                "articles": article_numbers,
+                                "has_table": bool(article.get("has_table", False)),
+                            },
+                            len(chunks),
+                        )
+                    )
 
-        # 合并过小的条款
-        chunks = self._merge_small_chunks(chunks, min_chars=400)
+        chunks = self._merge_short_articles(chunks)
 
         logger.info(f"合规文件切分完成: 共 {len(chunks)} 个片段")
         return chunks
+
+    def _protect_tables(self, content: str, table_list: List) -> str:
+        """保护表格内容"""
+        for match in self.TABLE_PATTERN.finditer(content):
+            placeholder = f"__TABLE_{len(table_list)}__"
+            table_list.append(match.group(1))
+            content = content[:match.start()] + "\n" + placeholder + "\n" + content[match.end():]
+        return content
+
+    def _restore_tables(self, content: str, table_list: List) -> str:
+        """恢复表格内容"""
+        for i, table in enumerate(table_list):
+            content = content.replace(f"__TABLE_{i}__", table)
+        return content
+
+    def _split_by_chapters(self, content: str) -> List[Dict]:
+        """按章节切分文档"""
+        chapters = []
+        
+        matches = list(self.CHAPTER_PATTERN.finditer(content))
+        
+        if not matches:
+            return [{"title": "", "content": content}]
+        
+        for i, match in enumerate(matches):
+            chapter_start = match.start()
+            chapter_title = match.group().strip()
+            
+            chapter_end = matches[i + 1].start() if i + 1 < len(matches) else len(content)
+            
+            chapter_content = content[chapter_start:chapter_end].strip()
+            
+            chapters.append({
+                "title": chapter_title,
+                "content": chapter_content,
+            })
+        
+        return chapters
+
+    def _split_articles_in_chapter(
+        self, chapter_content: str, chapter_title: str
+    ) -> List[Dict]:
+        """在章节内按条款切分"""
+        articles = []
+        
+        matches = list(self.ARTICLE_PATTERN.finditer(chapter_content))
+        
+        if not matches:
+            return [{"title": "", "content": chapter_content, "article_numbers": []}]
+        
+        for i, match in enumerate(matches):
+            article_start = match.start()
+            article_title = match.group().strip()
+            
+            article_match = re.match(r"第([零一二三四五六七八九十百千万\d]+)条", article_title)
+            article_number = article_match.group(1) if article_match else str(i + 1)
+            
+            article_end = matches[i + 1].start() if i + 1 < len(matches) else len(chapter_content)
+            
+            article_content = chapter_content[article_start:article_end].strip()
+            
+            has_table = bool(self.TABLE_PATTERN.search(article_content) or self.TABLE_PLACEHOLDER.search(article_content))
+            
+            articles.append({
+                "title": article_title,
+                "content": article_content,
+                "article_numbers": [article_number],
+                "has_table": has_table,
+            })
+        
+        return articles
+
+    def _semantic_split_article(
+        self,
+        content: str,
+        doc_title: str,
+        chapter_title: str,
+        article_numbers: List[str],
+    ) -> List[Dict]:
+        """对超长条款按语义切分"""
+        chunks = []
+        
+        sentences = self._split_into_sentences(content)
+        
+        current_chunk = []
+        current_size = 0
+        
+        for sentence in sentences:
+            sentence_size = len(sentence)
+            
+            if current_size + sentence_size > 1500 and current_chunk:
+                chunk_content = "".join(current_chunk)
+                chunks.append(
+                    self._create_chunk(
+                        chunk_content,
+                        "compliance_article_split",
+                        {
+                            "doc_title": doc_title,
+                            "chapter_title": chapter_title,
+                            "article_title": "",
+                            "articles": article_numbers,
+                            "is_split": True,
+                        },
+                        len(chunks),
+                    )
+                )
+                current_chunk = [sentence]
+                current_size = sentence_size
+            else:
+                current_chunk.append(sentence)
+                current_size += sentence_size
+        
+        if current_chunk:
+            chunk_content = "".join(current_chunk)
+            chunks.append(
+                self._create_chunk(
+                    chunk_content,
+                    "compliance_article_split",
+                    {
+                        "doc_title": doc_title,
+                        "chapter_title": chapter_title,
+                        "article_title": "",
+                        "articles": article_numbers,
+                        "is_split": True,
+                    },
+                    len(chunks),
+                )
+            )
+        
+        return chunks
+
+    def _split_into_sentences(self, text: str) -> List[str]:
+        """将文本按句子拆分"""
+        sentences = []
+        current = ""
+        
+        for char in text:
+            current += char
+            if char in "。；！？\n":
+                sentences.append(current)
+                current = ""
+        
+        if current:
+            sentences.append(current)
+        
+        return sentences if sentences else [text]
+
+    def _merge_short_articles(self, chunks: List[Dict]) -> List[Dict]:
+        """合并短条款（仅在同一章节内合并）"""
+        if not chunks:
+            return []
+        
+        merged = []
+        current = chunks[0].copy()
+        
+        for i in range(1, len(chunks)):
+            chunk = chunks[i]
+            
+            current_chapter = current.get("metadata", {}).get("chapter_title", "")
+            chunk_chapter = chunk.get("metadata", {}).get("chapter_title", "")
+            
+            current_articles = current.get("metadata", {}).get("articles", [])
+            chunk_articles = chunk.get("metadata", {}).get("articles", [])
+            
+            same_chapter = current_chapter == chunk_chapter
+            both_short = len(current["content"]) < 300 and len(chunk["content"]) < 300
+            same_type = current.get("type") == chunk.get("type")
+            
+            if same_chapter and both_short and same_type:
+                current["content"] += "\n\n" + chunk["content"]
+                current["metadata"]["articles"] = current_articles + chunk_articles
+            else:
+                merged.append(current)
+                current = chunk.copy()
+        
+        if current:
+            merged.append(current)
+        
+        return merged
 
 
 class HRDocumentChunker(BaseDocumentChunker):

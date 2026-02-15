@@ -260,6 +260,7 @@ class RAGFlowChunker:
                 ChunkType.COMPLIANCE,
                 ChunkType.HR,
                 ChunkType.PROJECT,
+                ChunkType.HYBRID,
             ]:
                 # 新的文档类型切分：使用智能切分逻辑，但根据类型调整分隔符
                 delimiter_map = {
@@ -275,25 +276,30 @@ class RAGFlowChunker:
                     ],
                     ChunkType.HR: ["##", "###", "\n\n", "。"],
                     ChunkType.PROJECT: ["##", "###", "阶段", "里程碑", "\n\n", "。"],
+                    ChunkType.HYBRID: ["第", "第一章", "第二章", "\n\n", "。"],
                 }
 
                 delimiters = delimiter_map.get(config.type, ["##", "###", "\n\n", "。"])
-                logger.info(f"使用 {config.type} 切分策略，分隔符: {delimiters}")
-
-                chunk_texts = self._naive_merge(
-                    content,
-                    chunk_token_num=config.chunk_token_size,
-                    delimiter=delimiters[0],
-                    overlapped_percent=config.overlapped_percent,
-                )
-                chunk_dicts = [
-                    {
-                        "content": t,
-                        "type": "text",
-                        "metadata": {"chunk_type": config.type},
-                    }
-                    for t in chunk_texts
-                ]
+                
+                if config.type == ChunkType.HYBRID:
+                    logger.info("使用混合切分-标题切分策略")
+                    chunk_dicts = self._hybrid_chunking(content, doc_id, config)
+                else:
+                    logger.info(f"使用 {config.type} 切分策略，分隔符: {delimiters}")
+                    chunk_texts = self._naive_merge(
+                        content,
+                        chunk_token_num=config.chunk_token_size,
+                        delimiter=delimiters[0],
+                        overlapped_percent=config.overlapped_percent,
+                    )
+                    chunk_dicts = [
+                        {
+                            "content": t,
+                            "type": "text",
+                            "metadata": {"chunk_type": config.type},
+                        }
+                        for t in chunk_texts
+                    ]
             else:
                 chunk_texts = self._naive_merge(
                     content,
@@ -832,6 +838,143 @@ class RAGFlowChunker:
             cks.append(current_chunk)
 
         return cks
+
+    def _hybrid_chunking(
+        self, content: str, doc_id: str, config: ChunkConfig
+    ) -> List[Dict[str, Any]]:
+        """
+        混合切分-标题切分
+        策略：
+        1. 按标题层级拆分（章节 > 子标题 > 条款）
+        2. 表格关联到当前章节
+        3. 超长内容语义切分
+        """
+        import re
+
+        chunks = []
+
+        CHAPTER_PATTERN = re.compile(
+            r"(?:^|\n)(?:##\s*第[一二三四五六七八九十百千\d]+章|第[一二三四五六七八九十百千\d]+章)", re.MULTILINE
+        )
+        ARTICLE_PATTERN = re.compile(
+            r"(?:^|\n)(?:第[一二三四五六七八九十百千\d]+条|第\d+条)", re.MULTILINE
+        )
+
+        title_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
+        doc_title = title_match.group(1) if title_match else "未知文档"
+
+        chapters = []
+        chapter_matches = list(CHAPTER_PATTERN.finditer(content))
+
+        if not chapter_matches:
+            return [{"content": content, "type": "hybrid", "metadata": {"doc_title": doc_title}}]
+
+        for i, match in enumerate(chapter_matches):
+            chapter_start = match.start()
+            chapter_title = match.group().strip()
+            chapter_end = chapter_matches[i + 1].start() if i + 1 < len(chapter_matches) else len(content)
+            chapter_content = content[chapter_start:chapter_end].strip()
+
+            articles = []
+            article_matches = list(ARTICLE_PATTERN.finditer(chapter_content))
+
+            if not article_matches:
+                articles.append({"title": "", "content": chapter_content, "numbers": []})
+            else:
+                for j, art_match in enumerate(article_matches):
+                    art_start = art_match.start()
+                    art_title = art_match.group().strip()
+                    art_match_num = re.match(r"第([一二三四五六七八九十百千\d]+)条", art_title)
+                    art_num = art_match_num.group(1) if art_match_num else str(j + 1)
+                    art_end = article_matches[j + 1].start() if j + 1 < len(article_matches) else len(chapter_content)
+                    art_content = chapter_content[art_start:art_end].strip()
+                    articles.append({"title": art_title, "content": art_content, "numbers": [art_num]})
+
+            for article in articles:
+                art_content = article["content"]
+                art_numbers = article["numbers"]
+
+                if len(art_content) > 2000:
+                    sentences = re.split(r"([。；！？\n])", art_content)
+                    temp = ""
+                    sub_idx = 0
+                    for sent in sentences:
+                        if num_tokens_from_string(temp + sent) > 1500 and temp:
+                            chunks.append({
+                                "content": temp,
+                                "type": "hybrid_article_split",
+                                "metadata": {
+                                    "doc_title": doc_title,
+                                    "chapter": chapter_title,
+                                    "article": article["title"],
+                                    "articles": art_numbers,
+                                    "is_split": True,
+                                    "sub_index": sub_idx,
+                                }
+                            })
+                            sub_idx += 1
+                            temp = sent
+                        else:
+                            temp += sent
+                    if temp:
+                        chunks.append({
+                            "content": temp,
+                            "type": "hybrid_article_split",
+                            "metadata": {
+                                "doc_title": doc_title,
+                                "chapter": chapter_title,
+                                "article": article["title"],
+                                "articles": art_numbers,
+                                "is_split": True,
+                                "sub_index": sub_idx,
+                            }
+                        })
+                else:
+                    chunks.append({
+                        "content": art_content,
+                        "type": "hybrid_article",
+                        "metadata": {
+                            "doc_title": doc_title,
+                            "chapter": chapter_title,
+                            "article": article["title"],
+                            "articles": art_numbers,
+                            "char_count": len(art_content),
+                        }
+                    })
+
+        chunks = self._merge_short_hybrid_chunks(chunks)
+        return chunks
+
+    def _merge_short_hybrid_chunks(self, chunks: List[Dict]) -> List[Dict]:
+        """合并短条款"""
+        if not chunks:
+            return []
+
+        merged = []
+        current = chunks[0].copy()
+
+        for i in range(1, len(chunks)):
+            chunk = chunks[i]
+
+            current_chapter = current.get("metadata", {}).get("chapter", "")
+            chunk_chapter = chunk.get("metadata", {}).get("chapter", "")
+            same_chapter = current_chapter == chunk_chapter
+            both_short = len(current["content"]) < 300 and len(chunk["content"]) < 300
+
+            if same_chapter and both_short:
+                current["content"] += "\n\n" + chunk["content"]
+                current["metadata"]["articles"] = (
+                    current.get("metadata", {}).get("articles", []) +
+                    chunk.get("metadata", {}).get("articles", [])
+                )
+            else:
+                merged.append(current)
+                current = chunk.copy()
+
+        if current:
+            merged.append(current)
+
+        return merged
 
 
 class Chunker(RAGFlowChunker):

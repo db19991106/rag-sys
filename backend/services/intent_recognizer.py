@@ -289,7 +289,10 @@ class IntentRecognizer:
 
             # 获取LLM客户端并生成
             llm_client = rag_generator._get_llm_client(llm_config)
-            response = llm_client.generate(prompt)
+            response_data = llm_client.generate(prompt)
+            
+            # 提取文本响应
+            response = response_data.get("text", "")
 
             # 尝试解析JSON
             result = json.loads(response.strip())

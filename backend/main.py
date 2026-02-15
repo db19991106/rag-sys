@@ -100,22 +100,30 @@ async def lifespan(app: FastAPI):
         "vector_db", "initialized", {"type": settings.vector_db_type, "status": "ready"}
     )
 
-    # 自动加载默认嵌入模型（BAAI/bge-base-zh-v1.5）
+    # 自动加载默认嵌入模型（使用配置文件中的设置）
     from models import EmbeddingConfig, EmbeddingModelType
     from services.embedding import embedding_service
 
     state_logger.log_system_state(
-        "embedding", "loading", {"model": "BAAI/bge-base-zh-v1.5", "device": "cuda"}
+        "embedding", "loading", {"model": settings.embedding_model_name, "device": settings.embedding_device}
     )
 
     try:
+        # 根据模型名称自动选择模型类型
+        if "Qwen3" in settings.embedding_model_name:
+            model_type = EmbeddingModelType.SENTENCE_TRANSFORMERS
+        elif "bge" in settings.embedding_model_name.lower():
+            model_type = EmbeddingModelType.BGE
+        else:
+            model_type = EmbeddingModelType.SENTENCE_TRANSFORMERS
+        
         embedding_config = EmbeddingConfig(
-            model_type=EmbeddingModelType.BGE,
-            model_name="BAAI/bge-base-zh-v1.5",
-            batch_size=32,
-            device="cuda",
+            model_type=model_type,
+            model_name=settings.embedding_model_name,
+            batch_size=settings.embedding_batch_size,
+            device=settings.embedding_device,
         )
-        logger.info("正在加载默认嵌入模型: BAAI/bge-base-zh-v1.5")
+        logger.info(f"正在加载默认嵌入模型: {settings.embedding_model_name}")
         embedding_response = embedding_service.load_model(embedding_config)
         if embedding_response.status == "success":
             logger.info(

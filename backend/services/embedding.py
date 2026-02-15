@@ -35,41 +35,32 @@ class SentenceTransformerModel(EmbeddingModel):
         try:
             # 禁用 CodeCarbonCallback 以避免版本兼容性问题
             import os
+            from pathlib import Path
             os.environ['ACCELERATE_DISABLE_CODE_CARBON'] = '1'
             
             from sentence_transformers import SentenceTransformer
             
-            # 尝试从本地加载，如果失败则从huggingface下载
-            cache_dir = settings.upload_dir.replace('/data/docs', '/data/models')
-            cache_path = Path(cache_dir) / model_name.replace('/', '--')
+            # 处理模型路径
+            model_path = Path(model_name).resolve()
             
-            # 查找本地模型文件
-            local_model_path = None
-            if cache_path.exists():
-                import os
-                for root, dirs, files in os.walk(cache_path):
-                    has_model = 'pytorch_model.bin' in files or any(f.endswith('.safetensors') for f in files)
-                    has_config = 'config.json' in files
-                    has_st_config = 'sentence_bert_config.json' in files
-                    
-                    if has_model and has_config and has_st_config:
-                        local_model_path = root
-                        logger.info(f"找到本地模型目录: {local_model_path}")
-                        break
-            
-            if local_model_path:
-                logger.info(f"从本地缓存加载模型: {local_model_path}")
-                self.model = SentenceTransformer(local_model_path, device=device)
+            if model_path.exists():
+                # 本地路径存在，使用绝对路径字符串加载
+                load_path = str(model_path)
+                logger.info(f"从本地路径加载模型: {load_path}")
             else:
-                logger.info(f"从huggingface下载模型: {model_name}")
-                cache_path.mkdir(parents=True, exist_ok=True)
-                self.model = SentenceTransformer(model_name, device=device, cache_folder=str(cache_path))
-                
+                # 可能是 Hugging Face Hub 的模型名称
+                load_path = model_name
+                logger.info(f"从 Hugging Face Hub 加载模型: {load_path}")
+            
+            # 使用 trust_remote_code=True 以支持更多模型
+            self.model = SentenceTransformer(load_path, device=device, trust_remote_code=True)
             self.dimension = self.model.get_sentence_embedding_dimension()
-            logger.info(f"加载 SentenceTransformer 模型: {model_name} (维度: {self.dimension})")
+            logger.info(f"成功加载模型: {model_name} (维度: {self.dimension})")
+            
         except Exception as e:
-            logger.error(f"加载 SentenceTransformer 模型失败: {str(e)}")
+            logger.error(f"加载 SentenceTransformer 模型失败: {e}")
             raise
+
 
     def encode(self, texts: List[str], batch_size: int = 32) -> np.ndarray:
         """编码文本为向量"""
@@ -83,75 +74,56 @@ class SentenceTransformerModel(EmbeddingModel):
 
 
 class BGEModel(EmbeddingModel):
-    """BGE 模型 - 使用 SentenceTransformer 加载"""
+    """BGE 模型 - 使用 Transformers 库直接加载"""
 
     def __init__(self, model_name: str, device: str = "cpu"):
         super().__init__(model_name, device)
         try:
             import os
+            from pathlib import Path
+            import torch
+            from transformers import AutoModel, AutoTokenizer
             
             # 禁用 CodeCarbonCallback 以避免版本兼容性问题
             os.environ['ACCELERATE_DISABLE_CODE_CARBON'] = '1'
             
-            from sentence_transformers import SentenceTransformer
+            # 处理模型路径
+            model_path = Path(model_name).resolve()
             
-            # 检查本地缓存
-            cache_dir = settings.upload_dir.replace('/data/docs', '/data/models')
-            cache_path = Path(cache_dir) / model_name.replace('/', '--')
+            if model_path.exists():
+                # 本地路径存在，使用绝对路径字符串加载
+                load_path = str(model_path)
+                logger.info(f"从本地路径加载 BGE 模型: {load_path}")
+                local_files_only = True
+            else:
+                # 可能是 Hugging Face Hub 的模型名称
+                load_path = model_name
+                logger.info(f"从 Hugging Face Hub 加载 BGE 模型: {load_path}")
+                local_files_only = False
             
-            # 检查本地缓存 - 递归查找模型目录
-            local_model_path = None
-            if cache_path.exists():
-                # 查找包含模型必要文件的目录
-                for root, dirs, files in os.walk(cache_path):
-                    has_model = 'pytorch_model.bin' in files or any(f.endswith('.safetensors') for f in files)
-                    has_config = 'config.json' in files
-                    
-                    if has_model and has_config:
-                        local_model_path = root
-                        logger.info(f"找到本地模型目录: {local_model_path}")
-                        break
+            # 使用 transformers 直接加载
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                load_path, 
+                local_files_only=local_files_only,
+                trust_remote_code=True
+            )
+            self.model = AutoModel.from_pretrained(
+                load_path, 
+                local_files_only=local_files_only,
+                trust_remote_code=True
+            )
+            self.model.to(device)
+            self.model.eval()
             
-            # 设置环境变量以抑制日志和进度条
-            os.environ['HF_HUB_ENABLE_HF_TRANSFER'] = '0'
-            os.environ['TRANSFORMERS_VERBOSITY'] = 'error'
-            os.environ['TQDM_DISABLE'] = '1'
-            os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '1'
-            os.environ['TRANSFORMERS_SILENCE_DEPRECATION_WARNINGS'] = '1'
-            os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+            # 获取维度 - BGE 模型通常是 1024 维
+            # 通过一次前向传播获取实际维度
+            with torch.no_grad():
+                test_input = self.tokenizer("test", return_tensors="pt", padding=True, truncation=True)
+                test_input = {k: v.to(device) for k, v in test_input.items()}
+                test_output = self.model(**test_input)
+                # 使用 [CLS] token 的表示
+                self.dimension = test_output.last_hidden_state[:, 0].shape[-1]
             
-            # 临时重定向stdout和stderr以抑制进度条
-            import sys
-            from io import StringIO
-            
-            # 保存原始的stdout和stderr
-            original_stdout = sys.stdout
-            original_stderr = sys.stderr
-            
-            try:
-                # 重定向到空缓冲区
-                sys.stdout = StringIO()
-                sys.stderr = StringIO()
-                
-                if local_model_path:
-                    # 使用本地路径加载
-                    logger.info(f"从本地路径加载 BGE 模型: {local_model_path}")
-                    self.model = SentenceTransformer(local_model_path, device=device, use_auth_token=False)
-                else:
-                    logger.info(f"从HuggingFace下载 BGE 模型: {model_name}")
-                    cache_path.mkdir(parents=True, exist_ok=True)
-                    
-                    # 使用sentence-transformers下载模型，指定缓存目录
-                    os.environ['SENTENCE_TRANSFORMERS_HOME'] = str(cache_path)
-                    
-                    self.model = SentenceTransformer(model_name, device=device, cache_folder=str(cache_path), use_auth_token=False)
-            finally:
-                # 恢复原始的stdout和stderr
-                sys.stdout = original_stdout
-                sys.stderr = original_stderr
-                
-            # 自动获取维度
-            self.dimension = self.model.get_sentence_embedding_dimension()
             logger.info(f"成功加载 BGE 模型: {model_name} (维度: {self.dimension})")
             
         except Exception as e:
@@ -161,14 +133,36 @@ class BGEModel(EmbeddingModel):
 
     def encode(self, texts: List[str], batch_size: int = 32) -> np.ndarray:
         """编码文本为向量"""
-        embeddings = self.model.encode(
-            texts,
-            batch_size=batch_size,
-            show_progress_bar=False,
-            convert_to_numpy=True,
-            normalize_embeddings=True  # BGE模型建议归一化
-        )
-        return embeddings
+        import torch
+        
+        all_embeddings = []
+        
+        with torch.no_grad():
+            for i in range(0, len(texts), batch_size):
+                batch_texts = texts[i:i + batch_size]
+                
+                # 编码文本
+                inputs = self.tokenizer(
+                    batch_texts, 
+                    padding=True, 
+                    truncation=True, 
+                    return_tensors="pt",
+                    max_length=512
+                )
+                inputs = {k: v.to(self.device) for k, v in inputs.items()}
+                
+                # 获取模型输出
+                outputs = self.model(**inputs)
+                
+                # 使用 [CLS] token 的表示作为句子嵌入
+                embeddings = outputs.last_hidden_state[:, 0]
+                
+                # 归一化 (BGE模型建议)
+                embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
+                
+                all_embeddings.append(embeddings.cpu().numpy())
+        
+        return np.vstack(all_embeddings)
 
 
 class OpenAIEmbeddingModel(EmbeddingModel):
