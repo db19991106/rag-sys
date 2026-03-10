@@ -20,6 +20,7 @@ from api import (
     vector_db,
     retrieval,
     rag,
+    rag_stream,  # 流式RAG路由
     cleaning,
     sync,
     summary,
@@ -27,6 +28,34 @@ from api import (
 )
 from api import settings as settings_api
 from api import enhanced_rag
+
+
+# 最顶层 OPTIONS 请求处理中间件 - 确保 CORS 预检请求能被正确处理
+class OptionsMiddleware:
+    """处理 OPTIONS 请求的中间件 - 必须在最顶层添加"""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http" and scope["method"] == "OPTIONS":
+            # 直接返回 200 OK，允许 CORS 预检请求通过
+            await send({
+                "type": "http.response.start",
+                "status": 200,
+                "headers": [
+                    [b"access-control-allow-origin", b"*"],
+                    [b"access-control-allow-methods", b"GET, POST, PUT, DELETE, OPTIONS"],
+                    [b"access-control-allow-headers", b"Content-Type, Authorization, X-CSRF-Token, X-Request-ID"],
+                    [b"access-control-max-age", b"600"],
+                ],
+            })
+            await send({
+                "type": "http.response.body",
+                "body": b"",
+            })
+            return
+        await self.app(scope, receive, send)
 
 
 # CSRF保护中间件
@@ -90,8 +119,17 @@ async def lifespan(app: FastAPI):
         {"type": settings.vector_db_type, "dimension": settings.faiss_dimension},
     )
 
+    # 根据 settings.vector_db_type 动态选择向量数据库类型
+    db_type_map = {
+        "faiss": VectorDBType.FAISS,
+        "milvus": VectorDBType.MILVUS,
+        "milvus_lite": VectorDBType.MILVUS_LITE,
+        "qdrant": VectorDBType.QDRANT,
+    }
+    db_type = db_type_map.get(settings.vector_db_type, VectorDBType.MILVUS_LITE)
+
     default_config = VectorDBConfig(
-        db_type=VectorDBType.FAISS,
+        db_type=db_type,
         dimension=settings.faiss_dimension,
         index_type=settings.faiss_index_type,
     )
@@ -155,12 +193,176 @@ async def lifespan(app: FastAPI):
             "error",
         )
 
+    # 自动加载 Reranker（如果配置启用）
+    if settings.reranker_enabled:
+        from services.reranker import reranker_manager
+        
+        state_logger.log_system_state(
+            "reranker",
+            "loading",
+            {"type": settings.reranker_type, "model": settings.reranker_model},
+        )
+        
+        try:
+            reranker_manager.initialize(
+                reranker_type=settings.reranker_type,
+                model_name=settings.reranker_model,
+                device=settings.reranker_device,
+                top_k=settings.reranker_top_k,
+                threshold=settings.reranker_threshold,
+            )
+            logger.info(
+                f"Reranker 加载成功: type={settings.reranker_type}, model={settings.reranker_model}"
+            )
+            state_logger.log_system_state(
+                "reranker",
+                "loaded",
+                {
+                    "type": settings.reranker_type,
+                    "model": settings.reranker_model,
+                    "status": "ready",
+                },
+            )
+        except Exception as e:
+            logger.warning(f"Reranker 加载失败: {str(e)}，将使用无重排序模式")
+            state_logger.log_system_state(
+                "reranker",
+                "failed",
+                {"error": str(e)},
+                "warning",
+            )
+    else:
+        logger.info("Reranker 未启用，跳过加载")
+
+    # 初始化意图识别器（LLM 兜底）
+    try:
+        from api.rag import intent_recognizer
+        from models import GenerationConfig
+        
+        intent_config = GenerationConfig(
+            llm_provider=settings.llm_provider,
+            llm_model=settings.llm_model,
+            temperature=0.1,
+            max_tokens=100,
+            top_p=1.0,
+            frequency_penalty=0.0,
+            presence_penalty=0.0
+        )
+        intent_recognizer.initialize_with_config(intent_config)
+        logger.info(f"意图识别器 LLM 兜底已初始化: provider={settings.llm_provider}")
+        state_logger.log_system_state(
+            "intent_recognizer",
+            "initialized",
+            {"provider": settings.llm_provider, "model": settings.llm_model},
+        )
+    except Exception as e:
+        logger.warning(f"意图识别器初始化失败: {str(e)}，将仅使用规则匹配")
+        state_logger.log_system_state(
+            "intent_recognizer",
+            "failed",
+            {"error": str(e)},
+            "warning",
+        )
+
     state_logger.log_system_state(
         "application",
         "running",
         {"host": settings.host, "port": settings.port, "status": "ready"},
     )
 
+    # 后台任务：BM25 预热和文档同步（不阻塞启动）
+    async def background_init_tasks():
+        """后台初始化任务：BM25 预热和文档同步"""
+        import asyncio
+        
+        # 1. BM25 预热（优先执行，快速，约 2-3 秒）
+        try:
+            from services.retriever import retriever
+            logger.info("[后台任务] 开始预热 BM25 索引...")
+            await asyncio.to_thread(retriever.warmup_bm25_index)
+            state_logger.log_system_state(
+                "bm25_index",
+                "warmed_up",
+                {"status": "ready"},
+            )
+        except Exception as e:
+            logger.warning(f"[后台任务] BM25 索引预热失败: {str(e)}，首次查询可能较慢")
+            state_logger.log_system_state(
+                "bm25_index",
+                "warmup_failed",
+                {"error": str(e)},
+                "warning",
+            )
+
+        # 2. 文档同步（稍后执行，较慢，约 3 分钟）
+        try:
+            from services.document_manager import document_manager
+            
+            # 检查 documents.json 是否为空
+            if len(document_manager.documents) == 0:
+                logger.info("[后台任务] documents.json 为空，开始从向量数据库同步元数据...")
+                
+                # 从 Milvus 获取所有元数据（在线程池中执行，避免阻塞）
+                all_metadata = await asyncio.to_thread(vector_db_manager.get_all_metadata)
+                
+                if all_metadata:
+                    logger.info(f"[后台任务] 从向量数据库获取到 {len(all_metadata)} 条元数据")
+                    
+                    # 提取唯一的文档信息
+                    doc_set = {}  # doc_id -> {filename, chunk_count}
+                    skipped_count = 0
+                    for meta in all_metadata:
+                        # 兼容多种字段名：document_id (新) / doc_id (旧) / source (备选)
+                        doc_id = meta.get("document_id", meta.get("doc_id", ""))
+                        # 兼容多种字段名：document_name (新) / filename (旧) / source (备选)
+                        filename = meta.get("document_name", meta.get("filename", meta.get("source", "unknown")))
+                        
+                        if not doc_id:
+                            skipped_count += 1
+                            continue
+                            
+                        if doc_id not in doc_set:
+                            doc_set[doc_id] = {
+                                "filename": filename,
+                                "chunk_count": 1,
+                            }
+                        else:
+                            doc_set[doc_id]["chunk_count"] += 1
+                    
+                    if skipped_count > 0:
+                        logger.warning(f"[后台任务] 跳过 {skipped_count} 条无 document_id 的元数据")
+                    
+                    logger.info(f"[后台任务] 识别到 {len(doc_set)} 个唯一文档")
+                    
+                    # 同步到 document_manager
+                    for doc_id, info in doc_set.items():
+                        if doc_id not in document_manager.documents:
+                            from models import DocumentInfo, DocumentStatus
+                            document_manager.documents[doc_id] = DocumentInfo(
+                                id=doc_id,
+                                name=info["filename"],
+                                size=0,
+                                status=DocumentStatus.COMPLETED,
+                                chunk_count=info["chunk_count"],
+                                upload_time=datetime.now(),
+                            )
+                    
+                    # 保存到 documents.json
+                    document_manager._save_documents()
+                    logger.info(f"[后台任务] 从向量数据库同步了 {len(doc_set)} 个文档元数据")
+                    state_logger.log_system_state(
+                        "document_sync",
+                        "completed",
+                        {"synced_documents": len(doc_set)},
+                    )
+        except Exception as e:
+            logger.warning(f"[后台任务] 文档元数据同步失败: {str(e)}")
+    
+    # 启动后台任务（不阻塞）
+    import asyncio
+    asyncio.create_task(background_init_tasks())
+    
+    logger.info("服务启动完成，后台任务正在执行...")
     yield
 
     # 关闭时
@@ -236,6 +438,15 @@ app.add_middleware(
         "Content-Type",
         "Authorization",
         "X-CSRF-Token",
+        "X-Request-ID",
+        "X-Trace-ID",
+        "X-Client-Version",
+        "Accept",
+        "Accept-Encoding",
+        "Accept-Language",
+        "Origin",
+        "Referer",
+        "User-Agent",
     ],  # 明确指定允许的headers
     max_age=600,  # 预检请求缓存时间（秒）
 )
@@ -257,6 +468,9 @@ from middleware.gateway import APIGatewayMiddleware, RequestLoggingMiddleware
 
 app.add_middleware(APIGatewayMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
+
+# 添加 OPTIONS 请求处理中间件（最后添加，确保最先处理预检请求）
+app.add_middleware(OptionsMiddleware)
 
 # 添加全局异常处理器
 from utils.error_handler import app_exception_handler, AppError
@@ -287,6 +501,9 @@ app.include_router(retrieval.router)
 
 # RAG生成：限制中等（计算密集）
 app.include_router(rag.router)
+
+# RAG流式生成：支持SSE流式输出
+app.include_router(rag_stream.router)
 
 # 清理操作：限制宽松
 app.include_router(cleaning.router)
@@ -377,8 +594,16 @@ if __name__ == "__main__":
 
     # 增加默认值容错，避免 settings 缺少字段报错
     host = settings.host if hasattr(settings, "host") else "0.0.0.0"
-    port = settings.port if hasattr(settings, "port") else 8000
+    port = settings.port if hasattr(settings, "port") else 9000
     debug = settings.debug if hasattr(settings, "debug") else False
     log_level = settings.log_level.lower() if hasattr(settings, "log_level") else "info"
 
-    uvicorn.run("main:app", host=host, port=port, reload=debug, log_level=log_level)
+    # 禁用 uvicorn 默认访问日志，使用自定义中间件处理（已过滤高频请求）
+    uvicorn.run(
+        "main:app",
+        host=host,
+        port=port,
+        reload=debug,
+        log_level=log_level,
+        access_log=False
+    )

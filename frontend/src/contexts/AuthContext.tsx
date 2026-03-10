@@ -1,13 +1,16 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { UserInfo } from '../types';
 
 interface AuthContextType {
   user: UserInfo | null;
+  token: string | null;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
   getPermissions: () => string[];
+  isLoading: boolean;
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,73 +43,113 @@ const rolePermissions: Record<string, string[]> = {
   ]
 };
 
+// API 基础 URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserInfo | null>(() => {
-    const saved = localStorage.getItem('user');
+    const saved = sessionStorage.getItem('user');
     return saved ? JSON.parse(saved) : null;
   });
+  
+  const [token, setToken] = useState<string | null>(() => {
+    return sessionStorage.getItem('token');
+  });
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
-    // 模拟登录验证
-    if (username === 'admin' && password === '123456') {
+  // 登录函数 - 调用后端 API
+  const login = useCallback(async (username: string, password: string): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: '登录失败' }));
+        throw new Error(errorData.detail || '用户名或密码错误');
+      }
+
+      const data = await response.json();
+      const { access_token } = data;
+
+      // 存储 token
+      sessionStorage.setItem('token', access_token);
+      setToken(access_token);
+
+      // 根据用户名确定角色和权限
+      let permissions: string[] = rolePermissions.user;
+      let email = `${username}@example.com`;
+
+      if (username === 'admin') {
+        permissions = rolePermissions.admin;
+        email = 'admin@example.com';
+      } else if (username === 'editor') {
+        permissions = rolePermissions.editor;
+        email = 'editor@example.com';
+      } else if (username === 'viewer') {
+        permissions = rolePermissions.viewer;
+        email = 'viewer@example.com';
+      }
+
       const userInfo: UserInfo = {
-        id: '1',
+        id: username === 'admin' ? '1' : username === 'editor' ? '2' : '3',
         username,
-        email: 'admin@example.com',
-        permissions: rolePermissions.admin,
+        email,
+        permissions,
         isAuthenticated: true,
         lastLogin: new Date().toISOString(),
         created_at: new Date().toISOString()
       };
+
       setUser(userInfo);
-      localStorage.setItem('user', JSON.stringify(userInfo));
+      sessionStorage.setItem('user', JSON.stringify(userInfo));
+      
       return true;
-    } else if (username === 'editor' && password === '123456') {
-      const userInfo: UserInfo = {
-        id: '2',
-        username,
-        email: 'editor@example.com',
-        permissions: rolePermissions.editor,
-        isAuthenticated: true,
-        lastLogin: new Date().toISOString(),
-        created_at: new Date().toISOString()
-      };
-      setUser(userInfo);
-      localStorage.setItem('user', JSON.stringify(userInfo));
-      return true;
-    } else if (username === 'viewer' && password === '123456') {
-      const userInfo: UserInfo = {
-        id: '3',
-        username,
-        email: 'viewer@example.com',
-        permissions: rolePermissions.viewer,
-        isAuthenticated: true,
-        lastLogin: new Date().toISOString(),
-        created_at: new Date().toISOString()
-      };
-      setUser(userInfo);
-      localStorage.setItem('user', JSON.stringify(userInfo));
-      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '登录失败，请检查网络连接';
+      setError(errorMessage);
+      console.error('登录失败:', err);
+      return false;
+    } finally {
+      setIsLoading(false);
     }
-    return false;
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem('user');
-  };
+    setToken(null);
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+  }, []);
 
-  const hasPermission = (permission: string): boolean => {
+  const hasPermission = useCallback((permission: string): boolean => {
     if (!user) return false;
     return user.permissions.includes(permission);
-  };
+  }, [user]);
 
-  const getPermissions = (): string[] => {
+  const getPermissions = useCallback((): string[] => {
     return user?.permissions || [];
-  };
+  }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, hasPermission, getPermissions }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token,
+      login, 
+      logout, 
+      hasPermission, 
+      getPermissions,
+      isLoading,
+      error 
+    }}>
       {children}
     </AuthContext.Provider>
   );
@@ -118,4 +161,13 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+};
+
+// 获取 Authorization header 的辅助函数
+export const getAuthHeaders = (): Record<string, string> => {
+  const token = sessionStorage.getItem('token');
+  if (token) {
+    return { Authorization: `Bearer ${token}` };
+  }
+  return {};
 };

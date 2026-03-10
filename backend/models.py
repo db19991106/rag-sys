@@ -62,6 +62,8 @@ class ChunkType(str, Enum):
     HR = "hr"  # HR文档切分
     PROJECT = "project"  # 项目管理切分
     HYBRID = "hybrid"  # 混合切分-标题切分
+    LAYERED = "layered"  # 分层智能切分（三层递进式）
+    LAYERED_LLM = "layered_llm"  # 分层LLM切分（正则结构切分 + Embedding语义合并）
 
     # 自定义
     CUSTOM = "custom"  # 自定义规则切分
@@ -85,7 +87,7 @@ class ChunkConfig(BaseModel):
 
     # 重叠配置
     overlapped_percent: float = Field(
-        default=0.0, ge=0.0, le=0.5, description="重叠百分比(0-0.5)"
+        default=0.15, ge=0.0, le=0.5, description="重叠百分比(0-0.5)"
     )
 
     # 上下文配置
@@ -127,6 +129,39 @@ class ChunkResponse(BaseModel):
     auto_embedded: bool = False  # 是否自动向量化成功
 
 
+class LayeredLLMConfig(BaseModel):
+    """分层LLM切分配置
+
+    用于 ChunkType.LAYERED_LLM 切分策略
+    核心流程: 正则结构切分 → 内容保护 → 句子级语义切分(Embedding相似度合并)
+    """
+    # 结构切分参数
+    max_chunk_tokens: int = Field(
+        default=768, ge=128, le=2048, description="最大chunk token数"
+    )
+    min_chunk_tokens: int = Field(
+        default=80, ge=10, le=200, description="最小chunk token数"
+    )
+
+    # 语义合并参数
+    similarity_threshold: float = Field(
+        default=0.65, ge=0.5, le=0.95, description="语义相似度阈值(0.5-0.95)，相邻句子相似度>=此值时尝试合并（注意：只在同一章节内进行）"
+    )
+    min_sentences_to_merge: int = Field(
+        default=2, ge=2, le=10, description="最小合并句子数"
+    )
+    
+    # 特殊内容保护
+    preserve_table: bool = Field(default=True, description="保护表格完整性")
+    preserve_code: bool = Field(default=True, description="保护代码块完整性")
+    preserve_flow: bool = Field(default=True, description="保护流程完整性")
+    
+    # 性能优化
+    batch_embedding: bool = Field(default=True, description="批量计算embedding")
+    embedding_batch_size: int = Field(default=32, ge=8, le=128, description="embedding批大小")
+    enable_cache: bool = Field(default=True, description="启用embedding缓存")
+
+
 # ========== 向量嵌入相关 ==========
 class EmbeddingModelType(str, Enum):
     SENTENCE_TRANSFORMERS = "sentence-transformers"
@@ -153,6 +188,7 @@ class EmbeddingResponse(BaseModel):
 class VectorDBType(str, Enum):
     FAISS = "faiss"
     MILVUS = "milvus"
+    MILVUS_LITE = "milvus_lite"
     QDRANT = "qdrant"
 
 
@@ -171,6 +207,7 @@ class VectorStatus(BaseModel):
     total_vectors: int
     dimension: int
     status: str
+    db_size: int = 0  # 数据库文件大小（字节）
 
 
 # ========== 检索相关 ==========
@@ -181,7 +218,7 @@ class SimilarityAlgorithm(str, Enum):
 
 
 class RetrievalConfig(BaseModel):
-    top_k: int = Field(default=5, ge=1, le=20, description="返回结果数量")
+    top_k: int = Field(default=20, ge=1, le=100, description="返回结果数量")
     similarity_threshold: float = Field(
         default=0.2,
         ge=0,
@@ -189,13 +226,23 @@ class RetrievalConfig(BaseModel):
         description="相似度阈值（降低以获取更多结果，财务制度类建议0.2-0.3）",
     )
     algorithm: SimilarityAlgorithm = Field(default=SimilarityAlgorithm.COSINE)
-    enable_rerank: bool = Field(default=False, description="是否启用重排序")
+    enable_rerank: bool = Field(default=True, description="是否启用重排序")
     reranker_type: str = Field(
-        default="none", description="重排序器类型: none/bge/cross-encoder"
+        default="bge", description="重排序器类型: none/bge/cross-encoder"
     )
     reranker_model: str = Field(default="", description="重排序模型名称")
-    reranker_top_k: int = Field(default=10, description="重排序返回top_k")
+    reranker_top_k: int = Field(default=5, description="重排序返回top_k")
     reranker_threshold: float = Field(default=0.0, description="重排序分数阈值")
+    
+    # RRF 融合参数
+    rrf_k: int = Field(default=60, ge=1, description="RRF 平滑参数，通常取 60")
+    vector_weight: float = Field(
+        default=0.5, ge=0.0, le=1.0, description="向量检索权重（与 bm25_weight 之和应为 1）"
+    )
+    bm25_weight: float = Field(
+        default=0.5, ge=0.0, le=1.0, description="BM25 检索权重（与 vector_weight 之和应为 1）"
+    )
+    enable_query_expansion: bool = Field(default=True, description="是否启用查询扩展")
 
 
 class RetrievalResult(BaseModel):
@@ -217,13 +264,14 @@ class RetrievalResponse(BaseModel):
 
 # ========== RAG 生成相关 ==========
 class GenerationConfig(BaseModel):
-    llm_provider: str = "openai"
-    llm_model: str = "gpt-3.5-turbo"
+    # 默认值将从config.py的settings中获取
+    llm_provider: str = "vllm"  # 默认使用vLLM加速
+    llm_model: str = "Qwen2.5-7B-Instruct"
     llm_api_key: Optional[str] = None
     llm_base_url: Optional[str] = None
-    temperature: float = 0.7
+    temperature: float = 0.1  # 降低随机性，使输出更确定性
     max_tokens: int = 2000
-    top_p: float = 0.9
+    top_p: float = 0.7  # 降低采样范围，减少随机性
     frequency_penalty: float = 0.0
     presence_penalty: float = 0.0
 
@@ -237,14 +285,14 @@ class RAGRequest(BaseModel):
 
 # ========== 意图识别相关 ==========
 class IntentType(str, Enum):
-    QUESTION = "question"  # 问题咨询
-    SEARCH = "search"  # 信息搜索
-    SUMMARY = "summary"  # 内容总结
-    COMPARISON = "comparison"  # 对比分析
-    PROCEDURE = "procedure"  # 操作流程
-    DEFINITION = "definition"  # 定义说明
-    GREETING = "greeting"  # 问候
-    OTHER = "other"  # 其他
+    """意图类型枚举 - 基于业务领域分类"""
+    HR = "hr"  # 人力资源：招聘、入职、离职、绩效、薪酬、考勤
+    FINANCE = "finance"  # 财务管理：报销、预算、费用、财务制度
+    ADMIN = "admin"  # 行政制度：办公管理、资产管理、行政流程
+    COMPLIANCE = "compliance"  # 合规安全：合规、安全、保密、风控
+    PROCESS = "process"  # 流程管理：审批流程、业务流程、操作规范
+    TECH_REPORT = "tech_report"  # 技术报告：技术文档、系统架构、开发指南
+    CASUAL_CHAT = "casual_chat"  # 闲聊：非业务问题，使用LLM回答
 
 
 class IntentResult(BaseModel):

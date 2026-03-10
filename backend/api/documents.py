@@ -132,6 +132,160 @@ async def list_documents():
         raise HTTPException(status_code=500, detail=f"获取文档列表失败: {str(e)}")
 
 
+def _build_file_tree(dir_path: "Path", base_path: "Path") -> List[dict]:
+    """
+    递归构建文件树结构
+
+    Args:
+        dir_path: 当前目录路径
+        base_path: 基础路径（用于计算相对路径）
+
+    Returns:
+        文件树列表
+    """
+    items = []
+    for item in sorted(dir_path.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower())):
+        # 跳过隐藏文件和文件夹（以 . 开头）
+        if item.name.startswith('.'):
+            continue
+        relative_path = item.relative_to(base_path)
+
+        if item.is_dir():
+            # 文件夹：递归获取子项
+            children = _build_file_tree(item, base_path)
+            items.append({
+                "type": "folder",
+                "name": item.name,
+                "path": str(relative_path),
+                "children": children,
+            })
+        else:
+            # 文件：获取文件信息
+            file_stat = item.stat()
+            size_kb = file_stat.st_size / 1024
+            if size_kb >= 1024:
+                size_str = f"{size_kb / 1024:.1f} MB"
+            else:
+                size_str = f"{size_kb:.1f} KB"
+
+            items.append({
+                "type": "file",
+                "id": str(relative_path),  # 直接使用完整路径作为 ID
+                "name": item.name,
+                "size": size_str,
+                "path": str(relative_path),
+                "extension": item.suffix.lower(),
+            })
+    return items
+
+
+@router.get("/local-docs", response_model=List[dict])
+async def list_local_docs():
+    """
+    获取本地 data/docs 目录中的所有文档列表（树形结构）
+
+    返回包含文件夹和文件的树形结构，支持递归遍历子文件夹。
+    """
+    try:
+        from pathlib import Path
+
+        docs_dir = Path(__file__).parent.parent / "data" / "docs"
+
+        if not docs_dir.exists():
+            return []
+
+        tree = _build_file_tree(docs_dir, docs_dir)
+        return tree
+    except Exception as e:
+        logger.error(f"获取本地文档列表失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取本地文档列表失败: {str(e)}")
+
+
+@router.get("/local-docs/content")
+async def get_local_doc_content_by_query(path: str):
+    """
+    通过查询参数获取本地文档内容
+
+    Args:
+        path: 相对于 data/docs 的文件路径（URL 编码）
+    """
+    return await _get_local_doc_content_internal(path)
+
+
+@router.get("/local-docs/{doc_id:path}/content")
+async def get_local_doc_content(doc_id: str):
+    """
+    获取本地 data/docs 目录中指定文档的内容
+
+    Args:
+        doc_id: 相对于 data/docs 的文件路径（支持斜杠，自动 URL 解码）
+    """
+    return await _get_local_doc_content_internal(doc_id)
+
+
+async def _get_local_doc_content_internal(doc_path: str):
+    """内部函数：获取本地文档内容"""
+    try:
+        from pathlib import Path
+        from urllib.parse import unquote
+
+        docs_dir = Path(__file__).parent.parent / "data" / "docs"
+
+        # URL 解码路径
+        doc_path = unquote(doc_path)
+
+        # 直接使用路径查找文件
+        doc_file = docs_dir / doc_path
+
+        # 安全检查：确保路径在 docs_dir 内
+        try:
+            doc_file.resolve().relative_to(docs_dir.resolve())
+        except ValueError:
+            raise HTTPException(status_code=403, detail="访问路径不在允许范围内")
+
+        if not doc_file.exists() or not doc_file.is_file():
+            raise HTTPException(status_code=404, detail=f"本地文档不存在: {doc_path}")
+
+        # 根据文件类型读取内容
+        ext = doc_file.suffix.lower()
+        if ext in [".md", ".txt", ".html"]:
+            with open(doc_file, "r", encoding="utf-8") as f:
+                content = f.read()
+            return {"content": content, "type": "text", "extension": ext}
+        elif ext == ".pdf":
+            # PDF 文件返回文件路径，前端可以使用 PDF 预览组件
+            return {
+                "content": f"[PDF文件] {doc_file.name}",
+                "type": "pdf",
+                "path": str(doc_file.relative_to(docs_dir.parent.parent)),
+                "extension": ext
+            }
+        elif ext in [".docx", ".doc"]:
+            return {
+                "content": f"[Word文档] {doc_file.name}",
+                "type": "docx",
+                "path": str(doc_file.relative_to(docs_dir.parent.parent)),
+                "extension": ext
+            }
+        else:
+            # 其他文件类型尝试以文本读取
+            try:
+                with open(doc_file, "r", encoding="utf-8") as f:
+                    content = f.read()
+                return {"content": content, "type": "text", "extension": ext}
+            except UnicodeDecodeError:
+                return {
+                    "content": f"[二进制文件] {doc_file.name}",
+                    "type": "binary",
+                    "extension": ext
+                }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"获取本地文档内容失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取本地文档内容失败: {str(e)}")
+
+
 @router.get("/{doc_id}", response_model=DocumentInfo)
 async def get_document(doc_id: str):
     """
@@ -548,71 +702,92 @@ async def check_system_integrity():
         raise HTTPException(status_code=500, detail=f"检查系统完整性失败: {str(e)}")
 
 
-@router.get("/local-docs", response_model=List[dict])
-async def list_local_docs():
+@router.post("/rebuild-from-vectordb", response_model=ApiResponse)
+async def rebuild_documents_from_vectordb():
     """
-    获取本地 data/docs 目录中的所有文档列表
+    从向量数据库重建 documents.json
+    
+    当 documents.json 丢失或损坏时，可以从向量数据库中存储的元数据恢复文档信息。
     """
     try:
-        import os
-        from pathlib import Path
-
-        docs_dir = Path(__file__).parent.parent / "data" / "docs"
-
-        if not docs_dir.exists():
-            return []
-
-        docs = []
-        for file_path in docs_dir.iterdir():
-            if file_path.is_file() and file_path.suffix == ".md":
-                file_stat = file_path.stat()
-                docs.append(
-                    {
-                        "id": file_path.stem,
-                        "name": file_path.name,
-                        "size": f"{file_stat.st_size / 1024:.1f} KB",
-                        "path": str(
-                            file_path.relative_to(Path(__file__).parent.parent)
-                        ),
-                    }
+        from datetime import datetime
+        from models import DocumentStatus
+        
+        # 获取向量数据库中的所有元数据
+        all_metadata = vector_db_manager.get_all_metadata()
+        
+        if not all_metadata:
+            return ApiResponse(
+                success=False,
+                message="向量数据库中没有元数据，无法重建",
+                data={"rebuilt_count": 0}
+            )
+        
+        logger.info(f"[重建] 从向量数据库获取到 {len(all_metadata)} 条元数据")
+        
+        # 提取唯一的文档信息
+        doc_set = {}  # doc_id -> {filename, chunk_count}
+        skipped_count = 0
+        
+        for meta in all_metadata:
+            # 兼容多种字段名：document_id (新) / doc_id (旧) / source (备选)
+            doc_id = meta.get("document_id", meta.get("doc_id", ""))
+            # 兼容多种字段名：document_name (新) / filename (旧) / source (备选)
+            filename = meta.get("document_name", meta.get("filename", meta.get("source", "unknown")))
+            
+            if not doc_id:
+                skipped_count += 1
+                continue
+                
+            if doc_id not in doc_set:
+                doc_set[doc_id] = {
+                    "filename": filename,
+                    "chunk_count": 1,
+                }
+            else:
+                doc_set[doc_id]["chunk_count"] += 1
+        
+        if skipped_count > 0:
+            logger.warning(f"[重建] 跳过 {skipped_count} 条无 document_id 的元数据")
+        
+        logger.info(f"[重建] 识别到 {len(doc_set)} 个唯一文档")
+        
+        # 同步到 document_manager
+        added_count = 0
+        updated_count = 0
+        
+        for doc_id, info in doc_set.items():
+            if doc_id not in document_manager.documents:
+                document_manager.documents[doc_id] = DocumentInfo(
+                    id=doc_id,
+                    name=info["filename"],
+                    size=0,
+                    status=DocumentStatus.COMPLETED,
+                    chunk_count=info["chunk_count"],
+                    upload_time=datetime.now(),
                 )
-
-        # 按文件名排序
-        docs.sort(key=lambda x: x["name"])
-        return docs
+                added_count += 1
+            else:
+                # 更新现有文档的 chunk_count
+                document_manager.documents[doc_id].chunk_count = info["chunk_count"]
+                updated_count += 1
+        
+        # 保存到 documents.json
+        document_manager._save_documents()
+        
+        logger.info(f"[重建] 完成：新增 {added_count} 个文档，更新 {updated_count} 个文档")
+        
+        return ApiResponse(
+            success=True,
+            message=f"成功从向量数据库重建文档元数据",
+            data={
+                "rebuilt_count": len(doc_set),
+                "added_count": added_count,
+                "updated_count": updated_count,
+                "skipped_count": skipped_count,
+            }
+        )
+        
     except Exception as e:
-        logger.error(f"获取本地文档列表失败: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"获取本地文档列表失败: {str(e)}")
-
-
-@router.get("/local-docs/{doc_id}/content")
-async def get_local_doc_content(doc_id: str):
-    """
-    获取本地 data/docs 目录中指定文档的内容
-    """
-    try:
-        import os
-        from pathlib import Path
-
-        docs_dir = Path(__file__).parent.parent / "data" / "docs"
-
-        # 查找匹配的文档文件
-        doc_file = None
-        for file_path in docs_dir.iterdir():
-            if file_path.is_file() and file_path.stem == doc_id:
-                doc_file = file_path
-                break
-
-        if not doc_file or not doc_file.exists():
-            raise HTTPException(status_code=404, detail="文档不存在")
-
-        # 读取文件内容
-        with open(doc_file, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        return {"content": content}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"获取本地文档内容失败: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"获取本地文档内容失败: {str(e)}")
+        logger.error(f"从向量数据库重建文档失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"重建失败: {str(e)}")

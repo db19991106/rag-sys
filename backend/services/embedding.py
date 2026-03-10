@@ -10,6 +10,33 @@ from utils.logger import logger
 from config import settings
 
 
+# 模型友好名称到本地路径的映射
+# 前端使用友好名称，后端自动映射到本地路径
+MODEL_PATH_MAPPING = {
+    'BAAI/bge-m3': '/root/autodl-tmp/models/bge-m3',
+    # 'BAAI/bge-small-zh-v1.5': '/root/autodl-tmp/rag/backend/data/models/bge-small-zh-v1.5',  # 模型不存在，已移除
+    'BAAI/bge-base-zh-v1.5': '/root/autodl-tmp/rag/backend/data/models/bge-base-zh-v1.5',
+    'BAAI/bge-large-zh-v1.5': '/root/autodl-tmp/models/bge-large-zh-v1.5',
+}
+
+
+def get_model_path(model_name: str) -> str:
+    """
+    获取模型的实际路径
+    
+    如果模型名称在映射表中，返回本地路径；
+    否则返回原始名称（可能是 Hugging Face Hub 模型）
+    """
+    if model_name in MODEL_PATH_MAPPING:
+        local_path = MODEL_PATH_MAPPING[model_name]
+        if Path(local_path).exists():
+            logger.info(f"模型名称映射: {model_name} -> {local_path}")
+            return local_path
+        else:
+            logger.warning(f"本地路径不存在: {local_path}，尝试从 Hugging Face 加载")
+    return model_name
+
+
 class EmbeddingModel:
     """嵌入模型基类"""
 
@@ -39,38 +66,101 @@ class SentenceTransformerModel(EmbeddingModel):
             os.environ['ACCELERATE_DISABLE_CODE_CARBON'] = '1'
             
             from sentence_transformers import SentenceTransformer
+            from transformers import AutoModel, AutoTokenizer
+            import torch
             
             # 处理模型路径
             model_path = Path(model_name).resolve()
             
             if model_path.exists():
-                # 本地路径存在，使用绝对路径字符串加载
+                # 本地路径存在，使用 transformers 直接加载
                 load_path = str(model_path)
                 logger.info(f"从本地路径加载模型: {load_path}")
+                
+                # 使用 transformers 加载模型
+                self.tokenizer = AutoTokenizer.from_pretrained(load_path, trust_remote_code=True)
+                self.transformer_model = AutoModel.from_pretrained(load_path, trust_remote_code=True)
+                self.transformer_model.to(device)
+                self.transformer_model.eval()
+                
+                # 获取隐藏层维度
+                self.dimension = self.transformer_model.config.hidden_size
+                if hasattr(self.transformer_model.config, 'hidden_size'):
+                    # 对于 BGE-M3，实际输出维度可能不同
+                    # 尝试通过配置获取
+                    if hasattr(self.transformer_model.config, 'embedding_dim'):
+                        self.dimension = self.transformer_model.config.embedding_dim
+                
+                # 创建 SentenceTransformer 兼容的模型
+                # 对于 BGE-M3，使用 Mean Pooling
+                self._use_transformers = True
+                self.device = device
+                
+                logger.info(f"成功加载模型: {model_name} (维度: {self.dimension})")
             else:
                 # 可能是 Hugging Face Hub 的模型名称
                 load_path = model_name
                 logger.info(f"从 Hugging Face Hub 加载模型: {load_path}")
-            
-            # 使用 trust_remote_code=True 以支持更多模型
-            self.model = SentenceTransformer(load_path, device=device, trust_remote_code=True)
-            self.dimension = self.model.get_sentence_embedding_dimension()
-            logger.info(f"成功加载模型: {model_name} (维度: {self.dimension})")
+                self.model = SentenceTransformer(load_path, device=device, trust_remote_code=True)
+                self.dimension = self.model.get_sentence_embedding_dimension()
+                self._use_transformers = False
+                logger.info(f"成功加载模型: {model_name} (维度: {self.dimension})")
             
         except Exception as e:
             logger.error(f"加载 SentenceTransformer 模型失败: {e}")
+            import traceback
+            traceback.print_exc()
             raise
-
 
     def encode(self, texts: List[str], batch_size: int = 32) -> np.ndarray:
         """编码文本为向量"""
-        embeddings = self.model.encode(
-            texts,
-            batch_size=batch_size,
-            show_progress_bar=False,
-            convert_to_numpy=True
-        )
-        return embeddings
+        if hasattr(self, '_use_transformers') and self._use_transformers:
+            import torch
+            
+            all_embeddings = []
+            
+            with torch.no_grad():
+                for i in range(0, len(texts), batch_size):
+                    batch_texts = texts[i:i + batch_size]
+                    
+                    # Tokenize
+                    inputs = self.tokenizer(
+                        batch_texts,
+                        padding=True,
+                        truncation=True,
+                        return_tensors='pt',
+                        max_length=8192  # BGE-M3 支持长文本
+                    )
+                    inputs = {k: v.to(self.device) for k, v in inputs.items()}
+                    
+                    # 获取模型输出
+                    outputs = self.transformer_model(**inputs)
+                    
+                    # Mean Pooling
+                    attention_mask = inputs['attention_mask']
+                    embeddings = self._mean_pooling(outputs.last_hidden_state, attention_mask)
+                    
+                    # 归一化
+                    embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
+                    
+                    all_embeddings.append(embeddings.cpu().numpy())
+            
+            return np.vstack(all_embeddings)
+        else:
+            embeddings = self.model.encode(
+                texts,
+                batch_size=batch_size,
+                show_progress_bar=False,
+                convert_to_numpy=True
+            )
+            return embeddings
+    
+    def _mean_pooling(self, model_output, attention_mask):
+        """Mean Pooling"""
+        import torch
+        token_embeddings = model_output
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
 
 class BGEModel(EmbeddingModel):
@@ -110,7 +200,8 @@ class BGEModel(EmbeddingModel):
             self.model = AutoModel.from_pretrained(
                 load_path, 
                 local_files_only=local_files_only,
-                trust_remote_code=True
+                trust_remote_code=True,
+                torch_dtype=torch.float16 if "cuda" in device else torch.float32
             )
             self.model.to(device)
             self.model.eval()
@@ -238,14 +329,17 @@ class EmbeddingService:
             cache_dir = settings.upload_dir.replace('/data/docs', '/data/models')
             Path(cache_dir).mkdir(parents=True, exist_ok=True)
             
-            logger.info(f"准备加载模型: {config.model_name} (类型: {config.model_type}) ")
+            # 获取模型实际路径（友好名称 -> 本地路径）
+            actual_model_path = get_model_path(config.model_name)
+            
+            logger.info(f"准备加载模型: {config.model_name} (类型: {config.model_type}) -> {actual_model_path}")
             
             if config.model_type == EmbeddingModelType.SENTENCE_TRANSFORMERS:
-                self.model = SentenceTransformerModel(config.model_name, config.device)
+                self.model = SentenceTransformerModel(actual_model_path, config.device)
             elif config.model_type == EmbeddingModelType.BGE:
-                self.model = BGEModel(config.model_name, config.device)
+                self.model = BGEModel(actual_model_path, config.device)
             elif config.model_type == EmbeddingModelType.OPENAI:
-                self.model = OpenAIEmbeddingModel(config.model_name, config.device)
+                self.model = OpenAIEmbeddingModel(actual_model_path, config.device)
             else:
                 return EmbeddingResponse(
                     model_name=config.model_name,

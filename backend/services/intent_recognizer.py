@@ -1,96 +1,135 @@
 """
-意图识别服务 - 基于大语言模型的识别方案
-支持动态使用本地部署的7B参数规模大语言模型
+意图识别服务 - 纯 LLM 模式
+
+意图类型：
+- HR: 人力资源相关事务
+- FINANCE: 财务管理相关事务
+- ADMIN: 行政制度相关事务
+- COMPLIANCE: 合规安全相关事务
+- PROCESS: 流程管理相关事务
+- TECH_REPORT: 专业技术相关事务
+- CASUAL_CHAT: 闲聊（不属于以上任何类别）
 """
 
 from typing import Dict, List, Tuple, Optional
-from enum import Enum
 import json
-import re
-import time
 from utils.logger import logger
+from models import IntentType
 
 
-class IntentType(str, Enum):
-    """意图类型枚举"""
-
-    QUESTION = "question"  # 问题咨询
-    SEARCH = "search"  # 信息搜索
-    SUMMARY = "summary"  # 内容总结
-    COMPARISON = "comparison"  # 对比分析
-    PROCEDURE = "procedure"  # 操作流程
-    DEFINITION = "definition"  # 定义说明
-    GREETING = "greeting"  # 问候
-    OTHER = "other"  # 其他
+# 意图到文档的映射
+INTENT_DOCUMENT_MAPPING = {
+    IntentType.HR: [
+        "员工管理制度.md",
+        "公司员工手册.md",
+        "人力资源部绩效考核方案.md",
+        "研发部门绩效考核制度.md",
+        "生产部绩效考核方案.md",
+        "行政部绩效考核方案.md",
+        "销售部绩效考核方案.md",
+        "绩效考核管理制度总则.md",
+        "发展晋升管理制度.md",
+        "考勤休假管理制度.md",
+    ],
+    IntentType.FINANCE: [
+        "薪酬福利管理制度.md",
+        "财务报销标准.md",
+        "城市分类地区报销差异.md",
+        "酒店级别标准.md",
+    ],
+    IntentType.ADMIN: [
+        "办公室管理制度.md",
+        "企业管理制度汇编索引.md",
+    ],
+    IntentType.COMPLIANCE: [
+        "合规安全管理制度.md",
+    ],
+    IntentType.PROCESS: [
+        "企业管理制度流程规范.md",
+        "企业管理制度汇编索引.md",
+    ],
+    IntentType.TECH_REPORT: [],  # 技术报告类文档
+    IntentType.CASUAL_CHAT: [],  # 闲聊不对应任何文档
+}
 
 
 class IntentConfig:
     """意图对应的检索配置"""
 
     CONFIGS = {
-        IntentType.QUESTION: {
+        IntentType.HR: {
+            "top_k": 6,
+            "similarity_threshold": 0.25,
+            "description": "人力资源咨询",
+            "prompt_template": "根据公司人力资源管理制度回答：",
+            "use_knowledge_base": True,
+        },
+        IntentType.FINANCE: {
             "top_k": 5,
-            "similarity_threshold": 0.2,
-            "description": "问题咨询",
-            "prompt_template": "根据以下信息回答问题：",
+            "similarity_threshold": 0.25,
+            "description": "财务管理咨询",
+            "prompt_template": "根据公司财务制度回答：",
+            "use_knowledge_base": True,
         },
-        IntentType.SEARCH: {
-            "top_k": 10,
-            "similarity_threshold": 0.2,
-            "description": "信息搜索",
-            "prompt_template": "以下是搜索到的相关信息：",
+        IntentType.ADMIN: {
+            "top_k": 5,
+            "similarity_threshold": 0.25,
+            "description": "行政制度咨询",
+            "prompt_template": "根据公司行政制度回答：",
+            "use_knowledge_base": True,
         },
-        IntentType.SUMMARY: {
-            "top_k": 15,
-            "similarity_threshold": 0.2,
-            "description": "内容总结",
-            "prompt_template": "请总结以下内容：",
+        IntentType.COMPLIANCE: {
+            "top_k": 5,
+            "similarity_threshold": 0.25,
+            "description": "合规安全咨询",
+            "prompt_template": "根据公司合规安全制度回答：",
+            "use_knowledge_base": True,
         },
-        IntentType.COMPARISON: {
+        IntentType.PROCESS: {
             "top_k": 8,
             "similarity_threshold": 0.2,
-            "description": "对比分析",
-            "prompt_template": "对比以下信息：",
+            "description": "流程管理咨询",
+            "prompt_template": "根据公司制度流程回答：",
+            "use_knowledge_base": True,
         },
-        IntentType.PROCEDURE: {
-            "top_k": 5,
+        IntentType.TECH_REPORT: {
+            "top_k": 6,
             "similarity_threshold": 0.2,
-            "description": "操作流程",
-            "prompt_template": "以下操作步骤：",
+            "description": "技术报告咨询",
+            "prompt_template": "根据技术文档回答：",
+            "use_knowledge_base": True,
         },
-        IntentType.DEFINITION: {
-            "top_k": 5,
-            "similarity_threshold": 0.2,
-            "description": "定义说明",
-            "prompt_template": "定义如下：",
-        },
-        IntentType.GREETING: {
-            "top_k": 3,
-            "similarity_threshold": 0.2,
-            "description": "问候",
-            "prompt_template": "您好！",
-        },
-        IntentType.OTHER: {
-            "top_k": 5,
-            "similarity_threshold": 0.2,
-            "description": "其他",
-            "prompt_template": "根据以下信息回答：",
+        IntentType.CASUAL_CHAT: {
+            "top_k": 0,  # 不检索知识库
+            "similarity_threshold": 0.0,
+            "description": "闲聊",
+            "prompt_template": "请友好地回答用户的问题：",
+            "use_knowledge_base": False,  # 不使用知识库
         },
     }
 
     @classmethod
     def get_config(cls, intent: IntentType) -> Dict:
         """获取意图对应的配置"""
-        return cls.CONFIGS.get(intent, cls.CONFIGS[IntentType.OTHER])
+        return cls.CONFIGS.get(intent, cls.CONFIGS[IntentType.CASUAL_CHAT])
+
+    @classmethod
+    def should_use_knowledge_base(cls, intent: IntentType) -> bool:
+        """判断是否应该使用知识库"""
+        config = cls.get_config(intent)
+        return config.get("use_knowledge_base", True)
+
+    @classmethod
+    def get_target_documents(cls, intent: IntentType) -> List[str]:
+        """获取意图对应的目标文档列表"""
+        return INTENT_DOCUMENT_MAPPING.get(intent, [])
 
 
 class IntentRecognizer:
     """
-    意图识别器
+    意图识别器 - 纯 LLM 模式
 
-    支持多种识别方法：
-    1. 基于规则的快速识别
-    2. 基于LLM的精确识别（当启用且模型可用时）
+    直接使用 LLM 进行意图识别，无需规则匹配
     """
 
     def __init__(self):
@@ -101,7 +140,7 @@ class IntentRecognizer:
         """使用配置初始化"""
         self._config = config
         self._initialized = True
-        logger.info("意图识别器已初始化（使用配置）")
+        logger.info("意图识别器已初始化（纯 LLM 模式）")
 
     def recognize(self, query: str) -> Tuple[IntentType, float, Dict]:
         """
@@ -113,210 +152,126 @@ class IntentRecognizer:
         Returns:
             Tuple of (意图类型, 置信度, 详细信息)
         """
-        # 首先尝试基于规则的快速识别
-        intent, confidence, details = self._rule_based_recognize(query)
-
-        # 如果规则识别置信度高，直接返回
-        if confidence >= 0.9:
-            return intent, confidence, details
-
-        # 如果配置了LLM且初始化成功，使用LLM进行精确识别
-        if self._initialized and self._config:
-            try:
-                llm_intent, llm_confidence, llm_details = self._llm_based_recognize(
-                    query
-                )
-                # 如果LLM置信度更高，使用LLM结果
-                if llm_confidence > confidence:
-                    return llm_intent, llm_confidence, llm_details
-            except Exception as e:
-                logger.warning(f"LLM意图识别失败，使用规则结果: {e}")
-
-        return intent, confidence, details
-
-    def _rule_based_recognize(self, query: str) -> Tuple[IntentType, float, Dict]:
-        """
-        基于规则的意图识别
-
-        通过关键词匹配快速识别常见意图
-        """
-        query_lower = query.lower().strip()
-
-        # 1. 问候识别
-        greeting_patterns = [
-            r"^(你好|您好|嗨|hello|hi|hey|早上好|下午好|晚上好)",
-            r"^(在吗|在不在|有人吗)",
-        ]
-        for pattern in greeting_patterns:
-            if re.search(pattern, query_lower):
-                return (
-                    IntentType.GREETING,
-                    0.95,
-                    {"method": "rule", "matched_pattern": "greeting"},
-                )
-
-        # 2. 总结类识别
-        summary_keywords = [
-            "总结",
-            "概括",
-            "概述",
-            "汇总",
-            "归纳",
-            "总结下",
-            "概括一下",
-        ]
-        if any(kw in query_lower for kw in summary_keywords):
-            return (
-                IntentType.SUMMARY,
-                0.9,
-                {"method": "rule", "matched_keywords": summary_keywords},
-            )
-
-        # 3. 对比类识别
-        comparison_keywords = [
-            "对比",
-            "比较",
-            "区别",
-            "差异",
-            "不同",
-            "vs",
-            "versus",
-            "哪个更好",
-            "哪个更",
-        ]
-        if any(kw in query_lower for kw in comparison_keywords):
-            return (
-                IntentType.COMPARISON,
-                0.9,
-                {"method": "rule", "matched_keywords": comparison_keywords},
-            )
-
-        # 4. 流程/步骤类识别
-        procedure_keywords = [
-            "怎么",
-            "如何",
-            "步骤",
-            "流程",
-            "怎么做",
-            "如何做",
-            "怎样",
-            "方法",
-            "教程",
-            "指南",
-        ]
-        if any(kw in query_lower for kw in procedure_keywords):
-            return (
-                IntentType.PROCEDURE,
-                0.85,
-                {"method": "rule", "matched_keywords": procedure_keywords},
-            )
-
-        # 5. 定义类识别
-        definition_keywords = ["是什么", "什么是", "定义", "概念", "意思", "含义"]
-        if any(kw in query_lower for kw in definition_keywords):
-            return (
-                IntentType.DEFINITION,
-                0.85,
-                {"method": "rule", "matched_keywords": definition_keywords},
-            )
-
-        # 6. 搜索类识别（广义的查询）
-        search_keywords = ["搜索", "查找", "找", "查询", "列出", "有哪些", "有什么"]
-        if any(kw in query_lower for kw in search_keywords):
-            return (
-                IntentType.SEARCH,
-                0.8,
-                {"method": "rule", "matched_keywords": search_keywords},
-            )
-
-        # 7. 默认问题类
-        question_patterns = [
-            r".*[？?]$",  # 以问号结尾
-            r"^(请问|我想知道|能否|能否告诉我)",  # 疑问词开头
-        ]
-        for pattern in question_patterns:
-            if re.search(pattern, query_lower):
-                return (
-                    IntentType.QUESTION,
-                    0.7,
-                    {"method": "rule", "matched_pattern": "question"},
-                )
-
-        # 默认其他类型
-        return IntentType.OTHER, 0.5, {"method": "rule", "fallback": True}
+        # 直接使用 LLM 进行意图识别
+        try:
+            return self._llm_based_recognize(query)
+        except Exception as e:
+            logger.error(f"LLM 意图识别失败: {e}")
+            # Fallback: 返回 tech_report，使用通用知识库检索
+            return IntentType.TECH_REPORT, 0.5, {"method": "fallback", "error": str(e)}
 
     def _llm_based_recognize(self, query: str) -> Tuple[IntentType, float, Dict]:
         """
-        基于LLM的意图识别
-
-        使用大语言模型进行更精确的意图识别
+        基于LLM的意图识别（使用 7B 模型）
         """
-        from services.rag_generator import rag_generator
+        from openai import OpenAI
 
-        # 构建提示词
-        prompt = f"""分析以下用户查询的意图类别。
+        # 构建提示词 - 精准分析与判定
+        prompt = f'''对用户提交的查询进行意图类别的精准分析与判定。
+
+【类别定义】
+
+- hr: 人力资源相关事务（招聘、员工关系、薪酬福利、绩效考核、培训发展等）
+- finance: 财务管理相关事务（报销、预算、费用核算、财务报表、税务等）
+- admin: 行政制度相关事务（办公环境、行政流程、办公用品、会务、差旅等）
+- compliance: 合规安全相关事务（法律法规、公司政策、信息安全、数据保护、风险管控等）
+- process: 流程管理相关事务（业务流程优化、规范制定、执行监督、效率提升等）
+- tech_report: 专业技术相关事务（各行业的技术原理、专业设备操作、技术规范、工艺流程、故障排查、技术概念等）
+- casual_chat: 闲聊，完全不符合以上任何专业类别
+
+【判断原则】
+
+1. **主题优先**：根据问题**最核心**主题判断所属领域；若涉及多领域，选择**最直接相关的单一类别**
+2. **技术判定**：涉及专业技术原理、专业设备/系统操作、技术规范、故障排查、技术概念的，归为 tech_report（跨行业适用）
+3. **职能归属**：涉及人力资源、财务管理、行政制度、合规安全、流程管理的制度、政策、管理方法，分别归属对应类别
+4. **闲聊**：仅当查询不属于以上任何一类时，归类为 casual_chat
+5. **置信度标准**：confidence 取值 0.0-1.0，明确归属时≥0.8，边界模糊时 0.6-0.8，难以判断时≤0.6
+
+【输出格式】
+
+返回JSON，字段要求：
+
+- intent: string，枚举值 [hr, finance, admin, compliance, process, tech_report, casual_chat]
+- confidence: number，范围 0.0-1.0，保留两位小数
+- reason: string，长度 10-40字，简明说明核心判断依据
+
+示例：
+
+- 高置信度：{{"intent": "finance", "confidence": 0.95, "reason": "核心主题为差旅费用报销标准"}}
+- 中置信度：{{"intent": "tech_report", "confidence": 0.75, "reason": "涉及系统操作但可能是流程问题"}}
+- 低置信度：{{"intent": "casual_chat", "confidence": 0.55, "reason": "内容模糊难以判断专业类别"}}
 
 用户查询: "{query}"
 
-请从以下类别中选择最匹配的意图：
-- question: 问题咨询（询问具体信息）
-- search: 信息搜索（查找资料）
-- summary: 内容总结（要求总结内容）
-- comparison: 对比分析（比较差异）
-- procedure: 操作流程（询问步骤、流程）
-- definition: 定义说明（询问定义、概念）
-- greeting: 问候（打招呼）
-- other: 其他
-
-请以JSON格式返回结果：
-{{"intent": "意图类别", "confidence": 0.8, "reason": "判断理由"}}
-
-注意：只返回JSON，不要其他内容。"""
+请返回JSON结果：'''
 
         try:
-            # 使用轻量级配置调用LLM
-            from models import GenerationConfig
+            from config import settings
 
-            llm_config = GenerationConfig(
-                llm_provider="local",
-                llm_model="Qwen2.5-7B-Instruct",
-                temperature=0.1,  # 低温度，确定性输出
-                max_tokens=200,
-                top_p=1.0,
-                frequency_penalty=0.0,
-                presence_penalty=0.0,
-            )
+            # 使用意图识别专用 vLLM 服务 (0.5B 模型，端口 8002)
+            if settings.intent_vllm_enabled:
+                client = OpenAI(
+                    api_key="EMPTY",
+                    base_url=f"http://{settings.intent_vllm_host}:{settings.intent_vllm_port}/v1",
+                )
+                
+                response = client.chat.completions.create(
+                    model=settings.intent_vllm_model_path,  # Qwen2.5-0.5B-Instruct
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.1,
+                    max_tokens=200,
+                )
+                
+                response_text = response.choices[0].message.content
+            else:
+                # 本地模型回退
+                raise RuntimeError("意图识别 vLLM 服务 (8002) 未启用，无法进行意图识别")
 
-            # 获取LLM客户端并生成
-            llm_client = rag_generator._get_llm_client(llm_config)
-            response_data = llm_client.generate(prompt)
-            
-            # 提取文本响应
-            response = response_data.get("text", "")
+            logger.info(f"意图识别 LLM 原始响应: {response_text}")
+
+            # 预处理：去除 markdown 代码块包装
+            response_text = response_text.strip()
+            if response_text.startswith("```"):
+                # 去除开头的 ```json 或 ```
+                import re
+                response_text = re.sub(r'^```(?:json)?\s*', '', response_text)
+                # 去除结尾的 ```
+                response_text = re.sub(r'\s*```$', '', response_text)
+                logger.debug(f"去除 markdown 包装后: {response_text}")
 
             # 尝试解析JSON
-            result = json.loads(response.strip())
+            result = json.loads(response_text.strip())
 
-            intent_str = result.get("intent", "other")
+            intent_str = result.get("intent", "tech_report")
             confidence = result.get("confidence", 0.5)
             reason = result.get("reason", "")
 
             # 转换字符串为IntentType
-            try:
-                intent = IntentType(intent_str)
-            except ValueError:
-                intent = IntentType.OTHER
+            intent_map = {
+                "hr": IntentType.HR,
+                "finance": IntentType.FINANCE,
+                "admin": IntentType.ADMIN,
+                "compliance": IntentType.COMPLIANCE,
+                "process": IntentType.PROCESS,
+                "tech_report": IntentType.TECH_REPORT,
+                "casual_chat": IntentType.CASUAL_CHAT,
+            }
+            intent = intent_map.get(intent_str, IntentType.TECH_REPORT)
+
+            logger.info(f"意图识别结果: intent={intent.value}, confidence={confidence}, reason={reason}")
 
             return (
                 intent,
                 confidence,
-                {"method": "llm", "reason": reason, "raw_response": response},
+                {"method": "llm", "reason": reason, "raw_response": response_text},
             )
 
+        except json.JSONDecodeError as e:
+            logger.error(f"LLM意图识别JSON解析失败: {e}, response: {response_text}")
+            return IntentType.TECH_REPORT, 0.5, {"method": "llm", "error": str(e), "raw_response": response_text}
         except Exception as e:
-            logger.error(f"LLM意图识别解析失败: {e}")
-            # 如果LLM识别失败，返回其他类型
-            return IntentType.OTHER, 0.3, {"method": "llm", "error": str(e)}
+            logger.error(f"LLM意图识别失败: {e}")
+            return IntentType.TECH_REPORT, 0.5, {"method": "llm", "error": str(e)}
 
     def recognize_intent(self, query: str) -> Dict:
         """

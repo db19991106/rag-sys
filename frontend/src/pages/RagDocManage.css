@@ -609,8 +609,196 @@
   .page-title {
     font-size: var(--text-xl);
   }
-  
+
   .page-title small {
     display: none;
   }
+}
+
+/* =========================================
+   Local Docs Tree Styles
+   ========================================= */
+.local-docs-container {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.local-docs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.local-docs-header h4 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.local-docs-header h4 small {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  font-weight: var(--font-normal);
+  margin-left: var(--space-2);
+}
+
+.local-docs-header h4 i {
+  color: var(--warning);
+}
+
+.btn-sm {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.local-docs-tree {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: var(--space-2) 0;
+}
+
+.tree-loading,
+.tree-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  color: var(--text-tertiary);
+  gap: var(--space-2);
+}
+
+.tree-loading i,
+.tree-empty i {
+  font-size: 32px;
+  opacity: 0.5;
+}
+
+.tree-loading span,
+.tree-empty p {
+  font-size: var(--text-sm);
+}
+
+/* File Tree Item Styles */
+.file-tree-item {
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border-left: 3px solid transparent;
+}
+
+.file-tree-item:hover {
+  background: var(--bg-hover);
+  border-left-color: var(--accent-primary);
+}
+
+.file-tree-folder-header {
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.file-tree-file {
+  color: var(--text-secondary);
+}
+
+.file-tree-file:hover {
+  color: var(--text-primary);
+}
+
+.file-tree-arrow {
+  width: 16px;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  transition: transform var(--transition-fast);
+}
+
+.file-tree-icon {
+  width: 20px;
+  font-size: var(--text-sm);
+  margin-right: var(--space-2);
+  text-align: center;
+}
+
+.folder-icon {
+  color: var(--warning);
+}
+
+.file-icon {
+  color: var(--text-tertiary);
+}
+
+.file-tree-name {
+  flex: 1;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-tree-count {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-left: var(--space-2);
+}
+
+.file-tree-size {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-left: var(--space-2);
+  min-width: 60px;
+  text-align: right;
+}
+
+.file-tree-preview-btn {
+  padding: var(--space-1);
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0;
+  transition: all var(--transition-fast);
+}
+
+.file-tree-item:hover .file-tree-preview-btn {
+  opacity: 1;
+}
+
+.file-tree-preview-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--accent-primary);
+}
+
+.file-tree-children {
+  border-left: 1px dashed var(--border-secondary);
+  margin-left: 20px;
+}
+
+/* Local Doc Preview Styles */
+.local-doc-preview {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.local-docs-footer {
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-secondary);
+}
+
+.local-docs-footer p {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin: 0;
+  text-align: center;
 }

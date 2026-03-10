@@ -55,6 +55,33 @@ class Settings(BaseSettings):
     local_llm_device: str = "cuda" if torch.cuda.is_available() else "cpu"
     local_llm_load_in_8bit: bool = False
 
+    # vLLM 配置（高性能推理引擎）
+    vllm_enabled: bool = True
+    vllm_host: str = "localhost"
+    vllm_port: int = 8001
+    vllm_model_path: str = "Qwen2.5-7B-Instruct"
+    vllm_gpu_memory_utilization: float = 0.85
+    vllm_tensor_parallel_size: int = 1
+    vllm_max_model_len: int = 4096
+
+    # 意图识别专用 vLLM 配置
+    intent_vllm_enabled: bool = True
+    intent_vllm_host: str = "localhost"
+    intent_vllm_port: int = 8002
+    intent_vllm_model_path: str = "Qwen2.5-0.5B-Instruct"
+    intent_vllm_gpu_memory_utilization: float = 0.3
+
+    # Reranker 配置
+    reranker_enabled: bool = True
+    reranker_type: str = "bge"
+    reranker_model: str = "/root/autodl-tmp/rag/models/bge-reranker-large"
+    reranker_top_k: int = 10
+    reranker_threshold: float = 0.35
+    reranker_device: str = "cuda" if torch.cuda.is_available() else "cpu"
+
+    # Milvus Lite 配置
+    milvus_lite_db_path: str = "./vector_db/milvus_lite.db"
+
     # 日志配置
     log_level: str = "INFO"
     log_file: str = "/root/autodl-tmp/rag/logs/app.log"

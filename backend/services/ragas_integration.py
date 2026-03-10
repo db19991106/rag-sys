@@ -10,6 +10,8 @@ from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
 import asyncio
+import json
+import re
 
 # 设置环境变量避免 RAGAS 的某些依赖问题
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -22,13 +24,14 @@ from ragas.metrics._context_recall import context_recall
 from ragas.metrics._context_entities_recall import context_entity_recall
 from ragas.metrics._answer_similarity import answer_similarity
 from ragas.metrics._answer_correctness import answer_correctness
-from ragas.dataset_schema import SingleTurnSample
+from ragas.dataset_schema import SingleTurnSample, EvaluationDataset
 from ragas.evaluation import evaluate
 from ragas.llms.base import BaseRagasLLM
 from ragas.embeddings.base import BaseRagasEmbeddings
 from langchain_core.outputs import LLMResult, Generation
 from langchain_core.callbacks import Callbacks
 from langchain_core.embeddings import Embeddings
+from langchain_core.prompt_values import PromptValue
 
 # 导入项目内部服务
 from services.embedding import embedding_service
@@ -51,69 +54,358 @@ class RAGASEvaluationResult:
 class CustomRagasLLM(BaseRagasLLM):
     """
     自定义 RAGAS LLM 适配器
-    用于将本地 LLM 集成到 RAGAS 评估中
+    使用 LangChain HuggingFacePipeline 包装本地模型
+    兼容 RAGAS 0.4.3 API
     """
 
-    def __init__(self, llm_client: Any):
+    def __init__(self, llm_client: Any = None, model_path: str = None, device: str = "cuda"):
+        """
+        初始化 RAGAS LLM 适配器
+        
+        Args:
+            llm_client: 可选的现有 LLM 客户端（优先使用）
+            model_path: 模型路径（如果 llm_client 为 None）
+            device: 设备类型
+        """
         self.llm_client = llm_client
+        self._langchain_llm = None
+        self.model_path = model_path
+        self.device = device
         super().__init__()
 
-    def generate(
-        self,
-        prompts: List[str],
-        n: int = 1,
-        temperature: float = 0.0,
-        stop: Optional[List[str]] = None,
-        callbacks: Optional[Callbacks] = None,
-    ) -> LLMResult:
-        """生成文本 - 同步版本"""
-        generations = []
-        for prompt in prompts:
+    def _get_langchain_llm(self):
+        """获取或创建 LangChain LLM 实例"""
+        if self._langchain_llm is not None:
+            return self._langchain_llm
+        
+        # 如果有现有的 LLM 客户端且有模型，尝试重用
+        if self.llm_client is not None:
             try:
-                # 使用本地 LLM 客户端生成
-                text = self.llm_client.generate(prompt)
-                generations.append([Generation(text=text)])
+                # 检查 llm_client 是否有模型属性
+                if hasattr(self.llm_client, 'model') and self.llm_client.model is not None:
+                    from langchain_huggingface import HuggingFacePipeline
+                    from transformers import pipeline
+                    
+                    logger.info("重用已加载的 LLM 模型创建 LangChain Pipeline")
+                    
+                    # 使用已加载的模型和 tokenizer
+                    model = self.llm_client.model
+                    tokenizer = self.llm_client.tokenizer
+                    
+                    # 创建 text-generation pipeline
+                    pipe = pipeline(
+                        "text-generation",
+                        model=model,
+                        tokenizer=tokenizer,
+                        max_new_tokens=512,
+                        temperature=0.1,
+                        do_sample=True,
+                        top_p=0.9,
+                        return_full_text=False,
+                    )
+                    
+                    self._langchain_llm = HuggingFacePipeline(pipeline=pipe)
+                    logger.info("LangChain HuggingFacePipeline 创建完成（重用模型）")
+                    return self._langchain_llm
             except Exception as e:
-                logger.error(f"RAGAS LLM 生成失败: {e}")
-                generations.append([Generation(text="")])
+                logger.warning(f"重用 LLM 客户端模型失败: {e}，将创建新模型")
+        
+        # 如果没有可重用的模型，创建新的
+        if self.model_path:
+            try:
+                from langchain_huggingface import HuggingFacePipeline
+                from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+                import torch
+                
+                logger.info(f"为 RAGAS 加载新模型: {self.model_path}")
+                
+                # 加载 tokenizer 和模型
+                tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
+                model = AutoModelForCausalLM.from_pretrained(
+                    self.model_path,
+                    torch_dtype=torch.float16,
+                    device_map="auto",
+                    trust_remote_code=True
+                )
+                
+                # 创建 text-generation pipeline
+                pipe = pipeline(
+                    "text-generation",
+                    model=model,
+                    tokenizer=tokenizer,
+                    max_new_tokens=512,
+                    temperature=0.1,
+                    do_sample=True,
+                    top_p=0.9,
+                    return_full_text=False,
+                )
+                
+                self._langchain_llm = HuggingFacePipeline(pipeline=pipe)
+                logger.info("LangChain HuggingFacePipeline 加载完成")
+                
+            except Exception as e:
+                logger.error(f"加载 LangChain HuggingFacePipeline 失败: {e}")
+                raise
+        
+        return self._langchain_llm
 
-        return LLMResult(generations=generations)
+    def _extract_text_from_prompt(self, prompt: Any) -> str:
+        """从 PromptValue 或其他格式中提取文本"""
+        if hasattr(prompt, 'to_string'):
+            return prompt.to_string()
+        elif isinstance(prompt, str):
+            return prompt
+        elif isinstance(prompt, tuple):
+            return " ".join(str(p) for p in prompt if p)
+        elif isinstance(prompt, list):
+            return " ".join(str(p) for p in prompt if p)
+        else:
+            return str(prompt)
 
-    async def agenerate(
+    def generate_text(
         self,
-        prompts: List[str],
+        prompt: Any,  # PromptValue
         n: int = 1,
-        temperature: float = 0.0,
+        temperature: Optional[float] = None,
         stop: Optional[List[str]] = None,
-        callbacks: Optional[Callbacks] = None,
+        callbacks: Callbacks = None,
     ) -> LLMResult:
-        """异步生成文本"""
-        # 使用同步版本
-        return self.generate(prompts, n, temperature, stop, callbacks)
+        """
+        生成文本 - 同步版本
+        使用 LangChain HuggingFacePipeline 进行生成
+        """
+        try:
+            # 从 PromptValue 提取文本
+            prompt_text = self._extract_text_from_prompt(prompt)
+            
+            # 使用 LangChain LLM
+            lc_llm = self._get_langchain_llm()
+            
+            # 调用 LangChain LLM
+            result = lc_llm.invoke(prompt_text)
+            
+            # 提取文本
+            if hasattr(result, 'content'):
+                text = result.content
+            elif isinstance(result, str):
+                text = result
+            else:
+                text = str(result)
+            
+            # 清理输出 - 尝试提取 JSON
+            text = self._clean_json_output(text, prompt_text)
+            
+            # 处理 RAGAS 期望的输出格式
+            # RAGAS faithfulness 指标期望 {"text": "..."} 格式
+            # 但模型可能返回 {"statements": [...]} 格式
+            text = self._ensure_ragas_output_format(text)
+            
+            # 生成 n 个结果（使用相同的结果，因为 pipeline 不支持 n > 1）
+            generations = [Generation(text=text) for _ in range(n)]
+            
+            return LLMResult(generations=[generations])
+            
+        except Exception as e:
+            logger.error(f"RAGAS LLM 生成失败: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return LLMResult(generations=[[Generation(text="") for _ in range(n)]])
+
+    def _clean_json_output(self, text: str, prompt: str) -> str:
+        """
+        清理 LLM 输出，确保输出是有效的 JSON
+        
+        RAGAS 期望 JSON 格式的输出，但 LLM 可能会输出额外的文本
+        """
+        # 如果输出包含 JSON，提取它
+        text = text.strip()
+        
+        # 检查是否已经是有效的 JSON
+        try:
+            json.loads(text)
+            return text
+        except:
+            pass
+        
+        # 尝试提取 JSON 块
+        # 模式 1: ```json ... ```
+        json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', text)
+        if json_match:
+            candidate = json_match.group(1).strip()
+            try:
+                json.loads(candidate)
+                return candidate
+            except:
+                pass
+        
+        # 模式 2: { ... } 或 [ ... ]
+        json_match = re.search(r'(\{[\s\S]*\}|\[[\s\S]*\])', text)
+        if json_match:
+            candidate = json_match.group(1).strip()
+            try:
+                json.loads(candidate)
+                return candidate
+            except:
+                pass
+        
+        # 模式 3: 尝试修复常见的 JSON 错误
+        # 例如: 单引号变双引号
+        try:
+            fixed = text.replace("'", '"')
+            json.loads(fixed)
+            return fixed
+        except:
+            pass
+        
+        # 如果无法提取 JSON，返回原始文本
+        return text
+
+    def _ensure_ragas_output_format(self, text: str) -> str:
+        """
+        确保输出是 RAGAS 期望的格式
+        
+        RAGAS faithfulness 等指标期望 {"text": "..."} 格式
+        但模型可能返回多种不同格式，需要统一转换
+        """
+        text = text.strip()
+        
+        # 首先尝试解析为 JSON
+        try:
+            data = json.loads(text)
+            
+            # 如果已经有 text 字段，直接返回
+            if "text" in data:
+                return text
+            
+            # 格式1: statements 格式（faithfulness 评估的常见输出）
+            if "statements" in data and isinstance(data["statements"], list):
+                statement_texts = []
+                for stmt in data["statements"]:
+                    if isinstance(stmt, dict):
+                        statement = stmt.get("statement", "")
+                        verdict = stmt.get("verdict", "")
+                        reason = stmt.get("reason", "")
+                        statement_texts.append(f"- {statement} (verdict: {verdict}, reason: {reason})")
+                ragas_format = {"text": "\n".join(statement_texts)}
+                return json.dumps(ragas_format, ensure_ascii=False)
+            
+            # 格式2: classifications 格式（context_recall 评估的输出）
+            if "classifications" in data and isinstance(data["classifications"], list):
+                classification_texts = []
+                for cls in data["classifications"]:
+                    if isinstance(cls, dict):
+                        statement = cls.get("statement", "")
+                        attributed = cls.get("attributed", "")
+                        classification_texts.append(f"- {statement} (attributed: {attributed})")
+                ragas_format = {"text": "\n".join(classification_texts)}
+                return json.dumps(ragas_format, ensure_ascii=False)
+            
+            # 格式3: reason + verdict 格式
+            if "reason" in data and ("verdict" in data or "attributed" in data):
+                verdict = data.get("verdict", data.get("attributed", ""))
+                reason = data.get("reason", "")
+                ragas_format = {"text": f"verdict: {verdict}, reason: {reason}"}
+                return json.dumps(ragas_format, ensure_ascii=False)
+            
+            # 格式4: question + noncommittal 格式
+            if "question" in data and "noncommittal" in data:
+                question = data.get("question", "")
+                noncommittal = data.get("noncommittal", "")
+                ragas_format = {"text": f"question: {question}, noncommittal: {noncommittal}"}
+                return json.dumps(ragas_format, ensure_ascii=False)
+            
+            # 格式5: 直接是纯文本字符串
+            if isinstance(data, str):
+                return json.dumps({"text": data}, ensure_ascii=False)
+            
+            # 其他未知格式
+            return json.dumps({"text": str(data)}, ensure_ascii=False)
+            
+        except json.JSONDecodeError:
+            # 不是 JSON 格式，将纯文本包装成 text 字段
+            # 这是最常见的情况：模型直接返回文本而不是 JSON
+            if text:
+                return json.dumps({"text": text}, ensure_ascii=False)
+            return text
+
+    async def agenerate_text(
+        self,
+        prompt: Any,  # PromptValue
+        n: int = 1,
+        temperature: Optional[float] = None,
+        stop: Optional[List[str]] = None,
+        callbacks: Callbacks = None,
+    ) -> LLMResult:
+        """
+        异步生成文本
+        """
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            None,
+            lambda: self.generate_text(prompt, n, temperature, stop, callbacks)
+        )
+
+    def is_finished(self, response: Any) -> bool:
+        """检查生成是否完成"""
+        return True
 
 
 class CustomRagasEmbeddings(BaseRagasEmbeddings):
     """
     自定义 RAGAS 嵌入模型适配器
     使用项目的 BGE 嵌入模型
+    支持重用已加载的嵌入服务
     """
 
-    def __init__(self):
+    def __init__(self, use_cpu: bool = False):
         super().__init__()
+        self.use_cpu = use_cpu
+        self._model_loaded = False
         self._ensure_model_loaded()
 
     def _ensure_model_loaded(self):
         """确保嵌入模型已加载"""
-        if not embedding_service.is_loaded():
-            from models import EmbeddingConfig, EmbeddingModelType
-            logger.info("加载 BGE 嵌入模型用于 RAGAS...")
+        if self._model_loaded:
+            return
+            
+        # 首先检查是否已有加载的模型
+        if embedding_service.is_loaded():
+            logger.info("重用已加载的嵌入模型")
+            self._model_loaded = True
+            return
+        
+        # 否则加载模型
+        from models import EmbeddingConfig, EmbeddingModelType
+        from config import settings
+        
+        logger.info("加载 BGE 嵌入模型用于 RAGAS...")
+        
+        # 确定 device
+        device = "cpu" if self.use_cpu else settings.embedding_device
+        
+        try:
             embedding_service.load_model(
                 EmbeddingConfig(
                     model_type=EmbeddingModelType.BGE,
-                    model_name="BAAI/bge-base-zh-v1.5",
-                    device="cpu",
+                    model_name=settings.embedding_model_name,
+                    device=device,
                 )
             )
+            self._model_loaded = True
+        except Exception as e:
+            logger.warning(f"在 {device} 上加载嵌入模型失败: {e}，尝试使用 CPU")
+            if device != "cpu":
+                try:
+                    embedding_service.load_model(
+                        EmbeddingConfig(
+                            model_type=EmbeddingModelType.BGE,
+                            model_name=settings.embedding_model_name,
+                            device="cpu",
+                        )
+                    )
+                    self._model_loaded = True
+                except Exception as e2:
+                    logger.error(f"在 CPU 上加载嵌入模型也失败: {e2}")
 
     def embed_text(self, text: str) -> List[float]:
         """嵌入单个文本"""
@@ -123,11 +415,15 @@ class CustomRagasEmbeddings(BaseRagasEmbeddings):
             return embedding[0].tolist()
         except Exception as e:
             logger.error(f"文本嵌入失败: {e}")
-            return [0.0] * 768  # BGE base 维度
+            return [0.0] * 1024  # BGE-M3 维度
 
     def embed_query(self, text: str) -> List[float]:
         """嵌入查询文本"""
         return self.embed_text(text)
+
+    async def aembed_query(self, text: str) -> List[float]:
+        """异步嵌入查询文本"""
+        return self.embed_query(text)
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         """嵌入多个文档"""
@@ -137,7 +433,11 @@ class CustomRagasEmbeddings(BaseRagasEmbeddings):
             return [emb.tolist() for emb in embeddings]
         except Exception as e:
             logger.error(f"文档嵌入失败: {e}")
-            return [[0.0] * 768 for _ in texts]
+            return [[0.0] * 1024 for _ in texts]
+
+    async def aembed_documents(self, texts: List[str]) -> List[List[float]]:
+        """异步嵌入多个文档"""
+        return self.embed_documents(texts)
 
 
 class RAGASEvaluator:
@@ -146,16 +446,32 @@ class RAGASEvaluator:
     提供完整的 RAG 系统评估功能
     """
 
-    def __init__(self, llm_client: Optional[Any] = None):
+    def __init__(self, llm_client: Optional[Any] = None, model_path: str = None, device: str = "cuda", use_cpu_embeddings: bool = True):
         """
         初始化 RAGAS 评估器
 
         Args:
             llm_client: LLM 客户端，用于 RAGAS 的 LLM-based 评估
+            model_path: 模型路径（用于创建 LangChain HuggingFacePipeline）
+            device: 设备类型
+            use_cpu_embeddings: 是否使用 CPU 运行嵌入模型（避免 GPU 显存不足）
         """
         self.llm_client = llm_client
-        self.ragas_llm = CustomRagasLLM(llm_client) if llm_client else None
-        self.ragas_embeddings = CustomRagasEmbeddings()
+        self.model_path = model_path
+        self.device = device
+        
+        # 创建 RAGAS LLM 适配器
+        if llm_client or model_path:
+            self.ragas_llm = CustomRagasLLM(
+                llm_client=llm_client,
+                model_path=model_path,
+                device=device
+            )
+        else:
+            self.ragas_llm = None
+            
+        # 使用 CPU 运行嵌入模型，避免 GPU 显存不足
+        self.ragas_embeddings = CustomRagasEmbeddings(use_cpu=use_cpu_embeddings)
 
         # 可用的评估指标
         self.metrics = {
@@ -219,19 +535,30 @@ class RAGASEvaluator:
 
             # 运行评估
             result = evaluate(
-                dataset=[sample],
+                dataset=EvaluationDataset(samples=[sample]),
                 metrics=selected_metrics,
                 llm=self.ragas_llm,
                 embeddings=self.ragas_embeddings,
             )
 
-            # 提取结果
+            # 提取结果 - 使用 to_pandas() 方法
             scores = {}
-            for metric_name in result.columns:
-                if metric_name not in ["user_input", "response", "retrieved_contexts", "reference"]:
-                    score = result[metric_name].iloc[0]
-                    # 处理 NaN
-                    scores[metric_name] = float(score) if not np.isnan(score) else 0.0
+            try:
+                # ragas 0.4.3 返回 EvaluationResult 对象
+                result_df = result.to_pandas()
+                for metric_name in result_df.columns:
+                    if metric_name not in ["user_input", "response", "retrieved_contexts", "reference"]:
+                        score = result_df[metric_name].iloc[0]
+                        # 处理 NaN
+                        if hasattr(score, '__float__'):
+                            scores[metric_name] = float(score) if not (isinstance(score, float) and np.isnan(score)) else 0.0
+                        else:
+                            scores[metric_name] = 0.0
+            except Exception as extract_error:
+                logger.warning(f"提取评估结果失败: {extract_error}")
+                # 尝试其他方式提取
+                if hasattr(result, '_scores'):
+                    scores = result._scores
 
             # 计算综合得分
             valid_scores = [v for v in scores.values() if v > 0]
@@ -411,14 +738,27 @@ class RAGASEvaluator:
             }
 
 
-def create_ragas_evaluator(llm_client: Optional[Any] = None) -> RAGASEvaluator:
+def create_ragas_evaluator(
+    llm_client: Optional[Any] = None,
+    model_path: Optional[str] = None,
+    device: str = "cuda",
+    use_cpu_embeddings: bool = True
+) -> RAGASEvaluator:
     """
     工厂函数：创建 RAGAS 评估器
 
     Args:
         llm_client: LLM 客户端
+        model_path: 模型路径（用于 LangChain HuggingFacePipeline）
+        device: 设备类型
+        use_cpu_embeddings: 是否使用 CPU 运行嵌入模型（默认 True，避免 GPU 显存不足）
 
     Returns:
         RAGASEvaluator 实例
     """
-    return RAGASEvaluator(llm_client=llm_client)
+    return RAGASEvaluator(
+        llm_client=llm_client,
+        model_path=model_path,
+        device=device,
+        use_cpu_embeddings=use_cpu_embeddings
+    )

@@ -161,6 +161,17 @@ class FAISSDatabase(VectorDatabase):
         if query_vector.ndim == 1:
             query_vector = query_vector.reshape(1, -1)
 
+        # 检查索引状态
+        if self.index is None:
+            logger.error("FAISS 索引未初始化")
+            return np.array([[]]), [[]]
+        
+        if self.index.ntotal == 0:
+            logger.warning("FAISS 索引为空，没有向量可搜索")
+            return np.array([[]]), [[]]
+        
+        logger.debug(f"FAISS 索引状态: {self.index.ntotal} 个向量")
+
         # 优化搜索参数
         if hasattr(self.index, "hnsw"):
             # HNSW 索引优化
@@ -175,9 +186,18 @@ class FAISSDatabase(VectorDatabase):
         start_search = time.time()
         distances, indices = self.index.search(query_vector, top_k)
         search_time = time.time() - start_search
+        
+        # 调试日志：显示搜索结果
         logger.debug(
             f"FAISS 搜索完成，耗时: {search_time:.4f}s, 返回: {len(indices[0])} 个结果"
         )
+        
+        # 显示前几个结果的距离和索引
+        if len(indices) > 0 and len(indices[0]) > 0:
+            for i in range(min(3, len(indices[0]))):
+                idx = indices[0][i]
+                dist = distances[0][i]
+                logger.debug(f"  结果 {i+1}: 索引={idx}, 距离={dist:.4f}")
 
         # 恢复原始参数
         if hasattr(self.index, "hnsw"):
@@ -218,11 +238,19 @@ class FAISSDatabase(VectorDatabase):
 
     def get_status(self) -> VectorStatus:
         """获取状态"""
+        # 计算数据库文件大小
+        db_size = 0
+        if self.db_path.exists():
+            db_size += self.db_path.stat().st_size
+        if self.metadata_path.exists():
+            db_size += self.metadata_path.stat().st_size
+
         return VectorStatus(
             db_type="faiss",
             total_vectors=self.total_vectors,
             dimension=self.dimension,
             status="ready",
+            db_size=db_size,
         )
 
     def save(self):
@@ -286,6 +314,20 @@ class FAISSDatabase(VectorDatabase):
             if self.total_vectors == 0:
                 logger.warning("加载的索引为空，重新初始化")
                 self._init_index()
+            
+            # 检测索引和元数据不匹配的情况
+            if self.total_vectors > 0 and len(self.metadata) != self.total_vectors:
+                logger.warning(
+                    f"⚠️ 检测到索引和元数据不匹配: 索引有 {self.total_vectors} 个向量，"
+                    f"但元数据只有 {len(self.metadata)} 条。"
+                )
+                # 不再自动清空索引，而是保留可用数据
+                # 只过滤掉没有元数据的搜索结果即可
+                if len(self.metadata) < self.total_vectors * 0.9:
+                    logger.warning(
+                        f"元数据缺失较多，但保留现有数据。"
+                        f"检索时会自动过滤无效结果。建议重新执行文档嵌入操作。"
+                    )
 
         except Exception as e:
             logger.error(f"加载 FAISS 索引失败: {str(e)}")
@@ -294,9 +336,35 @@ class FAISSDatabase(VectorDatabase):
             self.metadata = {}
             self.total_vectors = 0
 
+    def clear(self):
+        """清空数据库"""
+        import os
+
+        try:
+            # 删除索引文件
+            if self.db_path.exists():
+                os.remove(str(self.db_path))
+                logger.info(f"已删除 FAISS 索引文件: {self.db_path}")
+
+            # 删除元数据文件
+            if self.metadata_path.exists():
+                os.remove(str(self.metadata_path))
+                logger.info(f"已删除元数据文件: {self.metadata_path}")
+
+            # 重新初始化空索引
+            self._init_index()
+            self.metadata = {}
+            self.total_vectors = 0
+
+            logger.info("FAISS 数据库已清空")
+            return True
+        except Exception as e:
+            logger.error(f"清空 FAISS 数据库失败: {str(e)}")
+            return False
+
 
 class MilvusDatabase(VectorDatabase):
-    """Milvus 向量数据库"""
+    """Milvus 向量数据库（支持远程服务器和 Milvus Lite 本地模式）"""
 
     def __init__(
         self,
@@ -304,36 +372,75 @@ class MilvusDatabase(VectorDatabase):
         host: str = "localhost",
         port: int = 19530,
         collection_name: str = "rag_vectors",
+        db_path: str = None,  # Milvus Lite 本地文件路径
     ):
         super().__init__(dimension)
         self.host = host
         self.port = port
         self.collection_name = collection_name
+        self.db_path = db_path  # 如果提供，则使用 Milvus Lite 模式
         self.client = None
         self.collection = None
         self._connect()
 
     def _connect(self):
-        """连接 Milvus"""
+        """连接 Milvus 或 Milvus Lite"""
         try:
             from pymilvus import MilvusClient
 
-            self.client = MilvusClient(uri=f"http://{self.host}:{self.port}")
-            logger.info(f"连接 Milvus: {self.host}:{self.port}")
+            # 关闭旧连接（如果有），避免状态冲突
+            if self.client is not None:
+                try:
+                    if hasattr(self.client, 'close'):
+                        self.client.close()
+                        logger.info("已关闭旧的 Milvus 连接")
+                except Exception as e:
+                    logger.warning(f"关闭旧连接时出错: {str(e)}")
+                finally:
+                    self.client = None
+
+            # Milvus Lite 模式：使用本地文件路径
+            if self.db_path:
+                # 确保目录存在
+                from pathlib import Path
+                Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
+                self.client = MilvusClient(uri=self.db_path)
+                logger.info(f"连接 Milvus Lite: {self.db_path}")
+            else:
+                # 远程 Milvus 模式
+                self.client = MilvusClient(uri=f"http://{self.host}:{self.port}")
+                logger.info(f"连接 Milvus: {self.host}:{self.port}")
         except Exception as e:
             logger.error(f"连接 Milvus 失败: {str(e)}")
             raise
 
     def _ensure_collection(self):
         """确保集合存在"""
-        if not self.client.has_collection(self.collection_name):
+        has_collection = self.client.has_collection(self.collection_name)
+        logger.info(f"检查集合是否存在: {self.collection_name}, 结果: {has_collection}")
+        
+        if not has_collection:
+            # 准备 HNSW 索引参数（与 FAISS HNSW 配置一致）
+            index_params = self.client.prepare_index_params()
+            index_params.add_index(
+                field_name="vector",
+                index_type="HNSW",
+                metric_type="COSINE",
+                params={
+                    "M": 16,              # 每个节点的最大连接数
+                    "efConstruction": 200  # 构建时的搜索宽度
+                }
+            )
+
             self.client.create_collection(
                 collection_name=self.collection_name,
                 dimension=self.dimension,
                 metric_type="COSINE",
+                enable_dynamic_field=True,  # 启用动态字段支持元数据
+                index_params=index_params,
             )
-            logger.info(f"创建 Milvus 集合: {self.collection_name}")
-        self.collection = self.client.get_collection(self.collection_name)
+            logger.info(f"创建 Milvus 集合: {self.collection_name} (HNSW索引, M=16, efConstruction=200)")
+        # MilvusClient 不需要获取 collection 对象，直接使用 collection_name 即可
 
     def add_vectors(self, vectors: np.ndarray, metadata: List[Dict]):
         """添加向量"""
@@ -346,17 +453,26 @@ class MilvusDatabase(VectorDatabase):
         if vectors.ndim == 1:
             vectors = vectors.reshape(1, -1)
 
-        # 准备数据
-        ids = [
-            str(i) for i in range(self.total_vectors, self.total_vectors + len(vectors))
-        ]
+        # 准备数据 - 使用正确的字典格式
+        data = []
+        for i, (vec, meta) in enumerate(zip(vectors, metadata)):
+            # Milvus 要求 id 是 int64 类型
+            record = {
+                "id": self.total_vectors + i,  # 使用整数 id
+                "vector": vec.tolist(),
+            }
+            # 添加元数据字段（将 chunk_id 保存为单独字段）
+            for key, value in meta.items():
+                if key != "id" and key != "vector":
+                    # 将列表转换为字符串（Milvus 不支持列表类型）
+                    if isinstance(value, list):
+                        record[key] = str(value)
+                    else:
+                        record[key] = value
+            data.append(record)
 
         # 插入向量
-        data = [ids, vectors.tolist(), metadata]
         self.client.insert(self.collection_name, data=data)
-
-        # 刷新
-        self.client.flush(self.collection_name)
 
         self.total_vectors += len(vectors)
         logger.info(f"添加 {len(vectors)} 个向量到 Milvus (总数: {self.total_vectors})")
@@ -365,6 +481,9 @@ class MilvusDatabase(VectorDatabase):
         self, query_vector: np.ndarray, top_k: int = 5
     ) -> Tuple[np.ndarray, List[Dict]]:
         """搜索向量"""
+        # 确保集合存在
+        self._ensure_collection()
+
         if not isinstance(query_vector, np.ndarray):
             query_vector = np.array(query_vector, dtype=np.float32)
 
@@ -372,12 +491,18 @@ class MilvusDatabase(VectorDatabase):
         if query_vector.ndim == 1:
             query_vector = query_vector.reshape(1, -1)
 
+        # HNSW 搜索参数：ef 值越大，召回率越高，但搜索越慢
+        search_params = {
+            "params": {"ef": max(128, top_k * 4)}  # 与 FAISS HNSW efSearch 一致
+        }
+
         # 搜索
         results = self.client.search(
             collection_name=self.collection_name,
             data=query_vector.tolist(),
             limit=top_k,
             output_fields=["*"],
+            search_params=search_params,
         )
 
         # 提取距离和元数据
@@ -405,11 +530,20 @@ class MilvusDatabase(VectorDatabase):
         except:
             num_entities = 0
 
+        # 计算数据库文件大小（仅 Milvus Lite 有本地文件）
+        db_size = 0
+        if self.db_path:
+            from pathlib import Path
+            db_file = Path(self.db_path)
+            if db_file.exists():
+                db_size = db_file.stat().st_size
+
         return VectorStatus(
-            db_type="milvus",
+            db_type="milvus_lite" if self.db_path else "milvus",
             total_vectors=num_entities,
             dimension=self.dimension,
             status="ready",
+            db_size=db_size,
         )
 
     def save(self):
@@ -419,6 +553,106 @@ class MilvusDatabase(VectorDatabase):
     def load(self):
         """加载数据库 (Milvus 自动加载)"""
         logger.info("Milvus 自动加载数据")
+
+    def get_all_metadata(self) -> List[Dict[str, Any]]:
+        """
+        获取所有文档片段的元数据
+
+        Returns:
+            文档片段元数据列表
+        """
+        try:
+            self._ensure_collection()
+            
+            # 使用 query 获取所有数据
+            results = self.client.query(
+                collection_name=self.collection_name,
+                filter="",  # 空过滤器获取所有数据
+                output_fields=["*"],
+                limit=10000  # 限制最大数量
+            )
+            
+            logger.info(f"Milvus 获取到 {len(results)} 条元数据")
+            return results
+            
+        except Exception as e:
+            logger.error(f"Milvus 获取所有元数据失败: {str(e)}")
+            return []
+
+    def clear(self):
+        """清空数据库
+        
+        修复：先关闭连接释放文件句柄，再删除文件，最后重新连接。
+        这样可以避免 "Channel closed" 和 "internal error" 错误。
+        """
+        import os
+        import gc
+        import time
+
+        try:
+            # 步骤 1: 先关闭连接，释放文件句柄（关键修复点）
+            if self.client is not None:
+                try:
+                    # 先尝试删除集合（在连接还活着的时候）
+                    if hasattr(self.client, 'has_collection') and self.client.has_collection(self.collection_name):
+                        self.client.drop_collection(self.collection_name)
+                        logger.info(f"已删除 Milvus 集合: {self.collection_name}")
+                except Exception as e:
+                    logger.warning(f"删除集合时出错（可能已不存在）: {str(e)}")
+                
+                try:
+                    if hasattr(self.client, 'close'):
+                        self.client.close()
+                        logger.info("已关闭旧的 Milvus 连接")
+                except Exception as e:
+                    logger.warning(f"关闭旧连接时出错: {str(e)}")
+                finally:
+                    self.client = None
+            
+            # 强制垃圾回收，确保资源释放
+            gc.collect()
+            
+            # 给一点时间让操作系统释放文件句柄
+            time.sleep(0.1)
+
+            # 步骤 2: 删除文件（连接已关闭，文件句柄已释放）
+            if self.db_path:
+                db_file = Path(self.db_path)
+                
+                # 删除数据库文件
+                if db_file.exists():
+                    try:
+                        os.remove(str(db_file))
+                        logger.info(f"已删除 Milvus Lite 数据库文件: {self.db_path}")
+                    except PermissionError:
+                        # 文件可能仍被占用，稍等重试
+                        logger.warning("文件被占用，等待后重试...")
+                        time.sleep(0.5)
+                        gc.collect()
+                        os.remove(str(db_file))
+                        logger.info(f"重试成功，已删除 Milvus Lite 数据库文件: {self.db_path}")
+                
+                # 删除锁文件（Milvus Lite 锁文件格式：.<filename>.lock）
+                lock_file = db_file.parent / f".{db_file.name}.lock"
+                if lock_file.exists():
+                    try:
+                        os.remove(str(lock_file))
+                        logger.info(f"已删除锁文件: {lock_file}")
+                    except Exception as e:
+                        logger.warning(f"删除锁文件失败: {str(e)}")
+            
+            # 步骤 3: 重新建立连接
+            self._connect()
+            logger.info(f"已重新连接 Milvus Lite: {self.db_path}")
+
+            # 重置状态
+            self.total_vectors = 0
+
+            logger.info("Milvus 数据库已清空")
+            return True
+        except Exception as e:
+            logger.error(f"清空 Milvus 数据库失败: {str(e)}")
+            return False
 
 
 class VectorDatabaseManager:
@@ -445,6 +679,14 @@ class VectorDatabaseManager:
                     config.host or settings.milvus_host,
                     config.port or settings.milvus_port,
                     config.collection_name or settings.milvus_collection_name,
+                )
+            elif config.db_type == VectorDBType.MILVUS_LITE:
+                # Milvus Lite 模式：使用本地文件
+                db_path = config.index_path or settings.milvus_lite_db_path
+                self.db = MilvusDatabase(
+                    config.dimension,
+                    db_path=db_path,
+                    collection_name=config.collection_name or settings.milvus_collection_name,
                 )
             else:
                 raise ValueError(f"不支持的向量数据库类型: {config.db_type}")
@@ -495,8 +737,8 @@ class VectorDatabaseManager:
             # self._update_secondary_indices(vectors, metadata)
         except Exception as e:
             logger.error(f"添加向量失败: {str(e)}")
-            # 不抛出异常，避免系统崩溃
-            return
+            # 抛出异常，让调用方知道操作失败
+            raise RuntimeError(f"添加向量失败: {str(e)}")
 
     def _apply_filter(self, metadata: Dict, filters: Dict) -> bool:
         """应用过滤器"""
@@ -580,6 +822,10 @@ class VectorDatabaseManager:
             if self.db is None:
                 return []
 
+            # 对于Milvus数据库，调用其get_all_metadata方法
+            if hasattr(self.db, "get_all_metadata") and callable(getattr(self.db, "get_all_metadata")):
+                return self.db.get_all_metadata()
+
             # 对于FAISS数据库，直接返回metadata
             if hasattr(self.db, "metadata") and isinstance(self.db.metadata, dict):
                 all_metadata = []
@@ -597,6 +843,70 @@ class VectorDatabaseManager:
         except Exception as e:
             logger.error(f"获取所有元数据失败: {str(e)}")
             return []
+
+    def clear(self) -> bool:
+        """
+        清空向量数据库
+        
+        Returns:
+            是否成功
+        """
+        import os
+        
+        try:
+            if self.db is None:
+                logger.warning("向量数据库未初始化，无需清空")
+                return True
+            
+            # 调用数据库的 clear 方法
+            if hasattr(self.db, "clear") and callable(getattr(self.db, "clear")):
+                success = self.db.clear()
+            else:
+                logger.warning("当前数据库类型不支持 clear 方法")
+                success = False
+            
+            # 清空文档元数据文件 (documents.json)
+            if self.config and self.config.index_path:
+                docs_path = Path(self.config.index_path) / "documents.json"
+            else:
+                docs_path = Path(settings.vector_db_dir) / "documents.json"
+            
+            if docs_path.exists():
+                os.remove(str(docs_path))
+                logger.info(f"已删除文档元数据文件: {docs_path}")
+            
+            # 清空 BM25 索引文件
+            bm25_index_path = Path(settings.vector_db_dir) / "bm25_index.pkl"
+            if bm25_index_path.exists():
+                os.remove(str(bm25_index_path))
+                logger.info(f"已删除 BM25 索引文件: {bm25_index_path}")
+            
+            # 清空 Milvus Lite 数据库文件（确保文件被删除）
+            # 注意：MilvusDatabase.clear() 已经处理了这个，这里作为备份
+            milvus_db_path = Path(settings.vector_db_dir) / "milvus_lite.db"
+            if milvus_db_path.exists():
+                try:
+                    os.remove(str(milvus_db_path))
+                    logger.info(f"已删除 Milvus Lite 数据库文件: {milvus_db_path}")
+                except Exception as e:
+                    logger.warning(f"删除 Milvus Lite 数据库文件失败（可能被占用）: {e}")
+            
+            # 清空 BM25 和元数据的全局缓存
+            try:
+                from services.retriever import clear_global_caches
+                clear_global_caches()
+                logger.info("已清空 BM25 和元数据全局缓存")
+            except Exception as e:
+                logger.warning(f"清空全局缓存时出错: {str(e)}")
+            
+            # 重置状态
+            self.last_update_time = 0
+            
+            logger.info("向量数据库已完全清空")
+            return success
+        except Exception as e:
+            logger.error(f"清空向量数据库失败: {str(e)}")
+            return False
 
 
 # 全局向量数据库实例

@@ -1,9 +1,19 @@
 import logging
 import os
+import sys
 import time
 from pathlib import Path
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
+
+
+def _safe_print(msg):
+    """安全打印到原始 stderr，避免递归"""
+    try:
+        sys.__stderr__.write(str(msg) + '\n')
+        sys.__stderr__.flush()
+    except Exception:
+        pass
 
 
 class SmartRotatingFileHandler(logging.FileHandler):
@@ -48,6 +58,9 @@ class SmartRotatingFileHandler(logging.FileHandler):
         
         # 创建线程池用于异步处理文件操作
         self.executor = ThreadPoolExecutor(max_workers=2)
+        
+        # 递归保护标志
+        self._in_emit = False
         
         # 确保日志目录存在
         log_dir = os.path.dirname(filename)
@@ -134,7 +147,7 @@ class SmartRotatingFileHandler(logging.FileHandler):
             self.executor.submit(self._perform_rollover)
         except Exception as e:
             # 轮转失败时的错误处理
-            print(f"Error during log rollover: {str(e)}")
+            _safe_print(f"Error during log rollover: {str(e)}")
 
     def _perform_rollover(self):
         """
@@ -173,7 +186,7 @@ class SmartRotatingFileHandler(logging.FileHandler):
                 # 重命名当前文件为备份文件
                 if os.path.exists(self.baseFilename):
                     os.rename(self.baseFilename, backup_path)
-                    print(f"Log file rolled over to: {backup_path}")
+                    _safe_print(f"Log file rolled over to: {backup_path}")
 
                 # 清理旧的备份文件
                 self._cleanup_old_backups()
@@ -189,15 +202,15 @@ class SmartRotatingFileHandler(logging.FileHandler):
 
             except Exception as e:
                 # 轮转失败时的错误处理
-                print(f"Error performing log rollover (attempt {attempt + 1}/{max_retries}): {str(e)}")
+                _safe_print(f"Error performing log rollover (attempt {attempt + 1}/{max_retries}): {str(e)}")
                 
                 if attempt < max_retries - 1:
-                    print(f"Retrying in {retry_delay} seconds...")
+                    _safe_print(f"Retrying in {retry_delay} seconds...")
                     time.sleep(retry_delay)
                     retry_delay *= 2  # 指数退避
                 else:
                     # 最后一次尝试失败
-                    print(f"Max retries reached. Log rollover failed.")
+                    _safe_print(f"Max retries reached. Log rollover failed.")
                     # 尝试重新打开日志文件
                     try:
                         if not self.delay:
@@ -237,12 +250,12 @@ class SmartRotatingFileHandler(logging.FileHandler):
                 for _, file_path in backup_files[self.backup_count:]:
                     try:
                         os.remove(file_path)
-                        print(f"Cleaned up old backup file: {file_path}")
+                        _safe_print(f"Cleaned up old backup file: {file_path}")
                     except Exception as e:
-                        print(f"Error cleaning up old backup file {file_path}: {str(e)}")
+                        _safe_print(f"Error cleaning up old backup file {file_path}: {str(e)}")
 
         except Exception as e:
-            print(f"Error cleaning up old backups: {str(e)}")
+            _safe_print(f"Error cleaning up old backups: {str(e)}")
 
     def emit(self, record):
         """
@@ -251,54 +264,62 @@ class SmartRotatingFileHandler(logging.FileHandler):
         Args:
             record: 日志记录对象
         """
+        # 防止递归：如果已经在 emit 中，直接返回
+        if self._in_emit:
+            return
+        
+        self._in_emit = True
         max_retries = 3
         retry_delay = 0.1  # 100毫秒
 
-        for attempt in range(max_retries):
-            try:
-                # 检查是否需要轮转
-                if self.shouldRollover(record):
-                    self.doRollover()
+        try:
+            for attempt in range(max_retries):
+                try:
+                    # 检查是否需要轮转
+                    if self.shouldRollover(record):
+                        self.doRollover()
 
-                # 调用父类的emit方法
-                super().emit(record)
+                    # 调用父类的emit方法
+                    super().emit(record)
 
-                # 刷新流，确保日志实时写入
-                self.flush()
+                    # 刷新流，确保日志实时写入
+                    self.flush()
 
-                return  # 成功完成，退出重试循环
+                    return  # 成功完成，退出重试循环
 
-            except Exception as e:
-                # 写入失败时的错误处理
-                print(f"Error emitting log record (attempt {attempt + 1}/{max_retries}): {str(e)}")
-                
-                if attempt < max_retries - 1:
-                    print(f"Retrying in {retry_delay} seconds...")
-                    time.sleep(retry_delay)
-                    retry_delay *= 2  # 指数退避
+                except Exception as e:
+                    # 写入失败时的错误处理
+                    _safe_print(f"Error emitting log record (attempt {attempt + 1}/{max_retries}): {str(e)}")
                     
-                    # 尝试重新打开流
-                    try:
-                        if self.stream:
-                            self.stream.close()
-                            self.stream = None
-                        if not self.delay:
-                            self.stream = self._open()
-                    except Exception as reopen_error:
-                        print(f"Error reopening log stream: {str(reopen_error)}")
-                else:
-                    # 最后一次尝试失败
-                    print(f"Max retries reached. Log record emission failed.")
-                    # 尝试重新打开流作为最后的努力
-                    try:
-                        if self.stream:
-                            self.stream.close()
-                            self.stream = None
-                        if not self.delay:
-                            self.stream = self._open()
-                    except Exception:
-                        pass
-                    # 即使失败，也不抛出异常，确保应用程序主流程不受影响
+                    if attempt < max_retries - 1:
+                        _safe_print(f"Retrying in {retry_delay} seconds...")
+                        time.sleep(retry_delay)
+                        retry_delay *= 2  # 指数退避
+                        
+                        # 尝试重新打开流
+                        try:
+                            if self.stream:
+                                self.stream.close()
+                                self.stream = None
+                            if not self.delay:
+                                self.stream = self._open()
+                        except Exception as reopen_error:
+                            _safe_print(f"Error reopening log stream: {str(reopen_error)}")
+                    else:
+                        # 最后一次尝试失败
+                        _safe_print(f"Max retries reached. Log record emission failed.")
+                        # 尝试重新打开流作为最后的努力
+                        try:
+                            if self.stream:
+                                self.stream.close()
+                                self.stream = None
+                            if not self.delay:
+                                self.stream = self._open()
+                        except Exception:
+                            pass
+                        # 即使失败，也不抛出异常，确保应用程序主流程不受影响
+        finally:
+            self._in_emit = False
 
     def close(self):
         """
@@ -314,7 +335,7 @@ class SmartRotatingFileHandler(logging.FileHandler):
             self.executor.shutdown(wait=False)
 
         except Exception as e:
-            print(f"Error closing log handler: {str(e)}")
+            _safe_print(f"Error closing log handler: {str(e)}")
 
         super().close()
 
@@ -360,9 +381,9 @@ def setup_rotating_logger(name="rag_backend", max_bytes=5*1024*1024, backup_coun
             delay=False
         )
         file_handler.setLevel(logging.DEBUG)
-        print(f"Smart rotating file handler created successfully for: {log_file_path}")
+        _safe_print(f"Smart rotating file handler created successfully for: {log_file_path}")
     except Exception as e:
-        print(f"Error creating smart rotating file handler: {str(e)}")
+        _safe_print(f"Error creating smart rotating file handler: {str(e)}")
         # 创建一个简单的文件处理器作为备用
         file_handler = logging.FileHandler(log_file_path, encoding="utf-8", delay=False)
         file_handler.setLevel(logging.DEBUG)
@@ -379,7 +400,7 @@ def setup_rotating_logger(name="rag_backend", max_bytes=5*1024*1024, backup_coun
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
 
-    print(f"Rotating logger setup complete with {len(logger.handlers)} handlers")
+    _safe_print(f"Rotating logger setup complete with {len(logger.handlers)} handlers")
     return logger
 
 

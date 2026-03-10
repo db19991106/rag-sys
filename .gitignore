@@ -72,3 +72,6 @@ dataset/
 __pycache__/
 .cache/
 
+
+# 大型模型文件目录
+models/

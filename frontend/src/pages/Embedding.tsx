@@ -9,16 +9,17 @@ const Embedding: React.FC = () => {
 
   const [chunkVecList, setChunkVecList] = useState<Chunk[]>([]);
   const [showModelSelector, setShowModelSelector] = useState(false);
-  const [currentModel, setCurrentModel] = useState('BAAI/bge-base-zh-v1.5');
-  const [vectorDimension, setVectorDimension] = useState(512);
+  const [currentModel, setCurrentModel] = useState('BAAI/bge-m3');
+  const [vectorDimension, setVectorDimension] = useState(1024);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const availableModels = [
-    { name: 'BAAI/bge-small-zh-v1.5', type: 'bge', dimension: 512, desc: '轻量级中文模型,速度快' },
+    { name: 'BAAI/bge-m3', type: 'sentence-transformers', dimension: 1024, desc: 'BGE-M3 多语言模型（推荐）' },
     { name: 'BAAI/bge-base-zh-v1.5', type: 'bge', dimension: 768, desc: '平衡型中文模型' },
     { name: 'BAAI/bge-large-zh-v1.5', type: 'bge', dimension: 1024, desc: '高精度中文模型' },
-    { name: 'text2vec-base-chinese', type: 'text2vec', dimension: 768, desc: '通用中文文本模型' },
-    { name: 'ernie-embeddings-v2', type: 'ernie', dimension: 1024, desc: '百度ERNIE模型' }
+    { name: 'text2vec-base-chinese', type: 'sentence-transformers', dimension: 768, desc: '通用中文文本模型' },
+    { name: 'moka-ai/m3e-base', type: 'sentence-transformers', dimension: 768, desc: 'M3E模型，性能优异' },
+    { name: 'openai/text-embedding-3-small', type: 'openai', dimension: 1536, desc: 'OpenAI官方模型' }
   ];
 
   const loadActualChunkVecData = async () => {
@@ -80,7 +81,7 @@ const Embedding: React.FC = () => {
   useEffect(() => {
     const loadSystemSettings = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/settings`);
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000'}/settings`);
         if (response.ok) {
           const settings = await response.json();
           if (settings.data && settings.data.embedding_model_name) {
@@ -126,7 +127,7 @@ const Embedding: React.FC = () => {
 
     try {
       setIsGenerating(true);
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/chunking/embed?doc_id=${docId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000'}/chunking/embed?doc_id=${docId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

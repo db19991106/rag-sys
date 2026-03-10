@@ -7,19 +7,18 @@ const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
-  const { login } = useAuth();
+  const { login, isLoading, error } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     const success = await login(username, password);
     if (success) {
       setShowSuccess(true);
       setTimeout(() => {
         navigate('/chat');
-      }, 2000);
-    } else {
-      alert('账号或密码错误,请重试!');
+      }, 1500);
     }
   };
 
@@ -28,20 +27,15 @@ const Login: React.FC = () => {
     setPassword('');
   };
 
-  const handleBack = () => {
-    setShowSuccess(false);
-    handleReset();
-  };
-
   if (showSuccess) {
     return (
       <div className="login-container">
         <div className="success-page">
-          <h2>登录成功!</h2>
-          <p>欢迎进入系统,正在为您跳转...</p>
-          <button className="back-btn" onClick={handleBack}>
-            返回登录页
-          </button>
+          <div className="success-icon">
+            <i className="fas fa-check-circle"></i>
+          </div>
+          <h2>登录成功</h2>
+          <p>欢迎进入系统，正在为您跳转...</p>
         </div>
       </div>
     );
@@ -50,37 +44,67 @@ const Login: React.FC = () => {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h2 className="login-title">用户登录</h2>
+        <div className="login-header">
+          <div className="login-logo">
+            <i className="fas fa-brain"></i>
+          </div>
+          <h2 className="login-title">RAG 助手</h2>
+          <p className="login-subtitle">智能文档检索与问答系统</p>
+        </div>
+        
         <form onSubmit={handleLogin}>
           <div className="form-item">
+            <div className="input-icon">
+              <i className="fas fa-user"></i>
+            </div>
             <input
               type="text"
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              placeholder="请输入用户名"
               required
+              disabled={isLoading}
             />
-            <label htmlFor="username">账号/手机号</label>
           </div>
+          
           <div className="form-item">
+            <div className="input-icon">
+              <i className="fas fa-lock"></i>
+            </div>
             <input
               type="password"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="请输入密码"
               required
+              disabled={isLoading}
             />
-            <label htmlFor="password">密码</label>
           </div>
+          
+          {error && (
+            <div className="login-error">
+              <i className="fas fa-exclamation-circle"></i>
+              <span>{error}</span>
+            </div>
+          )}
+          
           <div className="btn-group">
-            <button type="submit" className="btn-login">
-              登录
+            <button type="submit" className="btn-login" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <i className="fas fa-spinner fa-spin"></i>
+                  <span>登录中...</span>
+                </>
+              ) : (
+                <span>登录</span>
+              )}
             </button>
-            <button type="button" className="btn-reset" onClick={handleReset}>
+            <button type="button" className="btn-reset" onClick={handleReset} disabled={isLoading}>
               重置
             </button>
           </div>
-          <p className="tip">测试账号:admin | 测试密码:123456</p>
         </form>
       </div>
     </div>

@@ -9,6 +9,7 @@ interface AppDataContextType {
   documents: Document[];
   addDocument: (doc: Document) => void;
   addDocuments: (docs: Document[]) => void;
+  setDocuments: (docs: Document[]) => void;
   updateDocument: (id: string, updates: Partial<Document>) => void;
   deleteDocument: (id: string) => void;
   batchDeleteDocuments: (ids: string[]) => void;
@@ -36,6 +37,10 @@ export const AppDataProvider: React.FC<{ children: ReactNode }> = ({ children })
     setDocuments(prev => [...prev, ...docs]);
   }, []);
 
+  const replaceDocuments = useCallback((docs: Document[]) => {
+    setDocuments(docs);
+  }, []);
+
   const updateDocument = useCallback((id: string, updates: Partial<Document>) => {
     setDocuments(prev =>
       prev.map(doc => (doc.id === id ? { ...doc, ...updates } : doc))
@@ -54,6 +59,7 @@ export const AppDataProvider: React.FC<{ children: ReactNode }> = ({ children })
     documents,
     addDocument,
     addDocuments,
+    setDocuments: replaceDocuments,
     updateDocument,
     deleteDocument,
     batchDeleteDocuments,

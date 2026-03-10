@@ -110,35 +110,7 @@ class ContextAnalyzer:
         return "\n".join(history_lines)
 
     def _llm_is_contextual(self, history: List[Message], query: str) -> bool:
-        """判断：当前查询是否依赖历史对话（规则+LLM混合判断）"""
-        # 首先用规则快速判断：包含明显指代词
-        reference_words = [
-            "它",
-            "这",
-            "那",
-            "该",
-            "此",
-            "其",
-            "对方",
-            "他们",
-            "这个",
-            "那个",
-            "这种",
-            "那种",
-        ]
-        for word in reference_words:
-            if word in query:
-                logger.info(f"规则判断：查询中包含指代词「{word}」，依赖上下文")
-                return True
-
-        # 如果查询太短（少于10字），很可能是省略句，依赖上下文
-        if len(query) < 10:
-            logger.info(
-                f"规则判断：查询过短（{len(query)}字），可能省略主语，依赖上下文"
-            )
-            return True
-
-        # 否则使用LLM判断
+        """使用 LLM 判断当前查询是否依赖历史对话"""
         history_str = self._format_history(history)
 
         prompt = f"""你是对话上下文关联性判断专家，请严格按规则判断。
@@ -149,15 +121,12 @@ class ContextAnalyzer:
 【当前用户查询】
 {query}
 
-判断规则（满足任一即依赖上下文）：
-1. 如果查询包含指代词（它、这、那、该、此、其、这个、那个、这种、那种等）→ 依赖上下文
+判断规则：
+1. 如果查询包含指代词（它、这、那、该、此、其、对方、他们、这个、那个、这种、那种等）→ 依赖上下文
 2. 如果查询不完整、缺少主语或宾语 → 依赖上下文
 3. 如果查询需要结合历史才能理解 → 依赖上下文
 4. 只有查询本身完整独立、无需历史即可理解 → 不依赖
-
-重要：
-- "那"、"这个"、"该"等词是指代词，出现时一定依赖上下文！
-- 只回答"是"或"否"，不要解释
+5. 只回答"是"或"否"，不要解释
 
 请回答："""
 

@@ -13,7 +13,7 @@ def check_vector_db():
     print("=" * 60)
 
     # 1. 检查状态
-    resp = requests.get("http://localhost:8000/vector-db/status")
+    resp = requests.get("http://localhost:9000/vector-db/status")
     status = resp.json()
     print(f"\n📊 当前状态:")
     print(f"   总向量数: {status['total_vectors']}")
@@ -21,7 +21,7 @@ def check_vector_db():
     print(f"   类型: {status['db_type']}")
 
     # 2. 检查文档
-    resp = requests.get("http://localhost:8000/vector-db/documents")
+    resp = requests.get("http://localhost:9000/vector-db/documents")
     docs = resp.json()
     print(f"\n📄 已索引文档:")
     if docs.get("data", {}).get("documents"):
@@ -37,7 +37,7 @@ def test_retrieval(query):
     """测试检索"""
     print(f"\n🔎 测试检索: '{query}'")
     resp = requests.post(
-        "http://localhost:8000/retrieval/search",
+        "http://localhost:9000/retrieval/search",
         json={
             "query": query,
             "config": {
@@ -58,7 +58,7 @@ def test_retrieval(query):
 def reindex_document(doc_id, doc_name):
     """重新索引文档"""
     print(f"\n🔄 重新索引: {doc_name}")
-    resp = requests.post(f"http://localhost:8000/chunking/embed?doc_id={doc_id}")
+    resp = requests.post(f"http://localhost:9000/chunking/embed?doc_id={doc_id}")
     if resp.status_code == 200:
         print(f"   ✅ 成功: {resp.json().get('message', '')}")
         return True
@@ -81,7 +81,7 @@ def main():
         print("=" * 60)
 
         # 获取所有已索引文档
-        resp = requests.get("http://localhost:8000/documents/list")
+        resp = requests.get("http://localhost:9000/documents/list")
         docs = resp.json()
 
         indexed_docs = [

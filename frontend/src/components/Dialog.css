@@ -1,0 +1,57 @@
+.dialog-content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.dialog-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xl);
+  font-size: var(--text-xl);
+  flex-shrink: 0;
+}
+
+.dialog-danger .dialog-icon {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.dialog-warning .dialog-icon {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.dialog-info .dialog-icon {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+.dialog-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dialog-title {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.dialog-message {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: var(--leading-relaxed);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}

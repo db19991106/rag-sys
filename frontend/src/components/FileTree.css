@@ -1,0 +1,99 @@
+.file-tree {
+  font-size: var(--text-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2);
+}
+
+.file-tree-group {
+  user-select: none;
+}
+
+.file-tree-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  color: var(--text-secondary);
+}
+
+.file-tree-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.file-tree-item.active {
+  background: var(--bg-selected);
+  color: var(--brand-primary);
+}
+
+.file-tree-folder-toggle {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: var(--text-2xs);
+  transition: var(--transition-fast);
+}
+
+.file-tree-folder-toggle:hover {
+  color: var(--text-primary);
+}
+
+.file-tree-folder-placeholder {
+  width: 16px;
+}
+
+.file-tree-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs);
+}
+
+.file-tree-icon.folder {
+  color: var(--color-warning);
+}
+
+.file-tree-icon.file {
+  color: var(--color-info);
+}
+
+.file-tree-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-tree-size {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.file-tree-children {
+  margin-left: var(--space-4);
+}
+
+.file-tree-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  color: var(--text-tertiary);
+  gap: var(--space-2);
+}
+
+.file-tree-empty i {
+  font-size: var(--text-2xl);
+  opacity: 0.5;
+}

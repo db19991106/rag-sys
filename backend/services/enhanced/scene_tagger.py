@@ -4,10 +4,13 @@
 """
 
 import re
+import os
+import torch
 from typing import List, Dict, Set, Optional
 from enum import Enum
 from dataclasses import dataclass
 from utils.logger import logger
+from config import settings
 
 
 class SceneTag(str, Enum):
@@ -33,16 +36,6 @@ class SceneTagResult:
 
 class SceneTagger:
     """场景标签识别器"""
-
-    # 指代词模式
-    HISTORY_REF_PATTERNS = [
-        r"[它这那此其这那][个]?[个]?",
-        r"[该上]述[的]?",
-        r"[之]?前[提到|说|的]?",
-        r"刚才[提到|说]?[的]?",
-        r"那个[东西|问题|内容]",
-        r"[这那]个[问题|东西|内容]",
-    ]
 
     # 对比词模式
     COMPARATIVE_PATTERNS = [
@@ -87,9 +80,6 @@ class SceneTagger:
     ]
 
     def __init__(self):
-        self.history_ref_regex = re.compile(
-            "|".join(self.HISTORY_REF_PATTERNS), re.IGNORECASE
-        )
         self.comparative_regex = re.compile(
             "|".join(self.COMPARATIVE_PATTERNS), re.IGNORECASE
         )
@@ -99,6 +89,115 @@ class SceneTagger:
         self.non_retrieval_regex = re.compile(
             "|".join(self.NON_RETRIEVAL_PATTERNS), re.IGNORECASE
         )
+        
+        # LLM 客户端用于判断历史引用
+        self.coref_llm = None
+        self.coref_tokenizer = None
+        self._coref_llm_initialized = False
+    
+    def _init_coref_llm(self):
+        """延迟初始化指代消解专用 LLM"""
+        if self._coref_llm_initialized:
+            return
+            
+        try:
+            os.environ['TQDM_DISABLE'] = '1'
+            os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '1'
+            os.environ['TRANSFORMERS_VERBOSITY'] = 'error'
+            os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+            
+            from transformers import AutoTokenizer, AutoModelForCausalLM
+            
+            model_path = settings.coref_llm_model_path
+            device = settings.coref_llm_device
+            
+            logger.info(f"[SceneTagger] 初始化 LLM: {model_path}")
+
+            import sys
+            from io import StringIO
+            
+            original_stdout = sys.stdout
+            original_stderr = sys.stderr
+            
+            try:
+                sys.stdout = StringIO()
+                sys.stderr = StringIO()
+                
+                self.coref_tokenizer = AutoTokenizer.from_pretrained(
+                    model_path,
+                    trust_remote_code=True
+                )
+
+                model_kwargs = {
+                    "torch_dtype": torch.float16 if device == "cuda" else torch.float32,
+                    "device_map": "auto" if device == "cuda" else None,
+                }
+
+                self.coref_llm = AutoModelForCausalLM.from_pretrained(
+                    model_path,
+                    trust_remote_code=True,
+                    **model_kwargs
+                )
+            finally:
+                sys.stdout = original_stdout
+                sys.stderr = original_stderr
+
+            if device == "cpu":
+                self.coref_llm = self.coref_llm.to(device)
+
+            self._coref_llm_initialized = True
+            logger.info(f"[SceneTagger] LLM 初始化完成")
+
+        except Exception as e:
+            logger.error(f"[SceneTagger] 初始化 LLM 失败: {str(e)}")
+            raise
+    
+    def _coref_llm_chat(self, prompt: str, temperature: float = 0.0) -> str:
+        """调用 LLM"""
+        if not self._coref_llm_initialized:
+            self._init_coref_llm()
+            
+        try:
+            messages = [{"role": "user", "content": prompt}]
+            text = self.coref_tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True
+            )
+
+            inputs = self.coref_tokenizer(
+                text,
+                return_tensors="pt",
+                truncation=True,
+                max_length=2048
+            ).to(self.coref_llm.device)
+
+            with torch.no_grad():
+                do_sample = True
+                temp = temperature
+                if temperature <= 0.0:
+                    do_sample = False
+                    temp = 1.0
+                
+                outputs = self.coref_llm.generate(
+                    **inputs,
+                    max_new_tokens=64,
+                    temperature=temp,
+                    top_p=0.9,
+                    do_sample=do_sample,
+                    pad_token_id=self.coref_tokenizer.eos_token_id
+                )
+
+            response = self.coref_tokenizer.decode(
+                outputs[0][inputs['input_ids'].shape[1]:],
+                skip_special_tokens=True
+            )
+
+            return response.strip()
+
+        except Exception as e:
+            logger.error(f"[SceneTagger] LLM 调用失败: {str(e)}")
+            return ""
 
     def tag(self, query: str, session_context: Optional[Dict] = None) -> SceneTagResult:
         """
@@ -179,28 +278,51 @@ class SceneTagger:
     def _detect_history_ref(
         self, query: str, session_context: Optional[Dict]
     ) -> tuple[bool, float]:
-        """检测历史引用"""
+        """使用 LLM 检测历史引用"""
         if not session_context or not session_context.get("has_history"):
             return False, 0.0
 
-        matches = self.history_ref_regex.findall(query)
-        if matches:
-            # 计算置信度 (基于匹配数量和位置)
-            confidence = min(0.6 + len(matches) * 0.1, 0.95)
-            return True, confidence
+        # 获取对话历史
+        history = session_context.get("history", [])
+        if not history:
+            return False, 0.0
+        
+        # 格式化对话历史（最近3轮）
+        recent_history = history[-3:] if len(history) > 3 else history
+        history_str = ""
+        for msg in recent_history:
+            role = msg.get("role", "")
+            content = msg.get("content", "")[:100]  # 截断过长的内容
+            role_cn = "用户" if role == "user" else "助手"
+            history_str += f"{role_cn}：{content}\n"
+        
+        # 使用 LLM 判断
+        prompt = f"""任务：判断用户查询是否需要参考对话历史。
 
-        # 检查是否有实体指代
-        if session_context.get("entities"):
-            entity_names = [e["name"] for e in session_context["entities"]]
-            for entity in entity_names:
-                if entity in query:
-                    return False, 0.0  # 有具体实体，不算指代
+对话历史：
+{history_str}
+当前查询：{query}
 
-        return False, 0.0
+判断标准：
+- 查询有"它/这/那/该/此"等代词 → 回答"是"
+- 查询省略了主语，需要历史补充 → 回答"是"
+- 查询完整独立，无需历史 → 回答"否"
 
-    def _extract_history_refs(self, query: str) -> List[str]:
-        """提取指代引用"""
-        return self.history_ref_regex.findall(query)
+只回答"是"或"否"："""
+
+        try:
+            resp = self._coref_llm_chat(prompt, temperature=0.0).strip()
+            is_contextual = resp == "是"
+            
+            if is_contextual:
+                logger.info(f"[SceneTagger] LLM 判断查询依赖历史: {query}")
+                return True, 0.85  # LLM 置信度
+            else:
+                return False, 0.0
+                
+        except Exception as e:
+            logger.error(f"[SceneTagger] LLM 判断失败: {str(e)}")
+            return False, 0.0
 
     def _detect_ambiguity(
         self, query: str, session_context: Optional[Dict]

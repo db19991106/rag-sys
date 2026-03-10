@@ -138,6 +138,12 @@ class APIGatewayMiddleware(BaseHTTPMiddleware):
         request.state.span_id = span_id
         request.state.baggage = baggage
 
+        # ===== 特殊处理: OPTIONS 请求 (CORS预检请求) =====
+        # OPTIONS 请求不需要鉴权，直接放行让 CORS 中间件处理
+        if request.method == "OPTIONS":
+            response = await call_next(request)
+            return response
+
         try:
             # ===== 阶段1: JWT鉴权 =====
             auth_result = await self._authenticate(request)
@@ -210,8 +216,32 @@ class APIGatewayMiddleware(BaseHTTPMiddleware):
 
     async def _authenticate(self, request: Request) -> Dict[str, Any]:
         """JWT鉴权"""
+        # 调试模式下跳过所有鉴权
+        if settings.debug:
+            return {"success": True, "user_id": "debug_user"}
+
         # 公开路径跳过鉴权
-        public_paths = ["/docs", "/openapi.json", "/health", "/", "/api/auth"]
+        public_paths = [
+            "/docs",
+            "/openapi.json",
+            "/health",
+            "/",
+            "/api/auth",
+            "/auth",
+            "/auth/login",
+            # API 路径全部设为公开（开发模式）
+            "/documents",
+            "/chunking",
+            "/embedding",
+            "/vector-db",
+            "/retrieval",
+            "/rag",
+            "/settings",
+            "/summary",
+            "/conversations",
+            "/cleaning",
+            "/sync",
+        ]
         if any(request.url.path.startswith(path) for path in public_paths):
             return {"success": True, "user_id": "anonymous"}
 
@@ -307,14 +337,35 @@ class APIGatewayMiddleware(BaseHTTPMiddleware):
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """请求日志中间件 - 记录所有请求"""
 
+    # 不记录日志的高频轮询路径
+    SKIP_LOG_PATTERNS = [
+        "/documents/list",      # 文档列表轮询
+        "/documents/local-docs", # 本地文档列表轮询
+        "/health",              # 健康检查
+        "/vector-db/documents", # 向量库文档列表轮询
+        "/settings",            # 设置获取轮询
+    ]
+
+    def _should_skip_log(self, method: str, path: str) -> bool:
+        """判断是否跳过日志记录"""
+        if method == "GET":
+            for pattern in self.SKIP_LOG_PATTERNS:
+                if path.startswith(pattern) or path == pattern:
+                    return True
+        return False
+
     async def dispatch(self, request: Request, call_next):
         start_time = datetime.utcnow()
         trace_id = getattr(request.state, "trace_id", "unknown")
 
-        # 记录请求
-        logger.info(
-            f"Request: {request.method} {request.url.path} [trace_id={trace_id}]"
-        )
+        # 检查是否跳过日志
+        skip_log = self._should_skip_log(request.method, request.url.path)
+
+        # 记录请求（跳过高频轮询）
+        if not skip_log:
+            logger.info(
+                f"Request: {request.method} {request.url.path} [trace_id={trace_id}]"
+            )
 
         try:
             response = await call_next(request)
@@ -322,10 +373,12 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             # 计算耗时
             duration = (datetime.utcnow() - start_time).total_seconds() * 1000
 
-            logger.info(
-                f"Response: {response.status_code} "
-                f"[duration={duration:.2f}ms, trace_id={trace_id}]"
-            )
+            # 记录响应（跳过高频轮询，或非200响应仍记录）
+            if not skip_log or response.status_code != 200:
+                logger.info(
+                    f"Response: {response.status_code} "
+                    f"[duration={duration:.2f}ms, trace_id={trace_id}]"
+                )
 
             return response
 

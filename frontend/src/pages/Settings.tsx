@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { settingsApi } from '../services/api';
+import { settingsApi, vectorDbApi } from '../services/api';
 import './Settings.css';
 
 interface SystemSettings {
@@ -33,13 +33,20 @@ interface SystemSettings {
   special_rules_enabled?: boolean;
 }
 
+interface VectorDBStatus {
+  db_type: string;
+  total_vectors: number;
+  dimension: number;
+  status: string;
+}
+
 // 可用的嵌入模型列表
 const EMBEDDING_MODELS = [
-  { name: 'BAAI/bge-small-zh-v1.5', type: 'bge', dimension: 512, desc: '轻量级中文模型，速度快' },
-  { name: 'BAAI/bge-base-zh-v1.5', type: 'bge', dimension: 768, desc: '平衡型中文模型（推荐）' },
+  { name: 'BAAI/bge-m3', type: 'sentence-transformers', dimension: 1024, desc: 'BGE-M3 多语言模型（推荐）' },
+  { name: 'BAAI/bge-base-zh-v1.5', type: 'bge', dimension: 768, desc: '平衡型中文模型' },
   { name: 'BAAI/bge-large-zh-v1.5', type: 'bge', dimension: 1024, desc: '高精度中文模型' },
   { name: 'text2vec-base-chinese', type: 'sentence-transformers', dimension: 768, desc: '通用中文文本模型' },
-  { name: 'moka-ai/m3e-base', type: 'bge', dimension: 768, desc: 'M3E模型，性能优异' },
+  { name: 'moka-ai/m3e-base', type: 'sentence-transformers', dimension: 768, desc: 'M3E模型，性能优异' },
   { name: 'openai/text-embedding-3-small', type: 'openai', dimension: 1536, desc: 'OpenAI官方模型' }
 ];
 
@@ -57,6 +64,11 @@ const Settings: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'embedding' | 'reranker' | 'vector_db' | 'content_organization'>('embedding');
+  
+  // 向量数据库相关状态
+  const [vectorDbStatus, setVectorDbStatus] = useState<VectorDBStatus | null>(null);
+  const [originalDbType, setOriginalDbType] = useState<string>('');
+  const [switchingDb, setSwitchingDb] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -69,6 +81,15 @@ const Settings: React.FC = () => {
       const data = await settingsApi.get();
       console.log('系统设置加载成功:', data);
       setSettings(data);
+      setOriginalDbType(data.vector_db_type);
+      
+      // 加载向量数据库状态
+      try {
+        const status = await vectorDbApi.getStatus();
+        setVectorDbStatus(status);
+      } catch (e) {
+        console.warn('获取向量数据库状态失败:', e);
+      }
     } catch (error) {
       console.error('加载设置失败:', error);
       showMessage('error', '加载设置失败: ' + (error instanceof Error ? error.message : '未知错误'));
@@ -82,8 +103,45 @@ const Settings: React.FC = () => {
     
     try {
       setSaving(true);
+      
+      // 检查向量数据库类型是否变化
+      const dbTypeChanged = settings.vector_db_type !== originalDbType;
+      
+      // 保存设置
       await settingsApi.update(settings);
-      showMessage('success', '设置保存成功！');
+      
+      // 如果向量数据库类型变化，需要重新初始化
+      if (dbTypeChanged) {
+        setSwitchingDb(true);
+        showMessage('success', '设置保存成功，正在切换向量数据库...');
+        
+        try {
+          // 构建初始化配置
+          const initConfig = {
+            db_type: settings.vector_db_type as 'faiss' | 'milvus' | 'milvus_lite' | 'qdrant',
+            dimension: settings.vector_db_dimension,
+            index_type: settings.vector_db_index_type,
+            host: settings.vector_db_host || undefined,
+            port: settings.vector_db_port || undefined,
+            collection_name: settings.vector_db_collection_name || undefined,
+          };
+          
+          await vectorDbApi.init(initConfig);
+          
+          // 更新状态
+          setOriginalDbType(settings.vector_db_type);
+          const status = await vectorDbApi.getStatus();
+          setVectorDbStatus(status);
+          
+          showMessage('success', `向量数据库已切换为 ${settings.vector_db_type.toUpperCase()}`);
+        } catch (initError) {
+          showMessage('error', '切换向量数据库失败: ' + (initError instanceof Error ? initError.message : '未知错误'));
+        } finally {
+          setSwitchingDb(false);
+        }
+      } else {
+        showMessage('success', '设置保存成功！');
+      }
     } catch (error) {
       showMessage('error', '保存设置失败: ' + (error instanceof Error ? error.message : '未知错误'));
     } finally {
@@ -347,6 +405,38 @@ const Settings: React.FC = () => {
               <p>配置向量数据库连接参数</p>
             </div>
             <div className="panel-body">
+              {/* 当前状态显示 */}
+              {vectorDbStatus && (
+                <div className="form-section status-section">
+                  <h4>当前状态</h4>
+                  <div className="status-grid">
+                    <div className="status-item">
+                      <span className="status-label">数据库类型</span>
+                      <span className="status-value highlight">{vectorDbStatus.db_type.toUpperCase()}</span>
+                    </div>
+                    <div className="status-item">
+                      <span className="status-label">向量数量</span>
+                      <span className="status-value">{vectorDbStatus.total_vectors.toLocaleString()}</span>
+                    </div>
+                    <div className="status-item">
+                      <span className="status-label">向量维度</span>
+                      <span className="status-value">{vectorDbStatus.dimension}</span>
+                    </div>
+                    <div className="status-item">
+                      <span className="status-label">运行状态</span>
+                      <span className={`status-value ${vectorDbStatus.status === 'ready' ? 'status-ready' : 'status-error'}`}>
+                        {vectorDbStatus.status === 'ready' ? '✓ 正常' : '✗ 异常'}
+                      </span>
+                    </div>
+                  </div>
+                  {switchingDb && (
+                    <div className="switching-notice">
+                      <i className="fas fa-spinner fa-spin"></i> 正在切换向量数据库...
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="form-section">
                 <h4>数据库类型</h4>
                 <div className="form-item">
@@ -355,11 +445,18 @@ const Settings: React.FC = () => {
                     className="form-select"
                     value={settings.vector_db_type}
                     onChange={(e) => setSettings({ ...settings, vector_db_type: e.target.value })}
+                    disabled={switchingDb}
                   >
                     <option value="faiss">FAISS (本地文件)</option>
+                    <option value="milvus_lite">Milvus Lite (本地文件，推荐)</option>
                     <option value="milvus">Milvus (分布式)</option>
                     <option value="qdrant">Qdrant (分布式)</option>
                   </select>
+                  {settings.vector_db_type !== originalDbType && (
+                    <small className="form-hint warning">
+                      ⚠️ 类型已修改，保存后将切换到新的向量数据库（原数据不会迁移）
+                    </small>
+                  )}
                 </div>
                 <div className="form-item">
                   <label className="form-label">向量维度</label>

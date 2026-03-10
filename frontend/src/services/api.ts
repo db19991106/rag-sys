@@ -1,5 +1,26 @@
 // API 客户端服务
 
+import type {
+  Document,
+  Chunk,
+  ChunkConfig,
+  EmbeddingConfig,
+  VectorDBConfig,
+  RetrievalConfig,
+  RetrievalResult,
+  RAGRequest,
+  RAGResponse,
+  StreamEvent,
+  StreamMetadata,
+  VectorDocument,
+  VectorDBStatus,
+  LocalDocItem,
+  Conversation,
+  IntentRecognitionResult,
+  SummaryResponse,
+  SimilarChunkResult,
+} from '../types';
+
 // 修改点：改为 /api 前缀，通过 Vite 代理转发到后端
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -18,14 +39,22 @@ async function request<T>(
     },
   };
 
-  const response = await fetch(url, { ...defaultOptions, ...options });
+  try {
+    const response = await fetch(url, { ...defaultOptions, ...options });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: '请求失败' }));
-    throw new Error(error.message || error.detail || '请求失败');
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: '请求失败' }));
+      throw new Error(error.message || error.detail || '请求失败');
+    }
+
+    return response.json();
+  } catch (error) {
+    // 处理网络错误
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('网络连接失败，请检查：\n1. 后端服务是否已启动\n2. 网络连接是否正常');
+    }
+    throw error;
   }
-
-  return response.json();
 }
 
 // ========== 文档管理 API ==========
@@ -35,21 +64,28 @@ export const documentApi = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_BASE_URL}/documents/upload`, {
-      method: 'POST',
-      body: formData,
-      // 不要手动设置 Content-Type，让浏览器自动设置（包含 boundary）
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/documents/upload`, {
+        method: 'POST',
+        body: formData,
+        // 不要手动设置 Content-Type，让浏览器自动设置（包含 boundary）
+      });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: '上传失败' }));
-      throw new Error(error.message || error.detail || '上传失败');
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: '上传失败' }));
+        throw new Error(error.message || error.detail || '上传失败');
+      }
+
+      return response.json();
+    } catch (error) {
+      // 处理网络错误
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('网络连接失败，请检查后端服务是否已启动');
+      }
+      throw error;
     }
-
-    return response.json();
   },
 
-  // 其他方法保持不变...
   list: async () => {
     return request<Document[]>('/documents/list');
   },
@@ -75,14 +111,15 @@ export const documentApi = {
     });
   },
 
-  // 获取本地 data/docs 目录中的文档列表
+  // 获取本地 data/docs 目录中的文档列表（树形结构）
   listLocalDocs: async () => {
-    return request<Array<{ id: string; name: string; size: string; path: string }>>('/documents/local-docs');
+    return request<LocalDocItem[]>('/documents/local-docs');
   },
 
-  // 获取本地文档内容
+  // 获取本地文档内容（docId 为完整路径，自动 URL 编码）
   getLocalDocContent: async (docId: string) => {
-    return request<{ content: string }>(`/documents/local-docs/${docId}/content`);
+    const encodedPath = encodeURIComponent(docId);
+    return request<{ content: string; type: string; extension?: string; path?: string }>(`/documents/local-docs/${encodedPath}/content`);
   },
 };
 
@@ -98,6 +135,30 @@ export const chunkingApi = {
   embed: async (docId: string) => {
     return request<{ success: boolean; message: string }>(`/chunking/embed?doc_id=${docId}`, {
       method: 'POST',
+    });
+  },
+
+  // 批量切分文档
+  batchSplit: async (docIds: string[], config: ChunkConfig, autoEmbed: boolean = true) => {
+    return request<{
+      success: boolean;
+      message: string;
+      data: {
+        total: number;
+        success: number;
+        failed: number;
+        total_chunks: number;
+        details: Array<{
+          doc_id: string;
+          doc_name: string;
+          status: string;
+          chunk_count?: number;
+          error?: string;
+        }>;
+      };
+    }>('/chunking/batch-split', {
+      method: 'POST',
+      body: JSON.stringify({ doc_ids: docIds, config, auto_embed: autoEmbed }),
     });
   },
 };
@@ -132,12 +193,7 @@ export const vectorDbApi = {
   },
 
   getStatus: async () => {
-    return request<{
-      db_type: string;
-      total_vectors: number;
-      dimension: number;
-      status: string;
-    }>('/vector-db/status');
+    return request<VectorDBStatus>('/vector-db/status');
   },
 
   save: async () => {
@@ -166,6 +222,12 @@ export const vectorDbApi = {
 
   deleteChunk: async (vectorId: string) => {
     return request<{ success: boolean; message: string; data?: any }>(`/vector-db/chunks/${vectorId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  clearVectorDb: async () => {
+    return request<{ success: boolean; message: string }>('/vector-db/clear', {
       method: 'DELETE',
     });
   },
@@ -271,35 +333,127 @@ export const retrievalApi = {
 // ========== RAG 生成 API ==========
 export const ragApi = {
   generate: async (requestData: RAGRequest) => {
-    return request<{
-      query: string;
-      answer: string;
-      context_chunks: RetrievalResult[];
-      generation_time_ms: number;
-      retrieval_time_ms: number;
-      total_time_ms: number;
-      tokens_used?: number;
-    }>('/rag/generate', {
+    return request<RAGResponse>('/rag/generate', {
       method: 'POST',
       body: JSON.stringify(requestData),
     });
   },
 
+  /**
+   * 流式生成回答 - SSE流式输出
+   */
+  generateStream: async (
+    requestData: RAGRequest,
+    callbacks: {
+      onToken?: (token: string) => void;
+      onMetadata?: (metadata: StreamMetadata) => void;
+      onComplete?: (fullResponse: string) => void;
+      onError?: (error: Error) => void;
+    }
+  ): Promise<AbortController> => {
+    const controller = new AbortController();
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/rag/generate/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
+        },
+        body: JSON.stringify(requestData),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No response body');
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullResponse = '';
+
+      // 异步读取流
+      const readStream = async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          
+          // 解析SSE事件
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              
+              if (data === '[DONE]') {
+                callbacks.onComplete?.(fullResponse);
+                return;
+              }
+
+              try {
+                const event: StreamEvent = JSON.parse(data);
+                
+                switch (event.type) {
+                  case 'token':
+                    if (event.content) {
+                      fullResponse += event.content;
+                      callbacks.onToken?.(event.content);
+                    }
+                    break;
+                    
+                  case 'metadata':
+                    callbacks.onMetadata?.(event.metadata || {});
+                    break;
+                    
+                  case 'done':
+                    callbacks.onComplete?.(fullResponse);
+                    return;
+                    
+                  case 'error':
+                    throw new Error(event.content || 'Stream error');
+                }
+              } catch (parseError) {
+                console.warn('Failed to parse SSE event:', data);
+              }
+            }
+          }
+        }
+      };
+
+      readStream().catch((err) => {
+        if (err.name !== 'AbortError') {
+          callbacks.onError?.(err);
+        }
+      });
+
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      if (error.name !== 'AbortError') {
+        callbacks.onError?.(error);
+      }
+    }
+
+    return controller;
+  },
+
   recognizeIntent: async (query: string) => {
-    return request<{
-      intent: string;
-      confidence: number;
-      details: any;
-    }>('/rag/recognize-intent', {
+    return request<IntentRecognitionResult>('/rag/recognize-intent', {
       method: 'POST',
       body: JSON.stringify({ query }),
     });
   },
 
   generateSummary: async (text: string) => {
-    return request<{
-      summary: string;
-    }>('/summary/generate', {
+    return request<SummaryResponse>('/summary/generate', {
       method: 'POST',
       body: JSON.stringify({ text }),
     });
@@ -314,135 +468,26 @@ export const ragApi = {
   listConversations: async () => {
     return request<{
       success: boolean;
-      data: Array<{
-        id: string;
-        title: string;
-        message_count: number;
-        created_at: string;
-        updated_at: string;
-      }>;
+      data: Conversation[];
     }>('/conversations/', {
       method: 'GET',
     });
   },
 };
 
-// ========== 类型定义 ==========
-export interface Document {
-  id: string;
-  name: string;
-  size: number;
-  status: string;
-  upload_time: string;
-  chunk_count?: number;
-  category?: string;
-  tags?: string[];
-}
-
-export interface Chunk {
-  id: string;
-  document_id: string;
-  num: number;
-  content: string;
-  length: number;
-  embedding_status: string;
-  embedding_dimension?: number;
-}
-
-export interface ChunkConfig {
-  type: 'naive' | 'intelligent' | 'enhanced' | 'char' | 'sentence' | 'paragraph' | 'qa' | 'paper' | 'laws' | 'book' | 'table' | 'custom' | 'product' | 'technical' | 'compliance' | 'hr' | 'project';
-  chunkTokenSize: number;
-  delimiters: string[];
-  childrenDelimiters: string[];
-  enableChildren: boolean;
-  overlappedPercent: number;
-  tableContextSize: number;
-  imageContextSize: number;
-  length: number;
-  overlap: number;
-  customRule: string;
-}
-
-export interface EmbeddingConfig {
-  model_type: 'sentence-transformers' | 'bge' | 'openai';
-  model_name: string;
-  batch_size: number;
-  device: string;
-}
-
-export interface VectorDBConfig {
-  db_type: 'faiss' | 'milvus' | 'qdrant';
-  dimension: number;
-  index_type: string;
-  host?: string;
-  port?: number;
-  collection_name?: string;
-}
-
-export interface RetrievalConfig {
-  top_k: number;
-  similarity_threshold: number;
-  algorithm: 'cosine' | 'euclidean' | 'dot';
-  enable_rerank?: boolean;
-  reranker_type?: 'cross_encoder' | 'colbert' | 'mmr' | 'none';
-  reranker_model?: string;
-  reranker_top_k?: number;
-  reranker_threshold?: number;
-}
-
-export interface RetrievalResult {
-  chunk_id: string;
-  document_id: string;
-  document_name: string;
-  chunk_num: number;
-  content: string;
-  similarity: number;
-  match_keywords: string[];
-}
-
-export interface SimilarChunkResult {
-  chunk_id: string;
-  document_id: string;
-  document_name: string;
-  chunk_num: number;
-  content: string;
-  similarity: number;
-}
-
-export interface GenerationConfig {
-  llm_provider: string;
-  llm_model: string;
-  temperature: number;
-  max_tokens: number;
-  top_p: number;
-  frequency_penalty: number;
-  presence_penalty: number;
-}
-
-export interface RAGRequest {
-  query: string;
-  retrieval_config: RetrievalConfig;
-  generation_config: GenerationConfig;
-  conversation_id?: string;  // 多轮对话ID，用于保持上下文
-}
-
-export interface VectorDocument {
-  document_id: string;
-  document_name: string;
-  chunk_count: number;
-  chunks: VectorChunk[];
-}
-
-export interface VectorChunk {
-  vector_id: string;
-  chunk_num: number;
-  content: string;
-  similarity: number;
-}
-
-export interface VectorDocument {
-  document_id: string;
-  document_name: string;
-  chunk_count: number;
-  chunks: VectorChunk[];
-}
+// Re-export types for convenience
+export type {
+  Document,
+  Chunk,
+  ChunkConfig,
+  EmbeddingConfig,
+  VectorDBConfig,
+  RetrievalConfig,
+  RetrievalResult,
+  RAGRequest,
+  RAGResponse,
+  StreamMetadata,
+  VectorDocument,
+  LocalDocItem,
+  Conversation,
+};

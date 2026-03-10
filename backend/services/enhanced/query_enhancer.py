@@ -5,10 +5,13 @@
 
 import re
 import hashlib
+import os
+import torch
 from typing import List, Dict, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from enum import Enum
 from utils.logger import logger
+from config import settings
 
 
 class EnhancementType(str, Enum):
@@ -60,13 +63,127 @@ class QueryEnhancer:
 
     def __init__(self, llm_client=None):
         self.llm = llm_client
+        
+        # 指代消解专用 LLM 客户端（使用轻量级模型）
+        self.coref_llm = None
+        self.coref_tokenizer = None
+        self._coref_llm_initialized = False
+    
+    def _init_coref_llm(self):
+        """延迟初始化指代消解专用 LLM"""
+        if self._coref_llm_initialized:
+            return
+            
+        try:
+            # 设置环境变量以抑制日志和进度条
+            os.environ['TQDM_DISABLE'] = '1'
+            os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '1'
+            os.environ['TRANSFORMERS_VERBOSITY'] = 'error'
+            os.environ['TRANSFORMERS_SILENCE_DEPRECATION_WARNINGS'] = '1'
+            os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+            
+            from transformers import AutoTokenizer, AutoModelForCausalLM
+            
+            model_path = settings.coref_llm_model_path
+            device = settings.coref_llm_device
+            
+            logger.info(f"初始化指代消解专用 LLM: {model_path}")
 
-        # 指代词映射表
-        self.coreference_patterns = {
-            r"[它这那此][个]?": None,  # 需要上下文解析
-            r"[该上]述[的]?": None,
-            r"[之]?前[提到|说]?[的]?": None,
-        }
+            # 临时重定向stdout和stderr以抑制进度条
+            import sys
+            from io import StringIO
+            
+            original_stdout = sys.stdout
+            original_stderr = sys.stderr
+            
+            try:
+                sys.stdout = StringIO()
+                sys.stderr = StringIO()
+                
+                # 加载 tokenizer
+                self.coref_tokenizer = AutoTokenizer.from_pretrained(
+                    model_path,
+                    trust_remote_code=True
+                )
+
+                # 加载模型
+                model_kwargs = {
+                    "torch_dtype": torch.float16 if device == "cuda" else torch.float32,
+                    "device_map": "auto" if device == "cuda" else None,
+                }
+
+                self.coref_llm = AutoModelForCausalLM.from_pretrained(
+                    model_path,
+                    trust_remote_code=True,
+                    **model_kwargs
+                )
+            finally:
+                sys.stdout = original_stdout
+                sys.stderr = original_stderr
+
+            if device == "cpu":
+                self.coref_llm = self.coref_llm.to(device)
+
+            self._coref_llm_initialized = True
+            logger.info(f"指代消解专用 LLM 初始化完成，设备: {device}")
+
+        except Exception as e:
+            logger.error(f"初始化指代消解专用 LLM 失败: {str(e)}")
+            raise
+    
+    def _coref_llm_chat(self, prompt: str, temperature: float = 0.0) -> str:
+        """调用指代消解专用 LLM"""
+        if not self._coref_llm_initialized:
+            self._init_coref_llm()
+            
+        try:
+            # 构建 messages 格式
+            messages = [
+                {"role": "user", "content": prompt}
+            ]
+
+            # 应用 chat template
+            text = self.coref_tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True
+            )
+
+            # Tokenize
+            inputs = self.coref_tokenizer(
+                text,
+                return_tensors="pt",
+                truncation=True,
+                max_length=2048
+            ).to(self.coref_llm.device)
+
+            # 生成
+            with torch.no_grad():
+                do_sample = True
+                if temperature <= 0.0:
+                    do_sample = False
+                    temperature = 1.0
+                
+                outputs = self.coref_llm.generate(
+                    **inputs,
+                    max_new_tokens=256,
+                    temperature=temperature,
+                    top_p=0.9,
+                    do_sample=do_sample,
+                    pad_token_id=self.coref_tokenizer.eos_token_id
+                )
+
+            # 解码
+            response = self.coref_tokenizer.decode(
+                outputs[0][inputs['input_ids'].shape[1]:],
+                skip_special_tokens=True
+            )
+
+            return response.strip()
+
+        except Exception as e:
+            logger.error(f"指代消解 LLM 调用失败: {str(e)}")
+            return ""
 
     def enhance(
         self, query: str, session_context: Dict, scene_tags: List[str]
@@ -133,63 +250,88 @@ class QueryEnhancer:
         self, query: str, session_context: Dict
     ) -> Tuple[str, List[str]]:
         """
-        指代消解
+        使用 LLM 进行指代消解
 
         Args:
             query: 包含指代词的查询
-            session_context: 包含历史实体的会话上下文
+            session_context: 包含历史实体和对话历史的会话上下文
 
         Returns:
             (消解后的查询, 使用的实体列表)
         """
+        # 获取对话历史
+        history = session_context.get("history", [])
         entities = session_context.get("entities", [])
-        if not entities:
+        
+        if not history:
             return query, []
 
-        # 按时间戳排序，取最近的实体
-        sorted_entities = sorted(
-            entities, key=lambda e: e.get("timestamp", ""), reverse=True
-        )
+        # 格式化对话历史
+        history_str = self._format_history_for_coref(history)
+        
+        # 格式化实体信息
+        entities_str = ""
+        if entities:
+            entity_names = [e.get("name", "") for e in entities if e.get("name")]
+            if entity_names:
+                entities_str = "已知实体：" + "、".join(entity_names[:5])
+        
+        # 构建 LLM prompt
+        prompt = f"""任务：将用户查询中的指代词替换为具体内容。
 
-        resolved_query = query
-        entities_used = []
+对话历史：
+{history_str}
 
-        # 检测指代词
-        coreference_keywords = ["它", "这", "那", "此", "该", "上述", "之前"]
+{entities_str}
 
-        for keyword in coreference_keywords:
-            if keyword in resolved_query:
-                # 找到最相关的实体
-                best_entity = None
-                best_score = 0
+用户当前查询：{query}
 
-                for entity in sorted_entities:
+规则：
+1. 把"它/这/那/该/此"等代词替换成历史中提到的具体事物
+2. 不要回答问题，只改写查询
+3. 只输出改写后的查询，不要其他文字
+
+改写后："""
+
+        try:
+            resolved_query = self._coref_llm_chat(prompt, temperature=0.0).strip()
+            
+            # 清理可能的格式残留
+            resolved_query = (
+                resolved_query.replace("【改写后查询】", "")
+                .replace("改写后查询：", "")
+                .strip()
+            )
+            
+            if resolved_query and len(resolved_query) > 3:
+                # 提取使用的实体（简化处理）
+                entities_used = []
+                for entity in entities:
                     entity_name = entity.get("name", "")
-                    entity_confidence = entity.get("confidence", 0)
-
-                    # 计算相关性分数
-                    score = entity_confidence
-
-                    # 如果查询中有实体名的一部分，提高分数
-                    if entity_name and len(entity_name) > 2:
-                        for part in entity_name.split():
-                            if len(part) > 2 and part in query:
-                                score += 0.2
-
-                    if score > best_score and score > 0.5:
-                        best_score = score
-                        best_entity = entity
-
-                if best_entity:
-                    # 替换指代词
-                    entity_name = best_entity["name"]
-                    pattern = re.compile(re.escape(keyword) + r"[个]?")
-                    resolved_query = pattern.sub(entity_name, resolved_query, count=1)
-                    entities_used.append(entity_name)
-
-                    logger.debug(f"Resolved '{keyword}' -> '{entity_name}'")
-
-        return resolved_query, entities_used
+                    if entity_name and entity_name in resolved_query:
+                        entities_used.append(entity_name)
+                
+                logger.info(f"LLM 指代消解: '{query}' -> '{resolved_query}'")
+                return resolved_query, entities_used
+            else:
+                logger.warning(f"LLM 返回空或太短，使用原始查询: {query}")
+                return query, []
+                
+        except Exception as e:
+            logger.error(f"LLM 指代消解失败: {str(e)}")
+            return query, []
+    
+    def _format_history_for_coref(self, history: List[Dict]) -> str:
+        """格式化对话历史用于指代消解"""
+        # 最多保留最近5轮对话
+        recent_history = history[-5:] if len(history) > 5 else history
+        history_lines = []
+        for msg in recent_history:
+            role = msg.get("role", "")
+            content = msg.get("content", "")
+            role_cn = "用户" if role == "user" else "助手"
+            history_lines.append(f"{role_cn}：{content}")
+        return "\n".join(history_lines)
 
     def _generate_hyde_hypotheses(
         self, query: str, session_context: Dict, max_hypotheses: int = 3
@@ -208,22 +350,31 @@ class QueryEnhancer:
         Returns:
             List[HypothesisDoc]: 假设文档列表
         """
+        logger.info(f"[HyDE] ========== 开始 HyDE 处理 ==========")
+        logger.info(f"[HyDE] 原始查询: {query}")
+        logger.info(f"[HyDE] 最大假设数量: {max_hypotheses}")
+        
         hypotheses = []
 
         # 检查是否有歧义实体
+        logger.info(f"[HyDE] 检测歧义实体...")
         ambiguous_entities = self._detect_ambiguous_entities(query)
+        logger.info(f"[HyDE] 检测到 {len(ambiguous_entities)} 个歧义实体: {[e['entity'] for e in ambiguous_entities]}")
 
         if ambiguous_entities and len(ambiguous_entities) <= max_hypotheses:
             # 为每个歧义实体生成假设
-            for entity_info in ambiguous_entities:
+            logger.info(f"[HyDE] 进入多假设模式（歧义消解）")
+            for i, entity_info in enumerate(ambiguous_entities):
                 entity = entity_info["entity"]
                 meanings = entity_info["meanings"]
+                logger.info(f"[HyDE] 处理歧义实体 [{i+1}/{len(ambiguous_entities)}]: '{entity}' -> 可能含义: {meanings}")
 
                 for meaning in meanings[:1]:  # 每个实体取最可能的含义
                     # 构建特化查询
                     specialized_query = query.replace(entity, meaning)
+                    logger.info(f"[HyDE] 特化查询: '{query}' -> '{specialized_query}'")
 
-                    # 生成假设文档 (简化版，实际应调用LLM)
+                    # 生成假设文档
                     hypothesis_text = self._generate_hypothesis_text(
                         specialized_query, meaning
                     )
@@ -233,38 +384,85 @@ class QueryEnhancer:
                             text=hypothesis_text, entity=meaning, confidence=0.7
                         )
                     )
+                    logger.info(f"[HyDE] 假设文档 #{len(hypotheses)} 已生成，实体: {meaning}，置信度: 0.7")
         else:
             # 生成单一假设
+            logger.info(f"[HyDE] 进入单假设模式（无歧义或歧义过多）")
             hypothesis_text = self._generate_hypothesis_text(query)
             hypotheses.append(HypothesisDoc(text=hypothesis_text, confidence=0.8))
+            logger.info(f"[HyDE] 单一假设文档已生成，置信度: 0.8")
+
+        result_count = len(hypotheses[:max_hypotheses])
+        logger.info(f"[HyDE] ========== HyDE 处理完成 ==========")
+        logger.info(f"[HyDE] 最终生成 {result_count} 个假设文档")
+        for i, h in enumerate(hypotheses[:max_hypotheses]):
+            logger.info(f"[HyDE] 假设 {i+1}: 实体={h.entity or 'N/A'}, 置信度={h.confidence}, 内容长度={len(h.text)}字")
 
         return hypotheses[:max_hypotheses]
 
     def _generate_hypothesis_text(self, query: str, context: str = None) -> str:
         """
-        生成假设文档文本
-
-        简化版实现：基于查询构建模板化的假设文档
-        实际生产环境应使用LLM生成
+        使用 LLM 生成假设文档文本
+        
+        HyDE 核心思想：用 LLM 生成一个假设的理想回答文档，
+        然后用这个假设文档的向量去检索，缩小查询-文档语义差距
+        
+        Args:
+            query: 用户查询
+            context: 额外上下文（如歧义消解后的实体）
+            
+        Returns:
+            假设文档文本
         """
-        # 模板化假设生成
-        templates = [
-            f"关于'{query}'，相关信息包括：",
-            f"'{query}'的详细说明如下：",
-            f"以下是关于'{query}'的主要内容：",
-        ]
+        logger.info(f"[HyDE] 开始生成假设文档，查询: {query[:50]}...")
+        if context:
+            logger.info(f"[HyDE] 上下文实体: {context}")
+        
+        # 构建 LLM prompt
+        context_hint = f"\n上下文提示：这可能关于「{context}」。" if context else ""
+        
+        prompt = f"""请为以下问题生成一个假设的理想回答文档。
+这个文档应该包含可能相关的关键信息、概念和细节，用于语义检索匹配。{context_hint}
 
-        # 这里简化处理，实际应该调用LLM
-        # 例如使用GPT-4生成一段假想的完美回答
+问题：{query}
 
-        base_text = templates[hash(query) % len(templates)]
+要求：
+1. 生成一段完整的回答文档（100-200字）
+2. 包含可能相关的关键词、概念、实体名称
+3. 不需要完全准确，但要语义相关
+4. 只输出假设文档内容，不要其他解释
 
-        # 添加查询关键词作为假设内容
-        keywords = self._extract_keywords(query)
-        if keywords:
-            base_text += " " + ", ".join(keywords[:5]) + "等关键信息。"
+假设回答："""
 
-        return base_text
+        try:
+            # 使用指代消解专用的 LLM 生成假设文档
+            hypothesis = self._coref_llm_chat(prompt, temperature=0.7).strip()
+            
+            # 清理可能的格式残留
+            hypothesis = (
+                hypothesis.replace("假设回答：", "")
+                .replace("【假设回答】", "")
+                .strip()
+            )
+            
+            if hypothesis and len(hypothesis) > 20:
+                logger.info(f"[HyDE] 假设文档生成完成 ({len(hypothesis)} 字): {hypothesis[:100]}...")
+                return hypothesis
+            else:
+                logger.warning(f"[HyDE] LLM 返回内容过短，使用备用方案")
+                # 备用方案：关键词拼接
+                keywords = self._extract_keywords(query)
+                fallback = f"关于「{query}」的相关信息，涉及{', '.join(keywords[:5])}等方面。"
+                logger.info(f"[HyDE] 使用备用假设文档: {fallback}")
+                return fallback
+                
+        except Exception as e:
+            logger.error(f"[HyDE] LLM 生成假设文档失败: {str(e)}")
+            # 备用方案
+            keywords = self._extract_keywords(query)
+            fallback = f"关于「{query}」的相关信息，涉及{', '.join(keywords[:5])}等方面。"
+            logger.info(f"[HyDE] 使用备用假设文档: {fallback}")
+            return fallback
 
     def _detect_ambiguous_entities(self, query: str) -> List[Dict]:
         """检测歧义实体"""
@@ -285,7 +483,7 @@ class QueryEnhancer:
                 "meanings": ["极光现象", "欧若拉(罗马女神)"],
                 "context_hints": ["天文", "北欧", "神话", "女神"],
             },
-            "": {
+            "亚马逊": {
                 "meanings": ["亚马逊公司", "亚马逊雨林", "亚马逊河"],
                 "context_hints": ["电商", "购物", "森林", "河流"],
             },
@@ -295,6 +493,9 @@ class QueryEnhancer:
         query_lower = query.lower()
 
         for entity, info in ambiguous_dict.items():
+            # 跳过空字符串实体
+            if not entity:
+                continue
             if entity in query_lower or entity.lower() in query_lower:
                 results.append({"entity": entity, **info})
 

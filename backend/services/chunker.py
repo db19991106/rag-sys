@@ -261,6 +261,8 @@ class RAGFlowChunker:
                 ChunkType.HR,
                 ChunkType.PROJECT,
                 ChunkType.HYBRID,
+                ChunkType.LAYERED,
+                ChunkType.LAYERED_LLM,  # 分层LLM切分：正则结构切分 + Embedding语义合并
             ]:
                 # 新的文档类型切分：使用智能切分逻辑，但根据类型调整分隔符
                 delimiter_map = {
@@ -284,6 +286,48 @@ class RAGFlowChunker:
                 if config.type == ChunkType.HYBRID:
                     logger.info("使用混合切分-标题切分策略")
                     chunk_dicts = self._hybrid_chunking(content, doc_id, config)
+                elif config.type == ChunkType.LAYERED:
+                    # 分层智能切分：三层递进式文档处理
+                    logger.info("使用分层智能切分策略（三层递进式）")
+                    try:
+                        from services.layered_chunker import LayeredChunker, LayeredChunkConfig
+                        
+                        layered_config = LayeredChunkConfig(
+                            max_chunk_size=getattr(config, 'length', 800) or 800,
+                            overlap=getattr(config, 'overlap', 100) or 100
+                        )
+                        chunker = LayeredChunker(layered_config)
+                        chunk_dicts = chunker.chunk(content, doc_id)
+                        logger.info(f"分层智能切分完成，生成 {len(chunk_dicts)} 个chunks")
+                    except Exception as e:
+                        logger.warning(f"分层智能切分失败: {e}，回退到智能切分")
+                        chunk_dicts = self._financial_policy_chunking(content)
+                elif config.type == ChunkType.LAYERED_LLM:
+                    # 分层LLM切分：正则结构切分 + Embedding语义合并
+                    logger.info("使用分层LLM切分策略（正则结构切分 + Embedding语义合并）")
+                    try:
+                        from services.layered_llm_chunker import LayeredLLMChunker
+                        from models import LayeredLLMConfig
+                        
+                        llm_config = LayeredLLMConfig(
+                            max_chunk_tokens=config.chunk_token_size,
+                            similarity_threshold=getattr(config, 'similarity_threshold', 0.7),
+                            min_chunk_tokens=getattr(config, 'min_chunk_tokens', 50),
+                        )
+                        chunker = LayeredLLMChunker(llm_config)
+                        chunk_dicts = chunker.chunk(content, doc_id)
+                        logger.info(f"分层LLM切分完成，生成 {len(chunk_dicts)} 个chunks")
+                    except Exception as e:
+                        logger.warning(f"分层LLM切分失败: {e}，回退到分层智能切分")
+                        try:
+                            from services.layered_chunker import LayeredChunker, LayeredChunkConfig
+                            layered_config = LayeredChunkConfig()
+                            chunker = LayeredChunker(layered_config)
+                            chunk_dicts = chunker.chunk(content, doc_id)
+                        except Exception as e2:
+                            logger.warning(f"回退切分也失败: {e2}，使用朴素切分")
+                            chunk_texts = self._naive_merge(content, chunk_token_num=config.chunk_token_size)
+                            chunk_dicts = [{"content": t, "type": "text", "metadata": {}} for t in chunk_texts]
                 else:
                     logger.info(f"使用 {config.type} 切分策略，分隔符: {delimiters}")
                     chunk_texts = self._naive_merge(

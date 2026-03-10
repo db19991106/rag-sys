@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from services.conversation_manager import LLMClient
 from utils.logger import logger
+from config import settings
 import re
 import json
 
@@ -23,7 +24,7 @@ REGULATION_CONTEXT = """
 """
 
 # 创建专门用于摘要生成的LLM客户端
-summary_llm_client = LLMClient(model_path="./data/models/Qwen2.5-7B-Instruct")
+summary_llm_client = LLMClient(model_path=settings.local_llm_model_path)
 
 def extract_entities(text: str) -> dict:
     """
@@ -205,9 +206,7 @@ async def generate_summary(request: SummaryRequest):
         # 调用LLM，参数调优
         raw_output = summary_llm_client.chat(
             prompt, 
-            temperature=0.05,  # 更低温度，减少随机性
-            max_tokens=25,     # 限制输出长度
-            stop=["\n", "。", "，", " "]  # 遇到这些字符停止生成
+            temperature=0.05  # 更低温度，减少随机性
         ).strip()
         
         # 后处理

@@ -18,11 +18,15 @@ class StreamToLogger:
         self.linebuf = ''
         # 保存原始的stdout/stderr，用于调用其方法
         self.original_stream = sys.stdout if log_level == logging.INFO else sys.stderr
+        # 递归保护标志
+        self._in_write = False
 
     def flush(self):
         """
         刷新缓冲区
         """
+        if self._in_write:
+            return
         if self.linebuf:
             try:
                 self.logger.log(self.log_level, self.linebuf.rstrip())
@@ -119,16 +123,29 @@ class StreamToLogger:
         """
         写入数据
         """
+        # 防止递归：如果已经在写入中，直接返回
+        if self._in_write:
+            return
         # 如果流已关闭，直接忽略
         if not s:
             return
+        self._in_write = True
         try:
             for line in s.rstrip().splitlines():
                 if line:
-                    self.logger.log(self.log_level, line.rstrip())
+                    # 过滤 uvicorn 访问日志（包含 HTTP 请求的日志）
+                    # 特征：包含 "GET /" 或 "POST /" 等且包含 "HTTP/1.1"
+                    line_stripped = line.rstrip()
+                    if 'HTTP/1.1' in line_stripped and any(
+                        method in line_stripped for method in ['"GET ', '"POST ', '"PUT ', '"DELETE ', '"OPTIONS ', '"PATCH ']
+                    ):
+                        continue  # 跳过 uvicorn 访问日志
+                    self.logger.log(self.log_level, line_stripped)
         except Exception:
             # 忽略所有错误，避免递归
             pass
+        finally:
+            self._in_write = False
 
     def writelines(self, lines):
         """
@@ -206,6 +223,8 @@ def setup_logger(name: str = "rag_backend") -> logging.Logger:
     logging.getLogger("torch").setLevel(logging.WARNING)
     logging.getLogger("fastapi").setLevel(logging.WARNING)
     logging.getLogger("uvicorn").setLevel(logging.WARNING)
+    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)  # 禁用访问日志
+    logging.getLogger("uvicorn.error").setLevel(logging.WARNING)
 
     return logger
 

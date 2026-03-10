@@ -1,0 +1,156 @@
+# RAG 系统 Docker Compose 配置
+# 支持 GPU 加速的多服务部署
+
+version: '3.8'
+
+services:
+  # ==================== vLLM 主模型服务 ====================
+  vllm-main:
+    image: vllm/vllm-openai:latest
+    container_name: rag-vllm-main
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=0
+    ports:
+      - "8001:8000"
+    volumes:
+      - ${MODEL_PATH:-/root/autodl-tmp/rag/models}:/models
+    command: >
+      --model /models/Qwen2.5-7B-Instruct
+      --served-model-name Qwen2.5-7B-Instruct
+      --host 0.0.0.0
+      --port 8000
+      --gpu-memory-utilization 0.85
+      --max-model-len 4096
+      --tensor-parallel-size 1
+      --trust-remote-code
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  # ==================== vLLM 意图识别模型服务 ====================
+  vllm-intent:
+    image: vllm/vllm-openai:latest
+    container_name: rag-vllm-intent
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=0
+    ports:
+      - "8002:8000"
+    volumes:
+      - ${MODEL_PATH:-/root/autodl-tmp/rag/models}:/models
+    command: >
+      --model /models/Qwen2.5-0.5B-Instruct
+      --served-model-name Qwen2.5-0.5B-Instruct
+      --host 0.0.0.0
+      --port 8000
+      --gpu-memory-utilization 0.3
+      --max-model-len 2048
+      --tensor-parallel-size 1
+      --trust-remote-code
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  # ==================== 后端服务 ====================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: rag-backend
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=0
+      - VLLM_HOST=vllm-main
+      - VLLM_PORT=8000
+      - INTENT_VLLM_HOST=vllm-intent
+      - INTENT_VLLM_PORT=8000
+    ports:
+      - "9000:9000"
+    volumes:
+      # 数据持久化
+      - ./backend/data:/app/backend/data
+      - ./backend/vector_db:/app/backend/vector_db
+      - ./backend/logs:/app/backend/logs
+      - ./backend/uploads:/app/backend/uploads
+      # 模型挂载（嵌入模型和 Reranker）
+      - ${MODEL_PATH:-/root/autodl-tmp/rag/models}:/models:ro
+      # 使用生产环境配置
+      - ./backend/.env.production:/app/backend/.env:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    depends_on:
+      vllm-main:
+        condition: service_healthy
+      vllm-intent:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  # ==================== 前端服务 ====================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: rag-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+# ==================== 网络配置 ====================
+networks:
+  rag-network:
+    driver: bridge
+
+# ==================== 数据卷（可选） ====================
+volumes:
+  rag-data:
+  rag-logs:

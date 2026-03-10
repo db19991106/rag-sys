@@ -11,7 +11,7 @@ import time
 def get_all_documents():
     """获取所有文档列表"""
     try:
-        response = requests.get("http://localhost:8000/documents/list")
+        response = requests.get("http://localhost:9000/documents/list")
         if response.status_code == 200:
             return response.json()
         else:
@@ -28,7 +28,7 @@ def embed_document(doc_id, doc_name):
     try:
         print(f"  正在向量化: {doc_name}...", end=" ")
         response = requests.post(
-            f"http://localhost:8000/chunking/embed?doc_id={doc_id}",
+            f"http://localhost:9000/chunking/embed?doc_id={doc_id}",
             timeout=300,  # 5分钟超时
         )
 
@@ -115,7 +115,7 @@ def main():
     # 检查向量数据库状态
     print("📝 步骤3: 检查向量数据库状态...")
     try:
-        response = requests.get("http://localhost:8000/vector-db/status")
+        response = requests.get("http://localhost:9000/vector-db/status")
         if response.status_code == 200:
             status = response.json()
             print(f"✅ 向量数据库: {status.get('db_type', 'unknown')}")

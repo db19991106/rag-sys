@@ -1,120 +1,174 @@
 /* =========================================
    Login Page Styles
-   Enterprise Design System
+   Modern Design System
    ========================================= */
 
 .login-container {
-  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  background: var(--bg-page);
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-6) var(--space-6);
+  padding: var(--space-6);
 }
 
 .login-box {
   background: var(--bg-primary);
-  padding: var(--space-8) var(--space-6);
-  border-radius: var(--radius-xl);
+  padding: var(--space-10) var(--space-8);
+  border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-xl);
   width: 100%;
   max-width: 420px;
   border: 1px solid var(--border-primary);
-  animation: slideUp var(--transition-normal) ease-out;
+  animation: slideUp var(--duration-300) var(--ease-out);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Login Header */
+.login-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.login-logo {
+  width: 64px;
+  height: 64px;
+  background: var(--brand-gradient);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-4);
+  font-size: var(--text-2xl);
+  color: white;
+  box-shadow: var(--shadow-primary);
 }
 
 .login-title {
-  text-align: center;
+  font-family: var(--font-display);
   font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
   color: var(--text-primary);
-  margin-bottom: var(--space-6);
-  font-weight: var(--font-semibold);
+  margin: 0 0 var(--space-2) 0;
   letter-spacing: var(--tracking-tight);
-  line-height: var(--leading-tight);
+}
+
+.login-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin: 0;
 }
 
 /* =========================================
-   Form Input Styles with Floating Labels
+   Form Input Styles
    ========================================= */
 .login-box .form-item {
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-4);
   position: relative;
 }
 
-.login-box .form-item input {
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-md);
-  font-size: var(--text-base);
-  color: var(--text-primary);
-  background: var(--bg-primary);
-  outline: none;
-  transition: all var(--transition-fast);
-  font-family: var(--font-sans);
-}
-
-.login-box .form-item input::placeholder {
-  color: transparent;
-}
-
-.login-box .form-item input:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px var(--accent-light);
-}
-
-.login-box .form-item input:hover:not(:disabled) {
-  border-color: var(--border-focus);
-}
-
-.login-box .form-item label {
+.login-box .form-item .input-icon {
   position: absolute;
   left: var(--space-4);
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-tertiary);
-  pointer-events: none;
-  transition: all var(--transition-normal);
-  background: var(--bg-primary);
-  padding: 0 var(--space-1);
   font-size: var(--text-sm);
+  z-index: 1;
 }
 
-.login-box .form-item input:focus ~ label,
-.login-box .form-item input:not(:placeholder-shown) ~ label {
-  top: 0;
-  font-size: var(--text-xs);
-  color: var(--accent-primary);
+.login-box .form-item input {
+  width: 100%;
+  padding: var(--space-3-5) var(--space-4) var(--space-3-5) var(--space-10);
+  border: 2px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.login-box .form-item input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.login-box .form-item input:focus {
+  border-color: var(--brand-primary);
+  background: var(--bg-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.login-box .form-item input:hover:not(:disabled):not(:focus) {
+  border-color: var(--text-tertiary);
+}
+
+.login-box .form-item input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* =========================================
-   Button Group Styles
+   Error Message
+   ========================================= */
+.login-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-error-bg);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-error);
+}
+
+.login-error i {
+  font-size: var(--text-base);
+}
+
+/* =========================================
+   Button Group
    ========================================= */
 .login-box .btn-group {
   display: flex;
   gap: var(--space-3);
-  margin-top: var(--space-2);
+  margin-top: var(--space-6);
 }
 
 .btn-login {
-  flex: 1;
-  padding: var(--space-3) var(--space-4);
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3-5) var(--space-4);
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-xl);
+  font-family: var(--font-sans);
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
   cursor: pointer;
-  transition: all var(--transition-fast);
-  background: var(--accent-primary);
-  color: var(--text-inverse);
-  font-family: var(--font-sans);
-  box-shadow: var(--shadow-sm);
+  transition: var(--transition-fast);
+  background: var(--brand-gradient);
+  color: white;
+  box-shadow: var(--shadow-primary);
 }
 
 .btn-login:hover:not(:disabled) {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), var(--shadow-primary);
 }
 
 .btn-login:active:not(:disabled) {
@@ -122,27 +176,29 @@
 }
 
 .btn-login:disabled {
-  opacity: 0.5;
+  opacity: 0.7;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-reset {
   flex: 1;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-md);
+  padding: var(--space-3-5) var(--space-4);
+  border: 2px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  font-family: var(--font-sans);
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: var(--transition-fast);
   background: transparent;
-  color: var(--text-primary);
-  font-family: var(--font-sans);
+  color: var(--text-secondary);
 }
 
 .btn-reset:hover:not(:disabled) {
   background: var(--bg-hover);
-  border-color: var(--border-focus);
+  border-color: var(--text-tertiary);
+  color: var(--text-primary);
 }
 
 .btn-reset:active:not(:disabled) {
@@ -154,110 +210,58 @@
   cursor: not-allowed;
 }
 
-.login-box .tip {
-  text-align: center;
-  margin-top: var(--space-5);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-}
-
 /* =========================================
-   Success Page Styles
+   Success Page
    ========================================= */
 .success-page {
   text-align: center;
-  color: var(--text-primary);
-  padding: var(--space-12) var(--space-6);
-  animation: fadeIn var(--transition-normal) ease-out;
+  padding: var(--space-8);
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--color-success-bg);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-6);
+  font-size: var(--text-3xl);
+  color: var(--color-success);
+  animation: successPulse 0.5s ease-out;
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .success-page h2 {
-  font-size: var(--text-3xl);
-  margin-bottom: var(--space-5);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
   font-weight: var(--font-semibold);
-  letter-spacing: var(--tracking-tight);
-  line-height: var(--leading-tight);
-  color: var(--success);
-}
-
-.success-page h2::before {
-  content: '✓ ';
+  color: var(--text-primary);
+  margin: 0 0 var(--space-3) 0;
 }
 
 .success-page p {
-  font-size: var(--text-base);
-  margin-bottom: var(--space-8);
+  font-size: var(--text-sm);
   color: var(--text-secondary);
-  line-height: var(--leading-relaxed);
-}
-
-.back-btn {
-  padding: var(--space-2) var(--space-6);
-  background: var(--accent-primary);
-  color: var(--text-inverse);
-  border: none;
-  border-radius: var(--radius-md);
-  font-weight: var(--font-medium);
-  transition: all var(--transition-fast);
-  cursor: pointer;
-  font-size: var(--text-sm);
-  font-family: var(--font-sans);
-  box-shadow: var(--shadow-sm);
-}
-
-.back-btn:hover:not(:disabled) {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.back-btn:active:not(:disabled) {
-  transform: scale(0.98);
+  margin: 0;
 }
 
 /* =========================================
-   Error Message Styles
-   ========================================= */
-.error-message {
-  background: var(--error-bg);
-  color: var(--error);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  margin-bottom: var(--space-4);
-  text-align: center;
-  animation: shake 200ms ease-in-out;
-}
-
-/* =========================================
-   Loading Spinner in Button
-   ========================================= */
-.btn-loading {
-  position: relative;
-  color: transparent !important;
-}
-
-.btn-loading::after {
-  content: '';
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  top: 50%;
-  left: 50%;
-  margin-left: -8px;
-  margin-top: -8px;
-  border: 2px solid var(--border-primary);
-  border-top-color: var(--text-inverse);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* =========================================
-   Responsive Styles
+   Responsive
    ========================================= */
 @media (max-width: 480px) {
   .login-container {
@@ -265,7 +269,8 @@
   }
   
   .login-box {
-    padding: var(--space-6) var(--space-4);
+    padding: var(--space-8) var(--space-6);
+    border-radius: var(--radius-xl);
   }
   
   .login-title {

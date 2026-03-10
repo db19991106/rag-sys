@@ -70,8 +70,34 @@ async def get_vector_documents():
     获取向量库中所有的文本数据及其元数据
     """
     try:
-        # 获取元数据
-        metadata = vector_db_manager.db.metadata if vector_db_manager.db else {}
+        db = vector_db_manager.db
+        if not db:
+            return ApiResponse(
+                success=True,
+                message="向量数据库未初始化",
+                data={
+                    'total_documents': 0,
+                    'total_chunks': 0,
+                    'documents': []
+                }
+            )
+        
+        # 检查数据库类型，只有 FAISS 支持 metadata 属性
+        from services.vector_db import FAISSDatabase
+        if not isinstance(db, FAISSDatabase):
+            return ApiResponse(
+                success=True,
+                message=f"当前数据库类型 {type(db).__name__} 不支持获取元数据列表",
+                data={
+                    'total_documents': 0,
+                    'total_chunks': db.total_vectors if hasattr(db, 'total_vectors') else 0,
+                    'documents': [],
+                    'db_type': type(db).__name__
+                }
+            )
+        
+        # 获取元数据（仅 FAISS）
+        metadata = db.metadata if hasattr(db, 'metadata') else {}
         
         # 按document_id分组统计
         document_stats = {}
@@ -126,8 +152,16 @@ async def delete_vector_document(document_id: str):
         if not db:
             raise HTTPException(status_code=404, detail="向量数据库未初始化")
         
+        # 检查数据库类型，只有 FAISS 支持 metadata 属性
+        from services.vector_db import FAISSDatabase
+        if not isinstance(db, FAISSDatabase):
+            raise HTTPException(
+                status_code=400, 
+                detail=f"当前数据库类型 {type(db).__name__} 不支持此操作，请使用 FAISS 数据库"
+            )
+        
         # 获取当前元数据
-        metadata = db.metadata
+        metadata = db.metadata if hasattr(db, 'metadata') else {}
         if not isinstance(metadata, dict):
             metadata = {}
         
@@ -210,8 +244,16 @@ async def delete_vector_chunk(vector_id: str):
         if not db:
             raise HTTPException(status_code=404, detail="向量数据库未初始化")
         
+        # 检查数据库类型，只有 FAISS 支持 metadata 属性
+        from services.vector_db import FAISSDatabase
+        if not isinstance(db, FAISSDatabase):
+            raise HTTPException(
+                status_code=400, 
+                detail=f"当前数据库类型 {type(db).__name__} 不支持此操作，请使用 FAISS 数据库"
+            )
+        
         # 获取当前元数据
-        metadata = db.metadata
+        metadata = db.metadata if hasattr(db, 'metadata') else {}
         if not isinstance(metadata, dict):
             metadata = {}
         
@@ -249,3 +291,43 @@ async def delete_vector_chunk(vector_id: str):
     except Exception as e:
         logger.error(f"删除向量片段失败: {str(e)}")
         raise HTTPException(status_code=500, detail=f"删除向量片段失败: {str(e)}")
+
+
+@router.delete("/clear", response_model=ApiResponse)
+async def clear_vector_db():
+    """
+    清空向量数据库
+    
+    删除所有向量数据、BM25索引和元数据，此操作不可恢复！
+    包括：
+    - Milvus Lite 向量数据库
+    - BM25 索引文件
+    - 文档元数据 (documents.json)
+    """
+    try:
+        from pathlib import Path
+        from config import settings
+        import json
+        
+        # 调用清空方法（已包含清空向量数据库、BM25索引、documents.json）
+        success = vector_db_manager.clear()
+        if not success:
+            raise HTTPException(status_code=500, detail="清空向量数据库失败")
+        
+        # 确保创建空的 documents.json
+        documents_json_path = Path(settings.vector_db_dir) / "documents.json"
+        documents_json_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(documents_json_path, "w", encoding="utf-8") as f:
+            json.dump({}, f)
+        
+        logger.info("向量数据库已完全清空（向量数据库 + BM25索引 + 元数据）")
+        
+        return ApiResponse(
+            success=True,
+            message="向量数据库已完全清空（向量数据库 + BM25索引 + 元数据）"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"清空向量数据库失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"清空向量数据库失败: {str(e)}")

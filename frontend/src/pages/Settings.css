@@ -395,6 +395,70 @@
 }
 
 /* =========================================
+   Status Section Styles
+   ========================================= */
+.status-section {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--space-3);
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.status-label {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  font-weight: var(--font-medium);
+}
+
+.status-value {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  font-weight: var(--font-semibold);
+}
+
+.status-value.highlight {
+  color: var(--accent-primary);
+  font-size: var(--text-base);
+}
+
+.status-value.status-ready {
+  color: var(--success);
+}
+
+.status-value.status-error {
+  color: var(--error);
+}
+
+.switching-notice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--warning-bg);
+  color: var(--warning);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+.form-hint.warning {
+  color: var(--warning);
+  font-weight: var(--font-medium);
+}
+
+/* =========================================
    Responsive Styles
    ========================================= */
 @media (max-width: 760px) {

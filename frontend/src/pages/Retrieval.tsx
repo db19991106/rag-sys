@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
 import { retrievalApi } from '../services/api';
 import { extractKeywords, highlightContent, getSimilarityScoreClass } from '../utils/format';
-import type { RetrievalResult } from '../types';
 import './Retrieval.css';
+
+// 本地显示用的检索结果类型
+interface DisplayResult {
+  id: string;
+  num: number;
+  content: string;
+  sim: number;
+  matchKeywords: string[];
+}
 
 const Retrieval: React.FC = () => {
   const [topK, setTopK] = useState(5);
   const [simThreshold, setSimThreshold] = useState(0.7);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<RetrievalResult[]>([]);
+  const [results, setResults] = useState<DisplayResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   const executeRetrieval = async () => {
@@ -29,11 +37,11 @@ const Retrieval: React.FC = () => {
 
       const keywords = extractKeywords(query);
 
-      const formattedResults: RetrievalResult[] = response.results.map((result) => ({
+      const formattedResults: DisplayResult[] = response.results.map((result) => ({
         id: result.chunk_id,
         num: result.chunk_num,
         content: result.content,
-        sim: result.similarity,
+        sim: result.similarity || 0,
         matchKeywords: keywords.filter(k => result.content.includes(k))
       }));
 
@@ -132,8 +140,8 @@ const Retrieval: React.FC = () => {
                     <div className="result-meta">
                       <span className="result-rank">#{index + 1}</span>
                       <span className="result-chunk">片段 #{result.num}</span>
-                      <span className={`similarity-score ${getSimilarityScoreClass(result.sim)}`}>
-                        相似度: {(result.sim * 100).toFixed(1)}%
+                      <span className={`similarity-score ${getSimilarityScoreClass(result.sim || 0)}`}>
+                        相似度: {((result.sim || 0) * 100).toFixed(1)}%
                       </span>
                     </div>
                   </div>

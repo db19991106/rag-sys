@@ -422,17 +422,11 @@ class EnhancedRAGPipeline:
             return []
 
         try:
-            # 准备reranker输入
-            documents = [r.content for r in results]
-            reranked_indices = reranker_manager.rerank(query, documents, top_k=top_k)
-
-            # 根据rerank结果重新排序
-            reranked = []
-            for idx in reranked_indices:
-                if idx < len(results):
-                    reranked.append(results[idx])
-
-            return reranked
+            # 使用 reranker_manager.rerank_results() 进行重排序
+            reranked = reranker_manager.rerank_results(query, results, apply_threshold=False)
+            
+            # 返回 top_k 个结果
+            return reranked[:top_k]
         except Exception as e:
             logger.warning(f"Reranking error: {e}")
             # 降级：按原始分数排序

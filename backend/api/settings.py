@@ -21,8 +21,8 @@ router = APIRouter(prefix="/settings", tags=["系统设置"])
 class SystemSettings(BaseModel):
     """系统设置模型"""
     # 嵌入模型配置
-    embedding_model_type: str = "bge"
-    embedding_model_name: str = "BAAI/bge-base-zh-v1.5"
+    embedding_model_type: str = "sentence-transformers"
+    embedding_model_name: str = "BAAI/bge-m3"  # 使用友好名称，后端会自动映射到本地路径
     embedding_device: str = "cuda"
     embedding_batch_size: int = 32
     
@@ -34,8 +34,8 @@ class SystemSettings(BaseModel):
     reranker_threshold: float = 0.0
     
     # 向量数据库配置
-    vector_db_type: str = "faiss"
-    vector_db_dimension: int = 768
+    vector_db_type: str = "milvus_lite"  # 默认使用 Milvus Lite（本地文件模式）
+    vector_db_dimension: int = 1024  # BGE-M3 输出维度
     vector_db_index_type: str = "HNSW"
     vector_db_host: Optional[str] = None
     vector_db_port: Optional[int] = None

@@ -1,6 +1,18 @@
 /* VectorManage Page Styles - Design System Compliant */
 @import '../styles/pages.css';
 
+/* Card Header Actions */
+.card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.card-header-actions .tip-text {
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+}
+
 /* Vector Stats Grid */
 .vector-stats-grid {
   display: grid;
